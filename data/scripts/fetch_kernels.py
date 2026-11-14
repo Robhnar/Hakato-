@@ -8,7 +8,6 @@ Pobiera jądra potrzebne do obliczeń położeń Słońca i Ziemi w układzie MO
 - moon_de440_250416.tf (FK - ramki odniesienia Księżyca w tym MOON_ME)
 """
 
-import ssl
 import urllib.request
 from pathlib import Path
 
@@ -28,10 +27,6 @@ def download_kernels(target_dir: Path | None = None) -> None:
         target_dir = Path(__file__).resolve().parents[1] / "raw" / "kernels"
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-
     print(f"Pobieranie jąder SPICE do: {target_dir}")
     for remote_path, filename in KERNELS:
         dest = target_dir / filename
@@ -46,7 +41,7 @@ def download_kernels(target_dir: Path | None = None) -> None:
         req = urllib.request.Request(
             url, headers={"User-Agent": "NASA-SpaceApps-Hakato/1.0"}
         )
-        with urllib.request.urlopen(req, context=ctx) as resp, open(dest, "wb") as out:
+        with urllib.request.urlopen(req) as resp, open(dest, "wb") as out:
             data = resp.read()
             out.write(data)
         print(f"  [ZAPISANO] {filename} ({dest.stat().st_size / 1024 / 1024:.2f} MB)")
