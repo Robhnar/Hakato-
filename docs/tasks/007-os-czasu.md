@@ -1,7 +1,7 @@
 # 007 – Oś czasu: okna zasilania i łączności
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba F, po zadaniu 009)
+- **Status:** w recenzji
+- **Właściciel:** osoba F
 - **Moduł:** frontend – widok `timeline`
 - **Gałąź:** `feat/007-os-czasu`
 - **Zależy od:** –
@@ -40,10 +40,10 @@ Dostaje `ViewProps` (`web/src/app/scenario.ts`). Korzysta z `api.timeline()` prz
 
 ## Kryteria ukończenia
 
-- [ ] Przeciągnięcie kursora zmienia położenie Słońca w zakładce Sky (po zadaniu 006; wcześniej – tekst kursora w zaślepce).
-- [ ] Animacja zatrzymuje się na końcu okna i przy opuszczeniu zakładki nie zostawia działającego licznika.
-- [ ] Funkcje wyznaczające okna i odliczanie z przebiegu mają testy.
-- [ ] `npm run lint`, `npm run build`, `npm test` zielone.
+- [x] Przeciągnięcie kursora zmienia położenie Słońca w zakładce Sky (po zadaniu 006; wcześniej – tekst kursora w zaślepce).
+- [x] Animacja zatrzymuje się na końcu okna i przy opuszczeniu zakładki nie zostawia działającego licznika.
+- [x] Funkcje wyznaczające okna i odliczanie z przebiegu mają testy.
+- [x] `npm run lint`, `npm run build`, `npm test` zielone.
 
 ## Notatki
 
