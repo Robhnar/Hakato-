@@ -1,0 +1,154 @@
+/* Style widoku nieba — tylko ten katalog (zadanie 006). */
+
+.sky {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sky h2 {
+  margin: 0;
+}
+
+.sky-hint {
+  margin: 0;
+  color: var(--muted, #9aa4b5);
+  font-size: 0.85rem;
+}
+
+.sky-panel {
+  background: var(--panel, #151a23);
+  border: 1px solid var(--border, #2a3140);
+  border-radius: 8px;
+  padding: 8px 8px 4px;
+  overflow: hidden;
+}
+
+.sky-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+}
+
+.sky-horizon {
+  fill: #3a4558;
+  stroke: #6b778c;
+  stroke-width: 1.2;
+}
+
+.sky-zero {
+  stroke: color-mix(in srgb, var(--muted, #9aa4b5) 55%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.sky-grid {
+  stroke: color-mix(in srgb, var(--border, #2a3140) 80%, transparent);
+  stroke-width: 1;
+}
+
+.sky-axis-label {
+  fill: var(--muted, #9aa4b5);
+  font-size: 11px;
+}
+
+.sky-trail-sun {
+  fill: none;
+  stroke: #f2c14e;
+  stroke-width: 1.5;
+  stroke-opacity: 0.55;
+}
+
+.sky-trail-earth {
+  fill: none;
+  stroke: #6eb6ff;
+  stroke-width: 1.5;
+  stroke-opacity: 0.55;
+}
+
+.sky-body-sun {
+  fill: #f2c14e;
+  stroke: #fff3c4;
+  stroke-width: 1.5;
+}
+
+.sky-body-earth {
+  fill: #4f9de0;
+  stroke: #cfe8ff;
+  stroke-width: 1.5;
+}
+
+.sky-body-occulted {
+  fill: none;
+  stroke-dasharray: 3 2;
+  opacity: 0.85;
+}
+
+.sky-body-sun.sky-body-occulted {
+  stroke: #f2c14e;
+}
+
+.sky-body-earth.sky-body-occulted {
+  stroke: #6eb6ff;
+}
+
+.sky-readout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.sky-readout dt {
+  margin: 0;
+  color: var(--muted, #9aa4b5);
+  font-weight: 600;
+}
+
+.sky-readout dd {
+  margin: 2px 0 0;
+}
+
+.sky-sun-label {
+  color: #f2c14e;
+}
+
+.sky-earth-label {
+  color: #6eb6ff;
+}
+
+.sky-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: var(--muted, #9aa4b5);
+}
+
+.sky-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.sky-legend-swatch-sun {
+  background: #f2c14e;
+}
+
+.sky-legend-swatch-earth {
+  background: #4f9de0;
+}
+
+.sky-legend-swatch-horizon {
+  background: #3a4558;
+  border: 1px solid #6b778c;
+  border-radius: 2px;
+}
