@@ -46,6 +46,7 @@ def compute_cycles(dt: datetime) -> dict:
     return {
         "lunar_day_index": lunar_day_index,
         "seasonal_phase_deg": seasonal_phase_deg,
+        "draconic_year_phase_deg": seasonal_phase_deg,
         "draconic_year_note": draconic_year_note,
         "libration_phase_deg": libration_phase_deg,
     }
@@ -373,7 +374,7 @@ def search_windows(
     cycles_summary = {
         "synodic_month_days": round(SYNODIC_MONTH_DAYS, 2),
         "draconic_year_days": round(DRACONIC_YEAR_DAYS, 2),
-        "nodal_precession_years": round(NODAL_PRECESSION_YEARS, 2),
+        "nodal_precession_years": round(NODAL_PRECESSION_YEARS, 1),
         "libration_month_days": round(DRACONIC_MONTH_DAYS, 2),
     }
 
