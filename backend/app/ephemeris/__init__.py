@@ -27,7 +27,10 @@ _REQUIRED_KERNELS = [
 ]
 
 _KERNELS_LOADED = False
-_KERNEL_LOCK = threading.Lock()
+# CSPICE ma globalny stan i nie jest wątkowo bezpieczny: równoległe str2et/spkpos zwracają
+# błędy albo wywalają proces. Każde wywołanie SPICE (też z innych modułów) trzyma ten zamek.
+SPICE_LOCK = threading.RLock()
+_KERNEL_LOCK = SPICE_LOCK
 
 
 def _try_load_kernels() -> bool:
@@ -81,9 +84,10 @@ def body_positions(lat_deg: float, lon_deg: float, times_utc: list[datetime]) ->
 
     if are_kernels_loaded():
         iso_times = [to_utc(t).strftime("%Y-%m-%dT%H:%M:%SZ") for t in times_utc]
-        ets = spice.str2et(iso_times)
-        pos_sun_arr, _ = spice.spkpos("SUN", ets, "MOON_ME", "LT+S", "MOON")
-        pos_earth_arr, _ = spice.spkpos("EARTH", ets, "MOON_ME", "LT+S", "MOON")
+        with SPICE_LOCK:
+            ets = spice.str2et(iso_times)
+            pos_sun_arr, _ = spice.spkpos("SUN", ets, "MOON_ME", "LT+S", "MOON")
+            pos_earth_arr, _ = spice.spkpos("EARTH", ets, "MOON_ME", "LT+S", "MOON")
         for pos_sun, pos_earth in zip(pos_sun_arr, pos_earth_arr):
             az_s, el_s = az_el(lat_deg, lon_deg, pos_sun)
             out["sun"]["az_deg"].append(az_s)

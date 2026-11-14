@@ -155,13 +155,14 @@ def find_optimal_site(
     # Pozycje Słońca i Ziemi w układzie MOON_ME dla wszystkich próbek
     if ephemeris.are_kernels_loaded() and spice is not None:
         iso_times = [to_utc(t).strftime("%Y-%m-%dT%H:%M:%SZ") for t in times]
-        ets = spice.str2et(iso_times)
-        pos_sun_arr, _ = spice.spkpos("SUN", ets, "MOON_ME", "LT+S", "MOON")
-        pos_earth_arr, _ = spice.spkpos("EARTH", ets, "MOON_ME", "LT+S", "MOON")
+        with ephemeris.SPICE_LOCK:
+            ets = spice.str2et(iso_times)
+            pos_sun_arr, _ = spice.spkpos("SUN", ets, "MOON_ME", "LT+S", "MOON")
+            pos_earth_arr, _ = spice.spkpos("EARTH", ets, "MOON_ME", "LT+S", "MOON")
 
-        et_cursor = spice.str2et(iso_z(c_dt))
-        cursor_sun_pos, _ = spice.spkpos("SUN", et_cursor, "MOON_ME", "LT+S", "MOON")
-        cursor_earth_pos, _ = spice.spkpos("EARTH", et_cursor, "MOON_ME", "LT+S", "MOON")
+            et_cursor = spice.str2et(iso_z(c_dt))
+            cursor_sun_pos, _ = spice.spkpos("SUN", et_cursor, "MOON_ME", "LT+S", "MOON")
+            cursor_earth_pos, _ = spice.spkpos("EARTH", et_cursor, "MOON_ME", "LT+S", "MOON")
         cursor_sun_vec = (
             float(cursor_sun_pos[0]),
             float(cursor_sun_pos[1]),
