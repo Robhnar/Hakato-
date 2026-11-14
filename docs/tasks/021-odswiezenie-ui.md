@@ -52,9 +52,14 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 
 ## Czego nie sprawdzono
 
-- Układ sprawdzony przy 1440, 1024 i 390 px pomiarem (brak poziomego przewijania strony w pięciu widokach, zakładki nie są zasłaniane); nie oglądałem zrzutów wszystkich widoków przy 1024 i 390 px.
-- Klawiatura: sprawdzone nazwy dostępne i wskaźnik fokusu wszystkich elementów interaktywnych oraz brak fokusu na kanwie globusa; nie przechodziłem Tabem ani strzałkami ręcznie.
-- Kontrast: policzony dla tokenów tekstu i komórek mapy cieplnej (≥ 4.61:1); linie danych (≥ 3:1) nie liczone.
-- Nie sprawdzono: lot `South pole` po kliknięciu, zwalnianie zasobów WebGL po wielu przełączeniach Map ↔ Sky, tryb prowadzony od początku do końca, skille `design:accessibility-review` i `design:design-critique`.
+- Układ przy 1440, 1024 i 390 px: pomiar przepełnienia i zakładek w pięciu widokach oraz zrzuty Sky, Timeline, Compare, Windows i Map przy 1024 px; przy 390 px bez zrzutów, tylko pomiar.
+- Klawiatura: automatycznie sprawdzone nazwy dostępne i wskaźnik fokusu wszystkich elementów interaktywnych, brak fokusu na kanwie globusa; nie przechodziłem Tabem ani strzałkami ręcznie, nie testowałem czytnika ekranu.
+- Przegląd skillami `design:accessibility-review` i `design:design-critique` wykonany; poprawki: cele dotykowe 44 px na telefonie, szerokość przycisków scenariusza, wspólny lewy margines widoków, układ Windows w jednej kolumnie poniżej 1200 px.
+- Kontrast tekstu: tokeny ≥ 5.6:1, komórki mapy cieplnej ≥ 4.61:1; linie danych (≥ 3:1) nie liczone.
+- Etykiety osi wykresów Sky i Timeline renderują się małą czcionką (ok. 8–10 px przy 1024 px); nie zmieniałem.
 - Numery rang 1–5 na globusie bywają chowane przez kolizje podpisów.
 - Zrzuty do opisu PR trzeba zrobić przy otwieraniu PR.
+
+## Znalezione poza zakresem (backend, do opisu PR)
+
+- Tryb prowadzony wysyła serie równoległych zapytań `/api/windows`. Na lokalnym backendzie kończy się to odpowiedziami 422, 500 i 502, a proces pada z błędem SPICE (`BADSUBSCRIPT` w `str2et`, `UNPARSEDTIME`). Po restarcie te same zapytania wysłane pojedynczo zwracają 200. Wygląda na brak bezpieczeństwa wątkowego wywołań SPICE; nie naprawiałem, to moduł backendu. Wynik w UI i tak się pojawia, ale konsola ma kilkadziesiąt błędów.
