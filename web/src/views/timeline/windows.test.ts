@@ -1,5 +1,11 @@
 import { expect, test } from 'vitest'
-import { hoursUntilChange, overlapSegments, stepMinutesFor, visibilitySegments } from './windows'
+import {
+  advance,
+  hoursUntilChange,
+  overlapSegments,
+  stepMinutesFor,
+  visibilitySegments,
+} from './windows'
 
 // Date.UTC obcina ułamkowe godziny, więc liczymy w milisekundach.
 const t = (hours: number) => new Date(Date.UTC(2027, 0, 1) + hours * 3_600_000).toISOString()
@@ -103,4 +109,20 @@ test('stepMinutesFor stays within 5…120 minutes and never rises with a shorter
     expect((duration * 60) / step).toBeLessThanOrEqual(800)
     previous = step
   }
+})
+
+test('advance moves the cursor at the chosen speed and stops at the end of the window', () => {
+  const end = 24 * 3_600_000
+  // 6 h/s przez 1 s to 6 h, czyli 1/4 okna 24-godzinnego.
+  const quarter = advance(0, 1000, 6, end)
+  expect(quarter.position).toBeCloseTo(6 * 3_600_000, 0)
+  expect(quarter.done).toBe(false)
+
+  // Blisko końca krok jest przycinany do `end` i kończy animację.
+  const last = advance(end - 60_000, 1000, 240, end)
+  expect(last.position).toBe(end)
+  expect(last.done).toBe(true)
+
+  // Ujemna delta (cofnięty zegar) nie przesuwa kursora do tyłu.
+  expect(advance(5_000, -1000, 60, end).position).toBe(5_000)
 })

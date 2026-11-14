@@ -73,3 +73,22 @@ export function stepMinutesFor(duration_hours: number): number {
   // Krok rośnie liniowo: ~600 próbek w środku zakresu, 5 min to dolna granica.
   return Math.min(120, Math.max(5, Math.round(duration_hours / 10)))
 }
+
+export interface AdvanceResult {
+  position: number
+  done: boolean
+}
+
+/**
+ * Jeden krok animacji: przesuwa kursor o `deltaMs` przy prędkości `speed_h_per_s`,
+ * nie wychodząc za koniec okna. `done` mówi, że animacja ma się zatrzymać.
+ */
+export function advance(
+  position_ms: number,
+  delta_ms: number,
+  speed_h_per_s: number,
+  end_ms: number,
+): AdvanceResult {
+  const next = Math.min(end_ms, position_ms + Math.max(0, delta_ms) * 0.001 * speed_h_per_s * 3_600_000)
+  return { position: next, done: next >= end_ms }
+}
