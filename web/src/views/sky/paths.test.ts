@@ -1,5 +1,11 @@
 import { expect, test } from 'vitest'
-import { horizonSilhouettePath, polylinePath, splitTrailByAzimuthWrap, trailPaths } from './paths'
+import {
+  horizonSilhouettePath,
+  polylinePath,
+  splitTrailByAzimuthWrap,
+  splitTrailByVisibility,
+  trailPaths,
+} from './paths'
 import type { PlotLayout } from './project'
 
 const layout: PlotLayout = {
@@ -44,4 +50,22 @@ test('horizonSilhouettePath closes with Z', () => {
   const d = horizonSilhouettePath([0.5, 1, 0.2, 0], 90, layout)
   expect(d.endsWith('Z')).toBe(true)
   expect(d.startsWith('M')).toBe(true)
+})
+
+test('tnie ślad na widoczny i zasłonięty z wspólnym punktem granicznym', () => {
+  const parts = splitTrailByVisibility({
+    az_deg: [10, 20, 30, 40],
+    el_deg: [1, 2, 3, 4],
+    visible: [true, true, false, false],
+  })
+  expect(parts.map((part) => part.visible)).toEqual([true, false])
+  expect(parts[0].az_deg).toEqual([10, 20, 30])
+  expect(parts[1].az_deg).toEqual([30, 40])
+})
+
+test('stała widoczność daje jeden odcinek, pusta seria – zero', () => {
+  expect(
+    splitTrailByVisibility({ az_deg: [1, 2], el_deg: [0, 0], visible: [true, true] }),
+  ).toHaveLength(1)
+  expect(splitTrailByVisibility({ az_deg: [], el_deg: [], visible: [] })).toEqual([])
 })

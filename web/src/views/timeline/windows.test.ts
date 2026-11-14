@@ -1,7 +1,9 @@
 import { expect, test } from 'vitest'
 import {
   advance,
+  dayTicks,
   hoursUntilChange,
+  niceTicks,
   overlapSegments,
   stepMinutesFor,
   visibilitySegments,
@@ -125,4 +127,40 @@ test('advance moves the cursor at the chosen speed and stops at the end of the w
 
   // Ujemna delta (cofnięty zegar) nie przesuwa kursora do tyłu.
   expect(advance(5_000, -1000, 60, end).position).toBe(5_000)
+})
+
+test('okrągłe podziałki z zerem', () => {
+  expect(niceTicks(-1.2, 6.3)).toEqual([0, 2, 4, 6])
+  expect(niceTicks(0, 0)).toEqual([0])
+})
+
+test('podziałki dni o północy UTC', () => {
+  const ticks = dayTicks(Date.parse('2027-05-19T19:13:00Z'), Date.parse('2027-05-22T19:13:00Z'))
+  expect(ticks.map((tick) => new Date(tick).toISOString())).toEqual([
+    '2027-05-20T00:00:00.000Z',
+    '2027-05-21T00:00:00.000Z',
+    '2027-05-22T00:00:00.000Z',
+  ])
+})
+
+test('podziałki dni rozrzedzają się do limitu', () => {
+  const ticks = dayTicks(Date.parse('2027-05-01T00:00:00Z'), Date.parse('2027-06-01T00:00:00Z'))
+  expect(ticks.length).toBeLessThanOrEqual(7)
+  expect(ticks.length).toBeGreaterThan(1)
+  for (const tick of ticks) expect(new Date(tick).getUTCHours()).toBe(0)
+})
+
+// Review Focus 4: okno bez wschodów i zachodów nie może dać pustego wykresu.
+test('okno ze 100% widocznością to jeden pełny pas i brak zmian', () => {
+  const times = [t(0), t(6), t(12), t(18), t(24)]
+  expect(visibilitySegments(times, [true, true, true, true, true])).toEqual([
+    { start_utc: t(0), end_utc: t(24) },
+  ])
+  expect(hoursUntilChange(times, [true, true, true, true, true], t(0))).toBeNull()
+})
+
+test('okno z zerową widocznością nie daje pasa, ale też nie ma zmian', () => {
+  const times = [t(0), t(6), t(12), t(18), t(24)]
+  expect(visibilitySegments(times, [false, false, false, false, false])).toEqual([])
+  expect(hoursUntilChange(times, [false, false, false, false, false], t(0))).toBeNull()
 })

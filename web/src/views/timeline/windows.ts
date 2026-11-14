@@ -74,6 +74,62 @@ export function stepMinutesFor(duration_hours: number): number {
   return Math.min(120, Math.max(5, Math.round(duration_hours / 10)))
 }
 
+// Odcina szum zmiennoprzecinkowy (np. 0.30000000000000004) i normalizuje -0.
+function clean(value: number): number {
+  return Math.abs(value) < 1e-9 ? 0 : Number(value.toFixed(10))
+}
+
+/**
+ * Okrągłe podziałki osi: krok 1, 2 albo 5 × 10ⁿ. Zero wypada zawsze, gdy leży
+ * w zakresie (dzięki temu linia horyzontu ma własną podziałkę).
+ */
+export function niceTicks(min: number, max: number, target = 4): number[] {
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return []
+  const low = Math.min(min, max)
+  const high = Math.max(min, max)
+  if (!(high > low)) return [clean(low)]
+
+  const rough = (high - low) / Math.max(1, target)
+  const magnitude = 10 ** Math.floor(Math.log10(rough))
+  const residual = rough / magnitude
+  const factor = residual <= 1 ? 1 : residual <= 2 ? 2 : residual <= 5 ? 5 : 10
+  const step = factor * magnitude
+
+  const ticks: number[] = []
+  const first = Math.ceil(low / step) * step
+  // Limit iteracji chroni przed pętlą, gdyby krok wyszedł niepoprawny.
+  for (let i = 0; i < 200; i += 1) {
+    const value = first + i * step
+    if (value > high + step * 1e-9) break
+    ticks.push(clean(value))
+  }
+  if (low < 0 && high > 0 && !ticks.includes(0)) {
+    ticks.push(0)
+    ticks.sort((a, b) => a - b)
+  }
+  return ticks
+}
+
+const DAY_MS = 86_400_000
+
+/**
+ * Znaczniki osi czasu o północy UTC, rozrzedzone do `max`. Pusta lista, gdy okno
+ * nie zawiera żadnej północy (krótsze niż doba i bez trafienia w granicę).
+ */
+export function dayTicks(startMs: number, endMs: number, max = 7): number[] {
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return []
+
+  const ticks: number[] = []
+  const firstMidnight = Math.ceil(startMs / DAY_MS) * DAY_MS
+  for (let value = firstMidnight; value <= endMs && ticks.length < 4000; value += DAY_MS) {
+    ticks.push(value)
+  }
+  if (ticks.length <= max) return ticks
+
+  const stride = Math.ceil(ticks.length / max)
+  return ticks.filter((_, index) => index % stride === 0)
+}
+
 export interface AdvanceResult {
   position: number
   done: boolean

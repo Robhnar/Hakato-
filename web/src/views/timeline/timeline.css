@@ -1,13 +1,9 @@
-/* Widok osi czasu. Kolory: żółty = Słońce/zasilanie, niebieski = Ziemia/łączność.
-   Rozróżnienie opiera się na jasności i fakturze (pas "Both" to podział), nie na barwie. */
+/* Widok osi czasu (zadanie 021). Bursztyn = Słońce, błękit = Ziemia; linia
+   Ziemi jest przerywana, więc oba ciała da się rozróżnić bez koloru. */
 
 .timeline {
-  --tl-sun: #f2c14e;
-  --tl-earth: #6ba3ff;
-  --tl-off: #1b2130;
-
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .timeline-head {
@@ -21,11 +17,9 @@
   margin: 0;
 }
 
-.timeline-meta,
-.timeline-share {
+.timeline-meta {
   color: var(--muted);
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
+  font-size: 12px;
 }
 
 .timeline-legend {
@@ -34,28 +28,36 @@
   gap: 6px;
   margin-left: auto;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 12px;
 }
 
 .timeline-chip {
   display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  margin-right: 4px;
+  position: relative;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
   vertical-align: -1px;
 }
 
 .timeline-chip-sun {
-  background: var(--tl-sun);
+  background: var(--sun);
 }
 
 .timeline-chip-earth {
-  background: var(--tl-earth);
+  background: var(--earth);
 }
 
+/* „Both" = pas dzielony w poprzek, bez gradientu. */
 .timeline-chip-both {
-  background: linear-gradient(180deg, var(--tl-sun) 0 50%, var(--tl-earth) 50% 100%);
+  background: var(--sun);
+}
+
+.timeline-chip-both::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 0 0;
+  background: var(--earth);
 }
 
 .timeline-toolbar {
@@ -65,16 +67,30 @@
   gap: 8px;
 }
 
-.timeline-cursor-label {
+.timeline-readout {
+  display: grid;
+  gap: 2px;
   margin-left: auto;
-  font-size: 0.85rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.timeline-readout-time {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.timeline-readout-change {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.timeline-sep {
+  margin: 0 6px;
 }
 
 .timeline-canvas {
   position: relative;
-  padding-top: 46px;
 }
 
 .timeline-plot {
@@ -83,8 +99,7 @@
   width: 100%;
   height: auto;
   /* Outline zamiast border: obramowanie nie zawęża content boxu, do którego mapuje się viewBox. */
-  outline: 1px solid var(--border);
-  border-radius: 8px;
+  outline: 1px solid var(--line);
   background: var(--bg);
   cursor: pointer;
   touch-action: none;
@@ -95,141 +110,142 @@
 }
 
 .timeline-plot:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 
-.timeline-track {
-  fill: var(--tl-off);
-}
+/* Pasy widoczności */
 
-.timeline-band {
-  filter: saturate(1);
+.timeline-track {
+  fill: var(--line);
 }
 
 .timeline-band-sun {
-  fill: var(--tl-sun);
+  fill: var(--sun);
 }
 
 .timeline-band-earth {
-  fill: var(--tl-earth);
-}
-
-.timeline-band-both {
-  fill: url(#timeline-both-fill);
-}
-
-.timeline-both-stop-sun {
-  stop-color: var(--tl-sun);
-}
-
-.timeline-both-stop-earth {
-  stop-color: var(--tl-earth);
-}
-
-.timeline-chart-bg {
-  fill: #10151f;
+  fill: var(--earth);
 }
 
 .timeline-row-label {
   fill: var(--muted);
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
+.timeline-row-percent {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+/* Wykres wysokości */
+
+.timeline-chart-bg {
+  fill: #101011;
+}
+
+.timeline-below {
+  fill: rgba(255, 255, 255, 0.03);
+}
+
+.timeline-below-label {
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
 .timeline-axis-label {
   fill: var(--muted);
+  font-family: var(--font-mono);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
+.timeline-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
 .timeline-tick {
-  stroke: color-mix(in srgb, var(--border) 55%, transparent);
+  stroke: color-mix(in srgb, var(--line) 55%, transparent);
   stroke-width: 1;
 }
 
 .timeline-zero {
-  stroke: #566076;
+  stroke: var(--muted);
   stroke-width: 1;
   stroke-dasharray: 4 3;
 }
 
 .timeline-line {
   fill: none;
-  stroke-width: 1.8;
+  stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .timeline-line-sun {
-  stroke: var(--tl-sun);
+  stroke: var(--sun);
 }
 
+/* Ziemia przerywana — rozróżnialna także bez koloru. */
 .timeline-line-earth {
-  stroke: var(--tl-earth);
+  stroke: var(--earth);
+  stroke-dasharray: 6 3;
+}
+
+.timeline-line-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.timeline-line-label-sun {
+  fill: var(--sun);
+}
+
+.timeline-line-label-earth {
+  fill: var(--earth);
 }
 
 .timeline-cursor {
-  stroke: #ffffff;
-  stroke-width: 1.6;
+  stroke: var(--text);
+  stroke-width: 1.5;
   pointer-events: none;
 }
 
 .timeline-cursor-handle {
-  fill: var(--tl-sun);
-  stroke: #ffffff;
+  fill: var(--text);
+  stroke: var(--bg);
   stroke-width: 1;
   pointer-events: none;
 }
 
-.timeline-badge {
-  position: absolute;
-  top: 4px;
-  transform: translateX(14px);
-  max-width: min(230px, 45%);
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: rgba(11, 14, 20, 0.92);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.timeline-badge-left {
-  transform: translateX(calc(-100% - 14px));
-}
-
-.timeline-badge p {
+.timeline-share {
   margin: 0;
-  line-height: 1.35;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 @media (max-width: 700px) {
-  .timeline-legend {
+  .timeline-legend,
+  .timeline-readout {
     margin-left: 0;
   }
 
-  .timeline-cursor-label {
-    margin-left: 0;
+  .timeline-readout {
+    text-align: left;
   }
 
-  .timeline-badge {
-    max-width: min(180px, 45%);
-    font-size: 0.75rem;
+  .timeline-readout-change {
     white-space: normal;
   }
 
   .timeline-canvas {
     overflow-x: auto;
-  }
-
-  .timeline-svg {
-    min-width: 720px;
   }
 
   /* Tekst w SVG skaluje się razem z wykresem — na wąskim ekranie podbijamy go
@@ -240,6 +256,15 @@
 
   .timeline-row-label {
     font-size: 20px;
+  }
+
+  .timeline-row-percent,
+  .timeline-line-label {
+    font-size: 20px;
+  }
+
+  .timeline-below-label {
+    font-size: 18px;
   }
 
   .timeline-ticks > g:nth-child(even) {
