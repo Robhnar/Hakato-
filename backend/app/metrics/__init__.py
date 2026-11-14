@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 
 from .. import ephemeris, terrain
 from ..timeutil import iso_z, time_range, to_utc
+from .uncertainty import detect_eclipses, solar_visibility_uncertainty
 
 BODIES = ("sun", "earth")
 SUMMARY_STEP_MINUTES = 10.0
@@ -183,6 +184,10 @@ def summary(
         )
 
     out["meta"] = tl["meta"]
+    sun_az_el = list(zip(tl["sun"]["az_deg"], tl["sun"]["el_deg"]))
+    earth_az_el = list(zip(tl["earth"]["az_deg"], tl["earth"]["el_deg"]))
+    out["uncertainty"] = solar_visibility_uncertainty(tl["times_utc"], sun_az_el, h_elevations)
+    out["eclipses"] = detect_eclipses(tl["times_utc"], sun_az_el, earth_az_el)
     return out
 
 

@@ -109,10 +109,16 @@ Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 
            "visible_at_start": true, "hours_until_change": 51.5},
  "earth": {"visible_fraction": 0.48, "max_el_deg": 5.9,
            "windows": [], "visible_at_start": false, "hours_until_change": 12.0},
+ "uncertainty": {"typical_sunlight_hours": 12.0, "worst_case_sunlight_hours": 11.7,
+                 "best_case_sunlight_hours": 12.3, "horizon_margin_deg": 0.2,
+                 "solar_radius_deg": 0.266},
+ "eclipses": [{"start_utc": "…", "end_utc": "…",
+               "max_obscuration_fraction": 0.75, "duration_hours": 2.5}],
  "meta":  {"ephemeris": "spice", "horizon": "lola"}}
 ```
 
 `hours_until_change`: czas od `start_utc` do najbliższego zachodu (gdy widoczne) albo wschodu (gdy niewidoczne); `null`, jeśli w zadanym zakresie nic się nie zmienia.
+`uncertainty` i `eclipses` są opcjonalnymi rozszerzeniami: czas oświetlenia uwzględnia widoczny ułamek tarczy Słońca i pasmo dla marginesu horyzontu ±0,2°, a zaćmienia opisują nakładanie się tarcz Ziemi i Słońca widzianych z Księżyca. Dotychczasowe pola widoczności pozostają bez zmian.
 
 **`GET /api/windows?lat_deg&lon_deg&search_start_utc&search_end_utc&…`** – wyszukiwarka okien lądowania (Faza 2).
 
@@ -124,7 +130,9 @@ Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_land
   "max_sun_el_deg":1.42,"sun_el_at_start_deg":-0.35,"earth_hours":295.2,
   "earth_visible_fraction":0.417,"earth_visible_at_start":false,"passes_requirements":true,
   "score":0.82,"cycles":{"lunar_day_index":0,"seasonal_phase_deg":12.4,"draconic_year_phase_deg":41.0},
-  "uncertainty":null}],
+  "uncertainty":{"typical_sunlight_hours":168.5,"worst_case_sunlight_hours":162.0,
+    "best_case_sunlight_hours":175.0,"horizon_margin_deg":0.2,"solar_radius_deg":0.266},
+  "eclipses":[]}],
  "matches":[],
  "slip_analysis":null,
  "cycles_summary":{"synodic_month_days":29.53,"draconic_year_days":346.62,
@@ -132,7 +140,7 @@ Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_land
  "meta":{"ephemeris":"placeholder","horizon":"synthetic"}}
 ```
 
-`matches` to podzbiór `grid` spełniający wymagania, posortowany malejąco po `score`. Pole `uncertainty` jest opcjonalne (zadanie 016). Do czasu zadań 012/013 endpoint może zwracać zaślepkę o tym kształcie.
+`matches` to podzbiór `grid` spełniający wymagania, posortowany malejąco po `score`. Pola `uncertainty` i `eclipses` są opcjonalne dla każdego okna. Do czasu zadań 012/013 endpoint może zwracać zaślepkę o tym kształcie.
 
 ### Kontrakt między powłoką a widokami (frontend)
 

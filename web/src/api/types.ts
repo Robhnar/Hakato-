@@ -55,6 +55,8 @@ export interface Summary {
   sun: BodySummary
   earth: BodySummary
   meta: Meta
+  uncertainty?: SolarUncertainty | null
+  eclipses?: Eclipse[] | null
 }
 
 export interface RangeQuery {
@@ -89,9 +91,21 @@ export interface SlotCycles {
   libration_phase_deg?: number | null
 }
 
-export interface SlotUncertainty {
+export interface SolarUncertainty {
+  typical_sunlight_hours?: number | null
   worst_case_sunlight_hours?: number | null
+  best_case_sunlight_hours?: number | null
   horizon_margin_deg?: number | null
+  solar_radius_deg?: number | null
+}
+
+export type SlotUncertainty = SolarUncertainty
+
+export interface Eclipse {
+  start_utc: string
+  end_utc: string
+  max_obscuration_fraction: number
+  duration_hours: number
 }
 
 export interface CalendarSlot {
@@ -110,6 +124,7 @@ export interface CalendarSlot {
   score: number
   cycles: SlotCycles
   uncertainty?: SlotUncertainty | null
+  eclipses?: Eclipse[] | null
 }
 
 export interface SlipAnalysis {
