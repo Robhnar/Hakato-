@@ -1,10 +1,10 @@
 import { api } from '../api/client'
-import type { BodySummary } from '../api/types'
+import type { BodySummary, Meta } from '../api/types'
 import { useAsync } from '../api/useAsync'
 import { type Scenario, toRangeQuery } from './scenario'
 
 function BodyCard({ label, body }: { label: string; body: BodySummary }) {
-  const state = body.visible_at_start ? 'Visible now' : 'Below horizon'
+  const state = body.visible_at_start ? 'Visible at start' : 'Below horizon at start'
   const change =
     body.hours_until_change === null
       ? 'No rise/set in this window'
@@ -18,6 +18,23 @@ function BodyCard({ label, body }: { label: string; body: BodySummary }) {
       <p>{change}</p>
       <p className="muted">{share} · max elev. {body.max_el_deg.toFixed(2)}°</p>
     </div>
+  )
+}
+
+function DataNotes({ meta }: { meta: Meta }) {
+  return (
+    <>
+      {meta.ephemeris === 'placeholder' && (
+        <p className="warning" role="status">
+          Approximate data: ephemeris is a placeholder model, not SPICE.
+        </p>
+      )}
+      {meta.horizon === 'flat' && (
+        <p className="hint" role="status">
+          Terrain not modelled at this site – flat horizon assumed.
+        </p>
+      )}
+    </>
   )
 }
 
@@ -42,20 +59,13 @@ export default function SummaryStrip({ scenario }: { scenario: Scenario }) {
     )
   }
 
-  const approximate = data.meta.ephemeris !== 'spice' || data.meta.horizon !== 'lola'
-
   return (
     <section className="summary summary-sticky" aria-live="polite">
       <div className="summary-grid">
         <BodyCard label="Sun (power)" body={data.sun} />
         <BodyCard label="Earth (comms)" body={data.earth} />
       </div>
-      {approximate && (
-        <p className="warning" role="status">
-          Approximate data: ephemeris “{data.meta.ephemeris}”, horizon “{data.meta.horizon}”. Results
-          improve once SPICE and LOLA tasks are merged.
-        </p>
-      )}
+      <DataNotes meta={data.meta} />
     </section>
   )
 }
