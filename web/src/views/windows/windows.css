@@ -1,0 +1,61 @@
+.windows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.windows-lead {
+  margin: 0;
+  max-width: 52rem;
+}
+
+.windows-meta,
+.windows-hint {
+  margin: 0;
+  color: var(--muted, #9aa4b5);
+  font-size: 0.9rem;
+}
+
+.windows-error {
+  color: var(--error, #ef6b6b);
+}
+
+.windows-loading {
+  margin: 0;
+}
+
+.windows h3 {
+  margin: 8px 0 6px;
+  font-size: 1rem;
+}
+
+.windows-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.windows-list-muted .windows-slot {
+  opacity: 0.92;
+}
+
+.windows-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--panel, #151a23);
+  border: 1px solid var(--border, #2a3140);
+  border-radius: 8px;
+}
+
+.windows-slip {
+  padding: 10px 12px;
+  border: 1px dashed var(--border, #2a3140);
+  border-radius: 8px;
+}

@@ -114,13 +114,33 @@ Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 
 
 `hours_until_change`: czas od `start_utc` do najbliższego zachodu (gdy widoczne) albo wschodu (gdy niewidoczne); `null`, jeśli w zadanym zakresie nic się nie zmienia.
 
+**`GET /api/windows?lat_deg&lon_deg&search_start_utc&search_end_utc&…`** – wyszukiwarka okien lądowania (Faza 2).
+
+Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_landing_deg` (0), `min_sunlight_hours` (0), `max_darkness_hours` (708.7), `require_earth_at_landing` (false), `min_earth_fraction` (0), opcjonalnie `reference_start_utc` i `slip_days` (0) dla trybu „start się opóźnił".
+
+```json
+{"grid":[{"start_utc":"2027-01-01T00:00:00Z","end_utc":"2027-01-30T12:42:00Z",
+  "sunlight_hours":168.5,"sun_visible_fraction":0.238,"max_darkness_hours":240.0,
+  "max_sun_el_deg":1.42,"sun_el_at_start_deg":-0.35,"earth_hours":295.2,
+  "earth_visible_fraction":0.417,"earth_visible_at_start":false,"passes_requirements":true,
+  "score":0.82,"cycles":{"lunar_day_index":0,"seasonal_phase_deg":12.4,"draconic_year_phase_deg":41.0},
+  "uncertainty":null}],
+ "matches":[],
+ "slip_analysis":null,
+ "cycles_summary":{"synodic_month_days":29.53,"draconic_year_days":346.62,
+   "nodal_precession_years":18.6,"libration_month_days":27.21},
+ "meta":{"ephemeris":"placeholder","horizon":"synthetic"}}
+```
+
+`matches` to podzbiór `grid` spełniający wymagania, posortowany malejąco po `score`. Pole `uncertainty` jest opcjonalne (zadanie 016). Do czasu zadań 012/013 endpoint może zwracać zaślepkę o tym kształcie.
+
 ### Kontrakt między powłoką a widokami (frontend)
 
 Zdefiniowany w `web/src/app/scenario.ts`. Każdy widok to komponent w `web/src/views/<nazwa>/index.tsx`, zarejestrowany w `web/src/app/views.ts`, który dostaje `ViewProps`:
 
 - `scenarios`, `active` – lista porównywanych scenariuszy (miejsce + okno czasu) i ten aktualnie wybrany;
 - `cursor_utc`, `setCursorUtc` – wspólny kursor czasu: przesunięcie go na osi czasu przesuwa Słońce w widoku nieba;
-- `selectScenario(id)`, `pickLocation(lat_deg, lon_deg)` – akcje, którymi widok zmienia stan powłoki.
+- `selectScenario(id)`, `pickLocation(lat_deg, lon_deg)`, `applyWindow(start_utc, duration_hours?)` – akcje, którymi widok zmienia stan powłoki (`applyWindow` ustawia start aktywnego scenariusza z wyszukiwarki okien).
 
 Widoki pobierają dane wyłącznie przez `api` z `web/src/api/client.ts` i hook `useAsync`. Nie importują niczego z innych widoków ani z `App.tsx`.
 
