@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../../api/client'
 import { useAsync } from '../../api/useAsync'
 import { type ViewProps, endUtc, toIsoZ, toRangeQuery } from '../../app/scenario'
-import { hoursUntilChange, overlapSegments, stepMinutesFor, visibilitySegments } from './windows'
+import { advance, hoursUntilChange, overlapSegments, stepMinutesFor, visibilitySegments } from './windows'
 import './timeline.css'
 
 // Pasy widoczności i wykres wysokości muszą się zgadzać co do piksela, więc cały
@@ -88,20 +88,24 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     const times = data.times_utc
     const sunWindows = visibilitySegments(times, data.sun.visible)
     const earthWindows = visibilitySegments(times, data.earth.visible)
-    const values = [...data.sun.el_deg, ...data.earth.el_deg, 0]
+    const values = [...data.sun.el_deg, ...data.earth.el_deg, 0].filter((value) => Number.isFinite(value))
     const rawMin = Math.min(...values)
     const rawMax = Math.max(...values)
     // Przy horyzoncie cała skala to ułamek stopnia; rozciągamy ją do MIN_EL_SPAN_DEG.
     const pad = Math.max(MIN_EL_SPAN_DEG - (rawMax - rawMin), 0) / 2
     const scale = { min: rawMin - pad, max: rawMax + pad }
-    const path = (series: number[]) =>
-      times
-        .map((time, index) => {
-          const x = xFor(Date.parse(time), startMs, endMs)
-          const y = yForElevation(series[index], scale)
-          return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`
-        })
-        .join(' ')
+    // Brakującą lub niepoprawną próbkę pomijamy, żeby jeden NaN nie skasował całej linii.
+    const path = (series: number[]) => {
+      const points: string[] = []
+      times.forEach((time, index) => {
+        const value = series[index]
+        if (!Number.isFinite(value)) return
+        const x = xFor(Date.parse(time), startMs, endMs)
+        const y = yForElevation(value, scale)
+        points.push(`${points.length === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`)
+      })
+      return points.join(' ')
+    }
 
     return {
       times,
@@ -135,15 +139,16 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     let position = cursorRef.current
 
     const tick = (now: number) => {
-      // speed to godziny na sekundę, a `position` jest w milisekundach: s → h → ms.
-      position = Math.min(endMs, position + ((now - previous) / 1000) * speed * 3_600_000)
+      // Ukryta karta wstrzymuje rAF; bez przycięcia delty powrót przeskoczyłby na koniec okna.
+      const step = advance(position, Math.min(now - previous, 250), speed, endMs)
+      position = step.position
       previous = now
       // Powłoka przerenderowuje się przy każdym ustawieniu kursora — 8 razy na sekundę wystarczy.
-      if (now - emittedAt > 120 || position >= endMs) {
+      if (now - emittedAt > 120 || step.done) {
         emittedAt = now
         setCursorUtc(toIsoZ(new Date(position)))
       }
-      if (position >= endMs) {
+      if (step.done) {
         setPlaying(false)
         return
       }
@@ -158,10 +163,12 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
   if (geometry.times.length === 0) return <p>No visibility samples in this window.</p>
 
   const { times, sunWindows, earthWindows, bothWindows, scale, sunPath, earthPath, shares } = geometry
+  // Kursor może wypaść z okna po zmianie okresu lub godziny startu — liczymy wszystko z przyciętej wartości.
+  const cursorIso = toIsoZ(new Date(cursorMs))
   const sunNow = lastVisibleAt(times, data!.sun.visible, cursorMs)
   const earthNow = lastVisibleAt(times, data!.earth.visible, cursorMs)
-  const sunChange = hoursUntilChange(times, data!.sun.visible, cursor_utc)
-  const earthChange = hoursUntilChange(times, data!.earth.visible, cursor_utc)
+  const sunChange = hoursUntilChange(times, data!.sun.visible, cursorIso)
+  const earthChange = hoursUntilChange(times, data!.earth.visible, cursorIso)
   const cursorX = xFor(cursorMs, startMs, endMs)
   const cursorPercent = (cursorX / VIEW_W) * 100
   const badgeOnLeft = cursorPercent > 62
@@ -190,7 +197,9 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
   }
 
   function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
-    if (draggingRef.current) moveCursor(timeAtClientX(event.clientX))
+    // Bez pointer capture `pointerup` poza wykresem nie dotrze - odzyskujemy stan po puszczeniu.
+    if (event.buttons === 0) draggingRef.current = false
+    else if (draggingRef.current) moveCursor(timeAtClientX(event.clientX))
   }
 
   function onPointerUp() {
@@ -214,14 +223,14 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     else moveCursor(cursorMs + (jumps[event.key] ?? 0))
   }
 
-  const summary = `${formatCursor(cursor_utc)}. ${describeChange('Sun', sunNow, sunChange)}. ${describeChange(
+  const summary = `${formatCursor(cursorIso)}. ${describeChange('Sun', sunNow, sunChange)}. ${describeChange(
     'Earth',
     earthNow,
     earthChange,
   )}`
 
   return (
-    <div className="timeline">
+    <div className="timeline" aria-busy={timeline.loading}>
       <div className="timeline-head">
         <h2>Timeline</h2>
         <span className="timeline-meta">
@@ -259,7 +268,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
             ))}
           </select>
         </label>
-        <span className="timeline-cursor-label">{formatCursor(cursor_utc)}</span>
+        <span className="timeline-cursor-label">{formatCursor(cursorIso)}</span>
       </div>
 
       <div className="timeline-canvas">
@@ -354,18 +363,20 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
           <path className="timeline-line timeline-line-sun" d={sunPath} />
           <path className="timeline-line timeline-line-earth" d={earthPath} />
 
-          {tickTimes(startMs, endMs).map((tickMs, index, all) => {
-            const x = xFor(tickMs, startMs, endMs)
-            const anchor = index === 0 ? 'start' : index === all.length - 1 ? 'end' : 'middle'
-            return (
-              <g key={tickMs} aria-hidden="true">
-                <line className="timeline-tick" x1={x} y1={CHART_TOP} x2={x} y2={CHART_TOP + CHART_H} />
-                <text className="timeline-axis-label" x={x} y={AXIS_TOP} textAnchor={anchor}>
-                  {formatTick(toIsoZ(new Date(tickMs)))}
-                </text>
-              </g>
-            )
-          })}
+          <g className="timeline-ticks">
+            {tickTimes(startMs, endMs).map((tickMs, index, all) => {
+              const x = xFor(tickMs, startMs, endMs)
+              const anchor = index === 0 ? 'start' : index === all.length - 1 ? 'end' : 'middle'
+              return (
+                <g key={tickMs} aria-hidden="true">
+                  <line className="timeline-tick" x1={x} y1={CHART_TOP} x2={x} y2={CHART_TOP + CHART_H} />
+                  <text className="timeline-axis-label" x={x} y={AXIS_TOP} textAnchor={anchor}>
+                    {formatTick(toIsoZ(new Date(tickMs)))}
+                  </text>
+                </g>
+              )
+            })}
+          </g>
 
           <line
             className="timeline-cursor"

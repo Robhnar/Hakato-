@@ -79,13 +79,19 @@
 
 .timeline-plot {
   display: block;
+  box-sizing: border-box;
   width: 100%;
   height: auto;
-  border: 1px solid var(--border);
+  /* Outline zamiast border: obramowanie nie zawęża content boxu, do którego mapuje się viewBox. */
+  outline: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg);
   cursor: pointer;
   touch-action: none;
+}
+
+.timeline[aria-busy='true'] .timeline-plot {
+  opacity: 0.55;
 }
 
 .timeline-plot:focus-visible {
@@ -182,7 +188,7 @@
   position: absolute;
   top: 4px;
   transform: translateX(14px);
-  max-width: 230px;
+  max-width: min(230px, 45%);
   padding: 6px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -213,8 +219,22 @@
   }
 
   .timeline-badge {
-    max-width: 180px;
+    max-width: min(180px, 45%);
     font-size: 0.75rem;
     white-space: normal;
+  }
+
+  /* Tekst w SVG skaluje się razem z wykresem — na wąskim ekranie podbijamy go
+     i pokazujemy co drugi tick, żeby etykiety nie nachodziły na siebie. */
+  .timeline-axis-label {
+    font-size: 22px;
+  }
+
+  .timeline-row-label {
+    font-size: 20px;
+  }
+
+  .timeline-ticks > g:nth-child(even) {
+    display: none;
   }
 }
