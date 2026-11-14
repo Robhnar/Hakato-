@@ -12,6 +12,7 @@ from .. import ephemeris, terrain
 from ..config import DATA_DIR
 from ..timeutil import iso_z, time_range, to_utc
 from . import summarize_body
+from .uncertainty import detect_eclipses, solar_visibility_uncertainty
 
 SYNODIC_MONTH_DAYS = 29.530588853
 DRACONIC_YEAR_DAYS = 346.620075
@@ -120,6 +121,10 @@ def evaluate_slot(
     earth_summary = summarize_body(
         times_iso, positions["earth"]["el_deg"], earth_vis, h_elevation_earth
     )
+    sun_az_el = list(zip(positions["sun"]["az_deg"], positions["sun"]["el_deg"]))
+    earth_az_el = list(zip(positions["earth"]["az_deg"], positions["earth"]["el_deg"]))
+    uncertainty = solar_visibility_uncertainty(times_iso, sun_az_el, h_elevation_sun)
+    eclipses = detect_eclipses(times_iso, sun_az_el, earth_az_el)
 
     sunlight_hours = round(sun_summary["visible_fraction"] * duration_hours, 2)
     earth_hours = round(earth_summary["visible_fraction"] * duration_hours, 2)
@@ -162,6 +167,8 @@ def evaluate_slot(
         "passes_requirements": passes,
         "score": score,
         "cycles": cycles,
+        "uncertainty": uncertainty,
+        "eclipses": eclipses,
     }
 
 

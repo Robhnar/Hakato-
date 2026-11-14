@@ -1,6 +1,6 @@
 # 016 – Margines niepewności (elipsa lądowania, tarcza Słońca) i zjawiska dodatkowe
 
-- **Status:** wolne
+- **Status:** w recenzji
 - **Właściciel:** osoba E
 - **Moduł:** `metrics`, `terrain`, `ephemeris`
 - **Gałąź:** `feat/016-niepewnosc-i-zacmienia`
@@ -41,6 +41,6 @@ Rozszerza wynik `metrics.summary` / `metrics.search_windows` o opcjonalne sekcje
 
 ## Kryteria ukończenia
 
-- [ ] Test jednostkowy tarczy słonecznej: gdy środek Słońca jest dokładnie na linii horyzontu (`el == horizon`), ułamek oświetlenia wynosi `0.5`, dla `el <= horizon - 0.266°` wynosi `0.0`, a dla `el >= horizon + 0.266°` wynosi `1.0`.
-- [ ] Test jednostkowy detekcji zaćmień: dla znanego historycznego/przyszłego zaćmienia Księżyca (widzianego z Księżyca jako zaćmienie Słońca przez Ziemię) funkcja wykrywa kilkugodzinne okno zaćmienia.
-- [ ] `ruff` i `pytest` zielone.
+- [x] Test jednostkowy tarczy słonecznej: gdy środek Słońca jest dokładnie na linii horyzontu (`el == horizon`), ułamek oświetlenia wynosi `0.5`, dla `el <= horizon - 0.266°` wynosi `0.0`, a dla `el >= horizon + 0.266°` wynosi `1.0`.
+- [x] Test jednostkowy detekcji zaćmień: dla znanego historycznego/przyszłego zaćmienia Księżyca (widzianego z Księżyca jako zaćmienie Słońca przez Ziemię) funkcja wykrywa kilkugodzinne okno zaćmienia.
+- [x] `ruff` i `pytest` zielone.
