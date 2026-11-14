@@ -485,3 +485,117 @@
     margin-left: 0;
   }
 }
+
+/* --- 014: mapa cieplna i legenda cykli --- */
+.windows-viz {
+  display: grid;
+  gap: 12px;
+}
+
+.windows-heat,
+.windows-cycles {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--panel, #151a23);
+  border: 1px solid var(--border, #2a3140);
+  border-radius: 8px;
+}
+
+.windows-heat-head,
+.windows-heat-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.windows-heat-head h3,
+.windows-cycles h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.windows-heat-metric {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+
+.windows-heat-ramp {
+  flex: 1;
+  min-width: 80px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(30, 41, 59), rgb(14, 116, 144), rgb(234, 179, 8), rgb(249, 115, 22));
+}
+
+.windows-heat-years {
+  display: grid;
+  gap: 8px;
+}
+
+.windows-heat-year {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.windows-heat-year-label {
+  font-size: 0.8rem;
+  color: var(--muted, #9aa4b5);
+}
+
+.windows-heat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.windows-heat-cell {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #0b0e14;
+  font-size: 0.65rem;
+}
+
+.windows-heat-cell.pass {
+  box-shadow: inset 0 0 0 2px #6bcf7f;
+}
+
+.windows-heat-cell.selected {
+  outline: 2px solid var(--accent, #f2c14e);
+  outline-offset: 1px;
+}
+
+.windows-heat-cell-label {
+  pointer-events: none;
+}
+
+.windows-heat-detail {
+  font-size: 0.85rem;
+}
+
+.windows-heat-detail p {
+  margin: 4px 0 0;
+}
+
+.windows-cycles-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.windows-cycles-focus {
+  margin: 0;
+  font-size: 0.85rem;
+}
