@@ -4,6 +4,8 @@ Jedno zadanie to jeden plik w tym katalogu. Plik jest briefem dla osoby i jej as
 
 Nowe zadanie: skopiuj [`_SZABLON.md`](_SZABLON.md) jako `<nr>-<opis>.md`. Zadania tworzy i przydziela integrator; propozycje własnych zadań zgłaszaj jako issue.
 
+Uwagi po przeglądzie oddanych zadań są w [`docs/POPRAWKI.md`](../POPRAWKI.md).
+
 **Status zmieniasz tylko w pliku swojego zadania.** Tabelę poniżej aktualizuje integrator – dzięki temu nikt nie ma konfliktów w tym pliku.
 
 ## Lista
