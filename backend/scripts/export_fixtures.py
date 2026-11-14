@@ -14,6 +14,7 @@ import os
 from datetime import UTC, datetime
 
 from app import metrics
+from app.api.windows_stub import windows_fixture
 from app.config import DATA_DIR, FIXTURES_DIR
 
 LAT_DEG, LON_DEG = -89.5, 0.0
@@ -53,6 +54,7 @@ def _build() -> dict[str, object]:
         "horizon.json": horizon,
         "timeline.json": metrics.timeline(LAT_DEG, LON_DEG, START, END, STEP_MINUTES, horizon),
         "summary.json": metrics.summary(LAT_DEG, LON_DEG, START, END, horizon=horizon),
+        "windows.json": windows_fixture(),
     }
 
 
