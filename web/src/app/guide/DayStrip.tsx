@@ -73,10 +73,14 @@ export default function DayStrip({
   const earthUp = columns.filter((c) => c.earth >= 0.5).length
   const summary = `Sun up on ${sunUp} of ${n} ${word}, Earth visible on ${earthUp} of ${n} ${word}`
   const first = formatDay(columns[0].day)
+  const middle = formatDay(columns[Math.floor((n - 1) / 2)].day)
   const last = formatDay(columns[columns.length - 1].day)
 
   return (
     <figure className="day-strip">
+      <figcaption className="day-strip-head">
+        <span className="legend-sun">Sun up</span> <span className="legend-earth">Earth in view</span>
+      </figcaption>
       <div className="day-strip-bars" role="img" aria-label={summary}>
         {columns.map((c) => (
           <div
@@ -89,12 +93,11 @@ export default function DayStrip({
           </div>
         ))}
       </div>
-      <figcaption>
-        <span className="legend-sun">Sun up</span> <span className="legend-earth">Earth in view</span>
-        <span className="day-strip-range">
-          {first} – {last}
-        </span>
-      </figcaption>
+      <div className="day-strip-axis num">
+        <span>{first}</span>
+        <span>{middle}</span>
+        <span>{last}</span>
+      </div>
     </figure>
   )
 }

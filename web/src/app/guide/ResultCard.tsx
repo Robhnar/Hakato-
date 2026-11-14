@@ -7,20 +7,17 @@ import { formatDay, formatDuration, formatLocalTime, formatPercent, formatUtcTim
 import { type Priority, type RankedCandidate, type Rating, rateDarkness, rateFraction } from './ranking'
 
 const RATING_TEXT: Record<Rating, string> = { great: 'Great', okay: 'Okay', poor: 'Poor' }
-const RATING_ICON: Record<Rating, string> = { great: '●', okay: '◐', poor: '○' }
 
-function Metric({ icon, label, value, rating }: { icon: string; label: string; value: string; rating: Rating }) {
+type MetricSign = 'sun' | 'earth' | 'dark'
+
+// Znak przy ocenie: kwadrat Słońca, koło Ziemi, szary kwadrat ciemności (zamiast emoji).
+function Metric({ sign, label, value, rating }: { sign: MetricSign; label: string; value: string; rating: Rating }) {
   return (
     <li className={`guide-metric rating-${rating}`}>
-      <span className="guide-metric-icon" aria-hidden="true">
-        {icon}
-      </span>
+      <span className={`guide-metric-sign sign-${sign}`} aria-hidden="true" />
       <span className="guide-metric-label">{label}</span>
       <span className="guide-metric-value">{value}</span>
-      <span className="guide-rating">
-        <span aria-hidden="true">{RATING_ICON[rating]} </span>
-        {RATING_TEXT[rating]}
-      </span>
+      <span className="guide-rating">{RATING_TEXT[rating]}</span>
     </li>
   )
 }
@@ -45,11 +42,11 @@ export default function ResultCard({ candidate, priority, durationHours, heading
 
   return (
     <article className="guide-result" aria-labelledby="guide-best-heading">
-      <p className="guide-eyebrow">Best choice</p>
+      <p className="guide-eyebrow label">Best choice</p>
       <h2 id="guide-best-heading" ref={headingRef} tabIndex={-1}>
         {site.name}
       </h2>
-      <p className="guide-when">
+      <p className="guide-when num">
         <strong>Land on {formatDay(slot.start_utc)}</strong>
         <span>
           {' '}
@@ -59,19 +56,19 @@ export default function ResultCard({ candidate, priority, durationHours, heading
 
       <ul className="guide-metrics">
         <Metric
-          icon="☀"
+          sign="sun"
           label="Solar power"
           value={sunText(slot.sun_visible_fraction, slot.max_darkness_hours)}
           rating={rateFraction(slot.sun_visible_fraction)}
         />
         <Metric
-          icon="🌍"
+          sign="earth"
           label="Talking to Earth"
           value={`Earth in view ${formatPercent(slot.earth_visible_fraction)} of the time`}
           rating={rateFraction(slot.earth_visible_fraction)}
         />
         <Metric
-          icon="🌑"
+          sign="dark"
           label="Longest darkness"
           value={formatDuration(slot.max_darkness_hours)}
           rating={rateDarkness(slot.max_darkness_hours)}
@@ -86,7 +83,7 @@ export default function ResultCard({ candidate, priority, durationHours, heading
       <DayStrip lat_deg={site.lat_deg} lon_deg={site.lon_deg} start_utc={slot.start_utc} hours={durationHours} />
 
       <div className="guide-actions">
-        <button type="button" className="guide-primary" onClick={() => open('sky')}>
+        <button type="button" className="btn-primary" onClick={() => open('sky')}>
           See it in the sky →
         </button>
         <button type="button" onClick={() => open('timeline')}>
