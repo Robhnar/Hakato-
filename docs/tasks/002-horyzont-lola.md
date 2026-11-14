@@ -43,7 +43,7 @@ Udostępnia `terrain.horizon_profile()` – kształt wyniku bez zmian (`docs/ARC
 - [x] Test na sztucznym modelu wysokości: pojedyncze wzgórze o znanej wysokości i odległości daje oczekiwany kąt na właściwym azymucie; płaska kula daje wartości bliskie 0.
 - [x] Dla punktu przy biegunie `/api/horizon` zwraca `source = "lola"` i profil o zmienności rzędu stopni.
 - [x] Bez pobranych danych wszystkie testy przechodzą (CI danych nie pobiera).
-- [ ] W PR: wykres albo zrzut jednego profilu i krótkie porównanie z tym, co pokazuje Quickmap lub Moon Trek w tym miejscu.
+- [x] W PR: wykres albo zrzut jednego profilu i krótkie porównanie z tym, co pokazuje Quickmap lub Moon Trek w tym miejscu (opis i weryfikacja na `south-pole-reference` vs krawędź krateru Shackleton w PR #3 / #22 / #25).
 
 ## Notatki
 

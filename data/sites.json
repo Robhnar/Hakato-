@@ -8,26 +8,26 @@
     "landing_utc": null
   },
   {
+    "id": "shackleton-ridge",
+    "name": "Artemis candidate: ridge near Shackleton",
+    "lat_deg": -89.45,
+    "lon_deg": -137.3,
+    "category": "candidate",
+    "landing_utc": null
+  },
+  {
     "id": "nobile-rim-1",
-    "name": "Artemis candidate: Nobile crater center reference",
-    "lat_deg": -85.28,
-    "lon_deg": 53.27,
+    "name": "Artemis candidate: Nobile Rim 1",
+    "lat_deg": -85.423,
+    "lon_deg": 36.19,
     "category": "candidate",
     "landing_utc": null
   },
   {
     "id": "de-gerlache-rim-2",
-    "name": "Artemis candidate: de Gerlache crater center reference",
-    "lat_deg": -88.5,
-    "lon_deg": -87.6,
-    "category": "candidate",
-    "landing_utc": null
-  },
-  {
-    "id": "connecting-ridge-site-001",
-    "name": "Artemis candidate: Connecting Ridge site 001",
-    "lat_deg": -89.45,
-    "lon_deg": -137.31,
+    "name": "Artemis candidate: de Gerlache Rim 2",
+    "lat_deg": -88.142,
+    "lon_deg": -63.662,
     "category": "candidate",
     "landing_utc": null
   },
@@ -105,7 +105,7 @@
   },
   {
     "id": "change-4",
-    "name": "Chang'e 4 (Von Kármán)",
+    "name": "Chang'e 4 (Von K\u00e1rm\u00e1n)",
     "lat_deg": -45.4446,
     "lon_deg": 177.5991,
     "category": "international",
@@ -121,7 +121,7 @@
   },
   {
     "id": "change-5",
-    "name": "Chang'e 5 (Mons Rümker)",
+    "name": "Chang'e 5 (Mons R\u00fcmker)",
     "lat_deg": 43.06,
     "lon_deg": -51.92,
     "category": "international",
