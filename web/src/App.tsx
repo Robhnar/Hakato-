@@ -262,9 +262,12 @@ function Shell({ sites }: { sites: Site[] }) {
         </nav>
       </header>
 
-      {mode === 'simple' ? (
+      {/* Zawsze zamontowany: odpowiedzi i wynik przetrwają wycieczkę do Expert. */}
+      <div hidden={mode !== 'simple'}>
         <GuidePanel sites={sites} onOpenExpert={openExpert} />
-      ) : (
+      </div>
+
+      {mode === 'expert' && (
       <>
 
       <section className="controls" aria-label="Scenario setup">

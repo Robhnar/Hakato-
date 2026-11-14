@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import type { CalendarSlot, Site, WindowsQuery, WindowsResponse } from '../../api/types'
-import { candidateSites, findLandings, type GuideAnswers } from './search'
+import { candidateSites, findLandings, type GuideAnswers, phaseOffsetsDays } from './search'
 
 const SITES: Site[] = [
   { id: 'pole', name: 'Pole', lat_deg: -89.5, lon_deg: 0, category: 'candidate', landing_utc: null },
@@ -66,7 +66,7 @@ test('findLandings asks each candidate site with the mission length and month ra
   expect(queries[0]).toMatchObject({
     duration_hours: 336,
     search_start_utc: '2028-03-01T00:00:00Z',
-    search_end_utc: '2029-01-01T00:00:00Z',
+    search_end_utc: '2029-01-15T00:00:00Z',
   })
 })
 
@@ -155,4 +155,40 @@ test('findLandings treats a site as failed only when all its phases fail', async
     return response([slot()])
   })
   expect(result.failedSites).toEqual([])
+})
+
+test('phaseOffsetsDays uses 4 phases for long stays', () => {
+  expect(phaseOffsetsDays(72)).toEqual([0])
+  expect(phaseOffsetsDays(336)).toHaveLength(8)
+  expect(phaseOffsetsDays(2126.1)).toHaveLength(4)
+})
+
+test('findLandings runs at most 4 requests at a time', async () => {
+  let running = 0
+  let peak = 0
+  await findLandings(ANSWERS, SITES, async () => {
+    running += 1
+    peak = Math.max(peak, running)
+    await new Promise((resolve) => setTimeout(resolve, 1))
+    running -= 1
+    return response([slot()])
+  })
+  expect(peak).toBe(4)
+})
+
+test('findLandings lets the mission end after the latest month', async () => {
+  const queries: WindowsQuery[] = []
+  await findLandings(QUICK, SITES, async (q) => {
+    queries.push(q)
+    return response([slot()])
+  })
+  // 2029-01-01 + 72 h
+  expect(queries[0].search_end_utc).toBe('2029-01-04T00:00:00Z')
+})
+
+test('findLandings drops landings that start after the latest month', async () => {
+  const result = await findLandings(QUICK, SITES, async () =>
+    response([slot({ start_utc: '2028-12-31T00:00:00Z' }), slot({ start_utc: '2029-01-02T00:00:00Z' })]),
+  )
+  expect(result.ranked.map((c) => c.slot.start_utc)).toEqual(['2028-12-31T00:00:00Z', '2028-12-31T00:00:00Z'])
 })

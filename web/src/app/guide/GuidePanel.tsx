@@ -215,7 +215,7 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
       </form>
 
       <section className="guide-results" aria-live="polite" aria-busy={status.kind === 'loading'}>
-        {status.kind === 'loading' && <p role="status">Checking sunlight and Earth contact for every day…</p>}
+        {status.kind === 'loading' && <p role="status">Checking sunlight and Earth contact for every day… Long missions can take up to half a minute.</p>}
         {status.kind === 'error' && (
           <div className="guide-error" role="alert">
             <p>{status.message}</p>
