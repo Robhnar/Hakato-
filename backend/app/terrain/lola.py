@@ -105,22 +105,27 @@ def latlon_to_pixel(
 
 
 def sample_heights(dem: PolarDem, sample: np.ndarray, line: np.ndarray) -> np.ndarray | None:
-    """Interpoluje dwuliniowo wysokość terenu (w metrach) dla tablic (sample, line)."""
-    if (
-        np.any(sample < 0.0)
-        or np.any(sample > dem.line_samples - 1)
-        or np.any(line < 0.0)
-        or np.any(line > dem.lines - 1)
-    ):
+    """Interpoluje dwuliniowo wysokość terenu (w metrach) dla tablic (sample, line).
+
+    Punkty leżące poza rastrem otrzymują wartość `np.nan`. Zwraca `None`, gdy wszystkie
+    przekazane punkty leżą poza rastrem.
+    """
+    in_bounds = (
+        (sample >= 0.0) & (sample <= dem.line_samples - 1) & (line >= 0.0) & (line <= dem.lines - 1)
+    )
+    if not np.any(in_bounds):
         return None
 
-    x0 = np.floor(sample).astype(np.int64)
-    y0 = np.floor(line).astype(np.int64)
+    sample_c = np.clip(sample, 0.0, dem.line_samples - 1)
+    line_c = np.clip(line, 0.0, dem.lines - 1)
+
+    x0 = np.floor(sample_c).astype(np.int64)
+    y0 = np.floor(line_c).astype(np.int64)
     x1 = np.minimum(x0 + 1, dem.line_samples - 1)
     y1 = np.minimum(y0 + 1, dem.lines - 1)
 
-    wx = sample - x0
-    wy = line - y0
+    wx = sample_c - x0
+    wy = line_c - y0
 
     z00 = dem.data[y0, x0].astype(np.float64)
     z10 = dem.data[y0, x1].astype(np.float64)
@@ -133,7 +138,7 @@ def sample_heights(dem: PolarDem, sample: np.ndarray, line: np.ndarray) -> np.nd
         + z01 * (1.0 - wx) * wy
         + z11 * wx * wy
     )
-    return dn * dem.scaling_factor
+    return np.where(in_bounds, dn * dem.scaling_factor, np.nan)
 
 
 def compute_horizon_profile(
@@ -152,7 +157,7 @@ def compute_horizon_profile(
 
     s0, l0 = latlon_to_pixel(np.array([lat0]), np.array([lon0]), dem)
     h0_arr = sample_heights(dem, s0, l0)
-    if h0_arr is None:
+    if h0_arr is None or np.isnan(h0_arr[0]):
         return None
     h0 = float(h0_arr[0])
     r0 = dem.radius_m + h0 + observer_height_m
@@ -186,7 +191,10 @@ def compute_horizon_profile(
 
     r1 = dem.radius_m + h1
     elev_rad = np.arctan2(r1 * np.cos(delta) - r0, r1 * np.sin(delta))
-    max_elev_deg = np.degrees(elev_rad.max(axis=1))
+    elev_rad = np.where(np.isnan(elev_rad), -np.inf, elev_rad)
+    max_elev_rad = elev_rad.max(axis=1)
+    max_elev_rad = np.where(np.isinf(max_elev_rad), 0.0, max_elev_rad)
+    max_elev_deg = np.degrees(max_elev_rad)
 
     return {
         "azimuth_step_deg": 1.0,

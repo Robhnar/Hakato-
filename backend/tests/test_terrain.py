@@ -156,3 +156,17 @@ def test_api_horizon_south_pole_returns_lola_with_variation():
     elevs = body["elevation_deg"]
     assert len(elevs) == 360
     assert max(elevs) - min(elevs) > 1.0
+
+
+def test_site_near_raster_edge_ignores_out_of_bounds_ray_points():
+    # Raster +/-310 km wokół bieguna: punkt IM-1 Odysseus (-80.13°, 1.44°) leży ~300 km od bieguna,
+    # więc mieści się w rastrze, ale promień 160 km na północ wychodzi poza krawędź.
+    dem = _make_synthetic_dem(size=1241, scale_m=500.0)
+    profile = compute_horizon_profile(dem, lat_deg=-80.13, lon_deg=1.44, max_distance_m=160_000.0)
+    assert profile is not None
+    assert profile["source"] == "lola"
+    assert len(profile["elevation_deg"]) == 360
+
+    # Gdy sam obserwator leży poza rastrem (np. zbyt mały raster), funkcja zwraca None.
+    tiny_dem = _make_synthetic_dem(size=201, scale_m=500.0)
+    assert compute_horizon_profile(tiny_dem, lat_deg=-80.13, lon_deg=1.44) is None
