@@ -3,11 +3,10 @@ import { api } from '../../api/client'
 import { useAsync } from '../../api/useAsync'
 import { toIsoZ, type ViewProps } from '../../app/scenario'
 import { vectorFromAzEl, vectorToLatLon } from './geo'
+import type { OptimalSiteResponse, OptimalWeights } from '../../api/types'
 import { overlayQuery, WEIGHT_PRESETS } from './heatmap'
 import MoonGlobe from './MoonGlobe'
 import OptimalZonePanel from './OptimalZonePanel'
-import type { OptimalSiteResponse, OptimalWeights } from './optimalContract'
-import { fetchOptimalSite } from './optimalSource'
 import './map.css'
 
 // Słońce nad punktem (0°, 0°) daje azymut i wysokość, z których odtwarzamy
@@ -45,7 +44,7 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
   // rozwiązuje się od razu wartością null, a klucz nie zmienia się z wagami.
   const optimalQuery = overlayQuery(active, cursor_utc, weights)
   const optimal = useAsync<OptimalSiteResponse | null>(
-    () => (overlayEnabled ? fetchOptimalSite(optimalQuery) : Promise.resolve(null)),
+    () => (overlayEnabled ? api.optimalSite(optimalQuery) : Promise.resolve(null)),
     overlayEnabled ? JSON.stringify(optimalQuery) : 'overlay-off',
   )
 
