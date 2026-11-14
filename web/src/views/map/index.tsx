@@ -3,7 +3,11 @@ import { api } from '../../api/client'
 import { useAsync } from '../../api/useAsync'
 import { toIsoZ, type ViewProps } from '../../app/scenario'
 import { vectorFromAzEl, vectorToLatLon } from './geo'
+import { overlayQuery, WEIGHT_PRESETS } from './heatmap'
 import MoonGlobe from './MoonGlobe'
+import OptimalZonePanel from './OptimalZonePanel'
+import type { OptimalSiteResponse, OptimalWeights } from './optimalContract'
+import { fetchOptimalSite } from './optimalSource'
 import './map.css'
 
 // Słońce nad punktem (0°, 0°) daje azymut i wysokość, z których odtwarzamy
@@ -34,6 +38,16 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
     cursor_utc,
   )
   const [southPoleRequest, setSouthPoleRequest] = useState(0)
+  const [overlayEnabled, setOverlayEnabled] = useState(false)
+  const [weights, setWeights] = useState<OptimalWeights>(() => ({ ...WEIGHT_PRESETS[0].weights }))
+
+  // Warstwa ON/OFF (zadanie 019). Przy OFF nie wołamy API wcale - loader
+  // rozwiązuje się od razu wartością null, a klucz nie zmienia się z wagami.
+  const optimalQuery = overlayQuery(active, cursor_utc, weights)
+  const optimal = useAsync<OptimalSiteResponse | null>(
+    () => (overlayEnabled ? fetchOptimalSite(optimalQuery) : Promise.resolve(null)),
+    overlayEnabled ? JSON.stringify(optimalQuery) : 'overlay-off',
+  )
 
   if (sites.error || sun.error) return <p className="error">{sites.error ?? sun.error}</p>
   if (!sites.data || !sun.data) return <p>Loading…</p>
@@ -48,6 +62,14 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
         <button type="button" onClick={() => setSouthPoleRequest((request) => request + 1)}>
           South pole view
         </button>
+        <button
+          type="button"
+          className={`map-overlay-toggle${overlayEnabled ? ' on' : ''}`}
+          aria-pressed={overlayEnabled}
+          onClick={() => setOverlayEnabled((enabled) => !enabled)}
+        >
+          Optimal zone overlay: {overlayEnabled ? 'ON' : 'OFF'}
+        </button>
         <span className="map-hint">
           Sun overhead at {latitude(subsolar.lat_deg)}, {longitude(subsolar.lon_deg)} — {cursor_utc}
         </span>
@@ -61,7 +83,20 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
         onSelect={selectScenario}
         onPick={pickLocation}
         southPoleRequest={southPoleRequest}
+        overlayEnabled={overlayEnabled}
+        optimalSite={overlayEnabled ? optimal.data : null}
       />
+
+      {overlayEnabled && (
+        <OptimalZonePanel
+          data={optimal.data}
+          loading={optimal.loading}
+          error={optimal.error}
+          weights={weights}
+          onWeightsChange={setWeights}
+          onMove={pickLocation}
+        />
+      )}
 
       <p className="map-legend">
         <span className="map-dot map-dot-site" /> catalogue sites
