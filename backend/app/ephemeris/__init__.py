@@ -49,6 +49,7 @@ def _try_load_kernels() -> bool:
         return True
     except Exception:  # noqa: BLE001
         _KERNELS_LOADED = False
+        spice.kclear()
         return False
 
 
@@ -70,14 +71,15 @@ def body_positions(lat_deg: float, lon_deg: float, times_utc: list[datetime]) ->
         "sun": {"az_deg": [], "el_deg": []},
         "earth": {"az_deg": [], "el_deg": []},
     }
+    if not times_utc:
+        return out
 
     if are_kernels_loaded():
         iso_times = [to_utc(t).strftime("%Y-%m-%dT%H:%M:%SZ") for t in times_utc]
-        ets = [spice.str2et(iso) for iso in iso_times]
-        for et in ets:
-            pos_sun, _ = spice.spkpos("SUN", et, "MOON_ME", "LT+S", "MOON")
-            pos_earth, _ = spice.spkpos("EARTH", et, "MOON_ME", "LT+S", "MOON")
-
+        ets = spice.str2et(iso_times)
+        pos_sun_arr, _ = spice.spkpos("SUN", ets, "MOON_ME", "LT+S", "MOON")
+        pos_earth_arr, _ = spice.spkpos("EARTH", ets, "MOON_ME", "LT+S", "MOON")
+        for pos_sun, pos_earth in zip(pos_sun_arr, pos_earth_arr):
             az_s, el_s = az_el(lat_deg, lon_deg, pos_sun)
             out["sun"]["az_deg"].append(az_s)
             out["sun"]["el_deg"].append(el_s)
