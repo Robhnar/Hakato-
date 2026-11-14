@@ -5,6 +5,7 @@ description = "Lunar Landing Site Navigator - obliczenia i API"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
+    "numpy>=1.26",
     "uvicorn[standard]>=0.30",
 ]
 
