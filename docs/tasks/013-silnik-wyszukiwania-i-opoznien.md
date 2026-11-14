@@ -1,6 +1,6 @@
 # 013 – Silnik wyszukiwania okien, cykli i analizy „Start się opóźnił o N dni"
 
-- **Status:** wolne
+- **Status:** w recenzji
 - **Właściciel:** osoba A
 - **Moduł:** `metrics`, `api`
 - **Gałąź:** `feat/013-wyszukiwarka-okien`
