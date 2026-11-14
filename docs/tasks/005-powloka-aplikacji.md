@@ -1,7 +1,7 @@
 # 005 – Powłoka aplikacji: miejsce, data, scenariusze
 
 - **Status:** w recenzji
-- **Właściciel:** Michał Majkut (Micello421)
+- **Właściciel:** osoba C
 - **Moduł:** frontend – powłoka
 - **Gałąź:** `feat/005-powloka-aplikacji`
 - **Zależy od:** –

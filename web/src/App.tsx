@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { api } from './api/client'
 import type { Site, SiteCategory } from './api/types'
 import { useAsync } from './api/useAsync'
@@ -9,6 +9,7 @@ import {
   type Scenario,
   coordErrorMessage,
   duplicateScenario,
+  endUtc,
   scenarioFromSite,
   toIsoZ,
   validateCoords,
@@ -88,17 +89,31 @@ function Shell({ sites }: { sites: Site[] }) {
   const selectedSiteId = matchingSiteId(sites, active)
   const atLimit = scenarios.length >= MAX_SCENARIOS
 
-  // Przy przełączaniu scenariusza pokaż jego współrzędne w polach custom (katalog = puste).
-  useEffect(() => {
+  function syncCoordDrafts(scenario: Scenario) {
     setCoordError(null)
-    if (matchingSiteId(sites, active)) {
+    if (matchingSiteId(sites, scenario)) {
       setLatDraft('')
       setLonDraft('')
       return
     }
-    setLatDraft(String(active.lat_deg))
-    setLonDraft(String(active.lon_deg))
-  }, [active.id, active.lat_deg, active.lon_deg, sites])
+    setLatDraft(String(scenario.lat_deg))
+    setLonDraft(String(scenario.lon_deg))
+  }
+
+  function activateScenario(id: string) {
+    const scenario = scenarios.find((candidate) => candidate.id === id) ?? scenarios[0]
+    setActiveId(scenario.id)
+    // Wspólny kursor nie jest zerowany przy zmianie scenariusza — przytnij do jego okna.
+    setCursor((current) => {
+      if (!current) return current
+      const start = new Date(scenario.start_utc).getTime()
+      const end = new Date(endUtc(scenario)).getTime()
+      const value = new Date(current).getTime()
+      if (Number.isNaN(value) || value < start || value > end) return scenario.start_utc
+      return current
+    })
+    syncCoordDrafts(scenario)
+  }
 
   function updateActive(change: Partial<Scenario>) {
     setScenarios((list) =>
@@ -132,18 +147,28 @@ function Shell({ sites }: { sites: Site[] }) {
     updateActive({ name, lat_deg, lon_deg })
   }
 
+  /** Nowy scenariusz: kolejne wolne miejsce z katalogu (albo pierwsze) i bieżąca godzina UTC. */
   function addScenario() {
     if (atLimit) return
-    const copy = scenarioFromSite(active, active.start_utc, active.duration_hours)
-    setScenarios((list) => [...list, copy])
-    setActiveId(copy.id)
+    const usedIds = new Set(
+      scenarios
+        .map((scenario) => matchingSiteId(sites, scenario))
+        .filter((id): id is string => id !== ''),
+    )
+    const nextSite = sites.find((site) => !usedIds.has(site.id)) ?? sites[0]
+    const created = scenarioFromSite(nextSite, startOfCurrentHour())
+    setScenarios((list) => [...list, created])
+    setActiveId(created.id)
+    syncCoordDrafts(created)
   }
 
+  /** Dokładna kopia aktywnego scenariusza (to samo miejsce, start i okno). */
   function duplicateActive() {
     if (atLimit) return
     const copy = duplicateScenario(active)
     setScenarios((list) => [...list, copy])
     setActiveId(copy.id)
+    syncCoordDrafts(copy)
   }
 
   function removeActive() {
@@ -151,6 +176,7 @@ function Shell({ sites }: { sites: Site[] }) {
     const remaining = scenarios.filter((scenario) => scenario.id !== active.id)
     setScenarios(remaining)
     setActiveId(remaining[0].id)
+    syncCoordDrafts(remaining[0])
   }
 
   function pickLocation(lat_deg: number, lon_deg: number) {
@@ -288,17 +314,27 @@ function Shell({ sites }: { sites: Site[] }) {
               key={scenario.id}
               type="button"
               className={scenario.id === active.id ? 'selected' : ''}
-              onClick={() => setActiveId(scenario.id)}
+              onClick={() => activateScenario(scenario.id)}
             >
               {scenario.name} · {scenario.start_utc.slice(0, 10)}
             </button>
           ))}
         </nav>
         <div className="scenario-actions">
-          <button type="button" onClick={addScenario} disabled={atLimit}>
+          <button
+            type="button"
+            onClick={addScenario}
+            disabled={atLimit}
+            title="Add another catalogue site with the current UTC hour as start"
+          >
             Add scenario
           </button>
-          <button type="button" onClick={duplicateActive} disabled={atLimit}>
+          <button
+            type="button"
+            onClick={duplicateActive}
+            disabled={atLimit}
+            title="Copy the active scenario exactly"
+          >
             Duplicate
           </button>
           <button type="button" onClick={removeActive} disabled={scenarios.length <= 1}>
@@ -329,7 +365,7 @@ function Shell({ sites }: { sites: Site[] }) {
           active={active}
           cursor_utc={cursor ?? active.start_utc}
           setCursorUtc={setCursor}
-          selectScenario={setActiveId}
+          selectScenario={activateScenario}
           pickLocation={pickLocation}
         />
       </main>
