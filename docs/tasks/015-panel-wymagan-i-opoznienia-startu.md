@@ -1,6 +1,6 @@
 # 015 – Widok wyszukiwarki: wymagania misji i symulator „Start opóźnił się o N dni"
 
-- **Status:** wolne
+- **Status:** w recenzji
 - **Właściciel:** osoba F
 - **Moduł:** frontend – widok `windows` (panel wymagań, ranking dat i analiza opóźnienia)
 - **Gałąź:** `feat/015-wymagania-i-opoznienie`
