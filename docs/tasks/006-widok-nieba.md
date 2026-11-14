@@ -41,7 +41,8 @@ Dostaje `ViewProps` (`web/src/app/scenario.ts`). Korzysta z `api.timeline()` i `
 ## Kryteria ukończenia
 
 - [x] Na fixtures (`npm run dev:fixtures`) widać nierówny horyzont i Słońce chowające się za nim przy zmianie kursora.
-- [ ] Na danych z backendu dla Apollo 11 Ziemia stoi wysoko i prawie nieruchomo, a Słońce przechodzi przez całe niebo.
+- [x] Na danych z backendu dla Apollo 11 Ziemia stoi wysoko i prawie nieruchomo, a Słońce przechodzi przez całe niebo.
+  - Weryfikacja 2026-11-14 (`meta.ephemeris=spice`, horyzont `flat`): okno ~1 dzień księżycowy od 1969-07-21, krok 60 min — Earth el 58.8–73.6° (frac 1.0), az ~35° w całym oknie / ~2.7°/24 h; Sun el −88–89.5° (frac ~0.50). `/api/timeline` + `/api/horizon` + `/api/summary` OK.
 - [x] Funkcje przeliczające dane na współrzędne ekranu mają testy.
 - [x] `npm run lint`, `npm run build`, `npm test` zielone.
 
