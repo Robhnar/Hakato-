@@ -1,6 +1,6 @@
 # 019 – Widok `map`: przełączana warstwa ON/OFF mapy cieplnej i optymalnego punktu na globusie 3D
 
-- **Status:** wolne
+- **Status:** w recenzji
 - **Właściciel:** osoba F
 - **Moduł:** frontend – widok `map` (`MoonGlobe.tsx`, nakładka ON/OFF i panel optymalnego punktu)
 - **Gałąź:** `feat/019-mapa-warstwa-on-off`
