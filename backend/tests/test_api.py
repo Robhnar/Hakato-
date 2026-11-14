@@ -1,5 +1,8 @@
+from datetime import UTC, datetime
+
 from fastapi.testclient import TestClient
 
+from app.api import routes
 from app.main import app
 
 client = TestClient(app)
@@ -52,3 +55,69 @@ def test_rejects_bad_input():
     assert client.get("/api/timeline", params=reversed_range).status_code == 422
     too_dense = {**SCENARIO, "end_utc": "2028-01-01T00:00:00Z", "step_minutes": 1}
     assert client.get("/api/timeline", params=too_dense).status_code == 422
+
+
+def test_horizon_response_is_cached_without_sharing_mutable_data(monkeypatch):
+    calls = 0
+
+    def build_profile(lat_deg, lon_deg):
+        nonlocal calls
+        calls += 1
+        return {"azimuth_step_deg": 1.0, "elevation_deg": [0.0], "source": "flat"}
+
+    routes._cached_horizon.cache_clear()
+    monkeypatch.setattr(routes.terrain, "horizon_profile", build_profile)
+
+    first = routes.horizon(1.0, 2.0)
+    first["elevation_deg"].append(99.0)
+    second = routes.horizon(1.0, 2.0)
+
+    assert calls == 1
+    assert second["elevation_deg"] == [0.0]
+    routes._cached_horizon.cache_clear()
+
+
+def test_timeline_response_is_cached_by_query(monkeypatch):
+    calls = 0
+
+    def build_timeline(*args):
+        nonlocal calls
+        calls += 1
+        return {"call": calls}
+
+    start = datetime(2027, 2, 1, tzinfo=UTC)
+    end = datetime(2027, 2, 2, tzinfo=UTC)
+    routes._cached_timeline.cache_clear()
+    monkeypatch.setattr(routes.metrics, "timeline", build_timeline)
+
+    first = routes.timeline(1.0, 2.0, start, end, 60)
+    repeated = routes.timeline(1.0, 2.0, start, end, 60)
+    different_step = routes.timeline(1.0, 2.0, start, end, 30)
+
+    assert first == repeated
+    assert different_step != first
+    assert calls == 2
+    routes._cached_timeline.cache_clear()
+
+
+def test_summary_response_is_cached_by_query(monkeypatch):
+    calls = 0
+
+    def build_summary(*args):
+        nonlocal calls
+        calls += 1
+        return {"call": calls}
+
+    start = datetime(2027, 3, 1, tzinfo=UTC)
+    end = datetime(2027, 3, 2, tzinfo=UTC)
+    routes._cached_summary.cache_clear()
+    monkeypatch.setattr(routes.metrics, "summary", build_summary)
+
+    first = routes.summary(1.0, 2.0, start, end, 60)
+    repeated = routes.summary(1.0, 2.0, start, end, 60)
+    different_step = routes.summary(1.0, 2.0, start, end, 30)
+
+    assert first == repeated
+    assert different_step != first
+    assert calls == 2
+    routes._cached_summary.cache_clear()

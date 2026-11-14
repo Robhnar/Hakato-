@@ -1,7 +1,9 @@
 """Endpointy HTTP. Opis w docs/ARCHITECTURE.md, przykłady w contracts/fixtures/."""
 
 import json
+from copy import deepcopy
 from datetime import datetime
+from functools import lru_cache
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
@@ -38,9 +40,25 @@ def sites() -> list[dict]:
     return json.loads((DATA_DIR / "sites.json").read_text(encoding="utf-8"))
 
 
+@lru_cache(maxsize=128)
+def _cached_horizon(lat_deg: float, lon_deg: float) -> dict:
+    return terrain.horizon_profile(lat_deg, lon_deg)
+
+
 @router.get("/horizon", response_model=schemas.Horizon)
 def horizon(lat_deg: Lat, lon_deg: Lon) -> dict:
-    return terrain.horizon_profile(lat_deg, lon_deg)
+    return deepcopy(_cached_horizon(lat_deg, lon_deg))
+
+
+@lru_cache(maxsize=8)
+def _cached_timeline(
+    lat_deg: float,
+    lon_deg: float,
+    start_utc: datetime,
+    end_utc: datetime,
+    step_minutes: float,
+) -> dict:
+    return metrics.timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes)
 
 
 @router.get("/timeline", response_model=schemas.Timeline)
@@ -48,7 +66,18 @@ def timeline(
     lat_deg: Lat, lon_deg: Lon, start_utc: datetime, end_utc: datetime, step_minutes: Step = 60
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
-    return metrics.timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes)
+    return deepcopy(_cached_timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+
+
+@lru_cache(maxsize=32)
+def _cached_summary(
+    lat_deg: float,
+    lon_deg: float,
+    start_utc: datetime,
+    end_utc: datetime,
+    step_minutes: float,
+) -> dict:
+    return metrics.summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes)
 
 
 @router.get("/summary", response_model=schemas.Summary)
@@ -60,4 +89,4 @@ def summary(
     step_minutes: Step = metrics.SUMMARY_STEP_MINUTES,
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
-    return metrics.summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes)
+    return deepcopy(_cached_summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
