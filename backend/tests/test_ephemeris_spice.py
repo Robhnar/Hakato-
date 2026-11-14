@@ -1,6 +1,8 @@
 """Testy modułu efemeryd: SPICE i zgodność z JPL Horizons."""
 
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -104,3 +106,41 @@ def test_body_positions_is_thread_safe():
         got = list(pool.map(lambda w: ephemeris.body_positions(-89.5, 0.0, w), windows * 4))
 
     assert got == expected * 4
+
+
+class _FakeSpice:
+    """Atrapa spiceypy: pamięta, ile wątków jest jednocześnie w wywołaniu SPICE."""
+
+    def __init__(self):
+        self._guard = threading.Lock()
+        self.inside = 0
+        self.max_inside = 0
+
+    def _call(self):
+        with self._guard:
+            self.inside += 1
+            self.max_inside = max(self.max_inside, self.inside)
+        time.sleep(0.002)  # daje innym wątkom szansę, żeby wejść równolegle
+        with self._guard:
+            self.inside -= 1
+
+    def str2et(self, iso_times):
+        self._call()
+        return [0.0] * len(iso_times)
+
+    def spkpos(self, target, ets, frame, abcorr, observer):
+        self._call()
+        return [[1.0, 0.0, 0.0]] * len(ets), 0.0
+
+
+def test_spice_calls_never_overlap_across_threads(monkeypatch):
+    """Bez jąder: równoległe body_positions muszą wołać SPICE pojedynczo (zamek SPICE_LOCK)."""
+    fake = _FakeSpice()
+    monkeypatch.setattr(ephemeris, "are_kernels_loaded", lambda: True)
+    monkeypatch.setattr(ephemeris, "spice", fake)
+    times = [datetime(2027, 1, 1, tzinfo=UTC) + timedelta(hours=h) for h in range(4)]
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(lambda _: ephemeris.body_positions(-89.5, 0.0, times), range(24)))
+
+    assert fake.max_inside == 1
