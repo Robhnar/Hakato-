@@ -4,11 +4,6 @@
   gap: 12px;
 }
 
-.windows-lead {
-  margin: 0;
-  max-width: 52rem;
-}
-
 .windows-meta,
 .windows-hint {
   margin: 0;
@@ -24,34 +19,30 @@
   margin: 0;
 }
 
+/* Dwukolumnowy układ widoku złożonego (015): panel wymagań po lewej,
+   dopasowania i symulator opóźnienia po prawej. */
+.windows-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(0, 1.6fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.windows-column {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .windows-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .windows h3 {
   margin: 8px 0 6px;
   font-size: 1rem;
-}
-
-.windows-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.windows-list-muted .windows-slot {
-  opacity: 0.92;
-}
-
-.windows-slot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background: var(--panel, #151a23);
-  border: 1px solid var(--border, #2a3140);
-  border-radius: 8px;
 }
 
 

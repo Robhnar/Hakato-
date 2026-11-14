@@ -1,5 +1,6 @@
-import type { ChangeEvent } from 'react'
-import type { CalendarSlot, SlipAnalysis } from './contract'
+import { useState } from 'react'
+import type { ChangeEvent, KeyboardEvent } from 'react'
+import type { CalendarSlot, SlipAnalysis } from '../../api/types'
 import {
   SLIP_MAX_DAYS,
   SLIP_MIN_DAYS,
@@ -58,9 +59,13 @@ function formatPercent(fraction: number): string {
   return Number.isFinite(fraction) ? `${Math.round(fraction * 100)}%` : DASH
 }
 
-function readDays(event: ChangeEvent<HTMLInputElement>): number {
-  const raw = event.target.value.trim()
-  return clampSlipDays(raw === '' ? Number.NaN : Number(raw))
+/** Wpisana liczba, jeśli mieści się w zakresie 1…90; inaczej null. */
+function parseDays(raw: string): number | null {
+  const text = raw.trim()
+  if (text === '') return null
+  const value = Number(text)
+  if (!Number.isFinite(value) || value < SLIP_MIN_DAYS || value > SLIP_MAX_DAYS) return null
+  return clampSlipDays(value)
 }
 
 /** Symulator "start opóźnił się o N dni" (zadanie 015). */
@@ -74,6 +79,27 @@ export default function SlipAnalyzer({
   onUse,
 }: Props) {
   const days = clampSlipDays(slipDays)
+  // Wersja robocza pola liczbowego pamięta, dla jakiej wartości `days` została
+  // wpisana - po zmianie slidera lub z zewnątrz pole pokazuje nową wartość
+  // bez efektu synchronizującego.
+  const [draft, setDraft] = useState({ days, text: String(days) })
+  const draftText = draft.days === days ? draft.text : String(days)
+
+  // Wpisana wartość trafia do rodzica dopiero, gdy jest poprawna liczbą
+  // z zakresu; na blur/Enter clampujemy to, co zostało w polu.
+  function commitDays() {
+    const next = clampSlipDays(Number(draftText.trim() === '' ? Number.NaN : draftText))
+    setDraft({ days, text: String(next) })
+    if (next !== days) onSlipDaysChange(next)
+  }
+
+  function changeDraft(event: ChangeEvent<HTMLInputElement>) {
+    const raw = event.target.value
+    setDraft({ days, text: raw })
+    const next = parseDays(raw)
+    if (next !== null && next !== days) onSlipDaysChange(next)
+  }
+
   const delayedStart = shiftUtc(referenceStartUtc, days)
 
   // Backend ma pierwszeństwo. Gdy nie zwrócił analizy, szukamy okien w siatce
@@ -139,9 +165,17 @@ export default function SlipAnalyzer({
           min={SLIP_MIN_DAYS}
           max={SLIP_MAX_DAYS}
           step={1}
-          value={days}
+          value={draftText}
           aria-label="Launch delay in days"
-          onChange={(event) => onSlipDaysChange(readDays(event))}
+          onChange={changeDraft}
+          onBlur={commitDays}
+          onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              commitDays()
+              event.currentTarget.blur()
+            }
+          }}
         />
       </div>
 
