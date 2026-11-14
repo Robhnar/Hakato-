@@ -1,6 +1,6 @@
 # 024 – Tryb prowadzony: wybór miejsca na mapie
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** Claude Code
 - **Moduł:** frontend – tryb prowadzony (`web/src/app/guide/`)
 - **Gałąź:** `feat/024-wybor-miejsca-na-mapie`
