@@ -49,3 +49,12 @@ export function vectorFromAzEl(lat_deg: number, lon_deg: number, az_deg: number,
     z: c * (Math.cos(az) * north.z + Math.sin(az) * east.z) + s * up.z,
   }
 }
+
+/**
+ * Punkt na Księżycu pod ciałem (podsłoneczny, podziemski): kierunek do ciała widziany z (0°, 0°),
+ * czyli z azymutu i wysokości zwracanych przez /api/timeline dla tego punktu. Błąd z paralaksy
+ * (obserwator na powierzchni, nie w środku) to ok. 0.03° dla Ziemi, dla Słońca pomijalny.
+ */
+export function subBodyPoint(az_deg: number, el_deg: number): { lat_deg: number; lon_deg: number } {
+  return vectorToLatLon(vectorFromAzEl(0, 0, az_deg, el_deg))
+}
