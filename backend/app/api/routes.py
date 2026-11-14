@@ -90,3 +90,38 @@ def summary(
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
     return deepcopy(_cached_summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+
+
+@router.get("/windows", response_model=schemas.WindowsResponse)
+def windows(
+    lat_deg: Lat,
+    lon_deg: Lon,
+    search_start_utc: datetime,
+    search_end_utc: datetime,
+    duration_hours: Annotated[float, Query(gt=0, le=10_000)] = 708.7,
+    min_sun_el_at_landing_deg: float = 0.0,
+    min_sunlight_hours: float = 0.0,
+    max_darkness_hours: Annotated[float, Query(ge=0)] = 708.7,
+    require_earth_at_landing: bool = False,
+    min_earth_fraction: Annotated[float, Query(ge=0, le=1)] = 0.0,
+    reference_start_utc: datetime | None = None,
+    slip_days: float = 0.0,
+) -> dict:
+    """Zaślepka kontraktu (011). Docelowy silnik: zadania 012/013."""
+    del (
+        lat_deg,
+        lon_deg,
+        duration_hours,
+        min_sun_el_at_landing_deg,
+        min_sunlight_hours,
+        max_darkness_hours,
+        require_earth_at_landing,
+        min_earth_fraction,
+        reference_start_utc,
+        slip_days,
+    )
+    if to_utc(search_end_utc) <= to_utc(search_start_utc):
+        raise HTTPException(422, "search_end_utc musi być późniejszy niż search_start_utc")
+    from .windows_stub import windows_fixture
+
+    return deepcopy(windows_fixture())

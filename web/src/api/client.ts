@@ -3,16 +3,17 @@
 // VITE_USE_FIXTURES=1 (npm run dev:fixtures): zamiast backendu zwraca pliki
 // z contracts/fixtures/ - zawsze ten sam scenariusz, niezależnie od parametrów.
 
-import type { Horizon, RangeQuery, Site, Summary, Timeline } from './types'
+import type { Horizon, RangeQuery, Site, Summary, Timeline, WindowsQuery, WindowsResponse } from './types'
 
 const USE_FIXTURES = import.meta.env.VITE_USE_FIXTURES === '1'
 
-type Params = Record<string, string | number | undefined>
+type Params = Record<string, string | number | boolean | undefined>
 
 async function get<T>(path: string, params: Params = {}): Promise<T> {
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined) query.set(key, String(value))
+    if (value === undefined) continue
+    query.set(key, String(value))
   }
   const suffix = query.size > 0 ? `?${query}` : ''
   const response = await fetch(`/api/${path}${suffix}`)
@@ -46,4 +47,9 @@ export const api = {
     USE_FIXTURES
       ? fixture(() => import('../../../contracts/fixtures/summary.json'))
       : get('summary', { ...q }),
+
+  windows: (q: WindowsQuery): Promise<WindowsResponse> =>
+    USE_FIXTURES
+      ? fixture(() => import('../../../contracts/fixtures/windows.json'))
+      : get('windows', { ...q }),
 }
