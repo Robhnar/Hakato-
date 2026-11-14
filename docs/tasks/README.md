@@ -40,7 +40,7 @@ Deterministyczne przeszukiwanie wieloletnie tym samym silnikiem (`SPICE` + horyz
 | [012](012-kalendarz-wieloletni-dane.md) | Kalendarz miejsca na lata 2027–2035 (`data/calendars/`) | `data`, `metrics` | osoba B | 011 | scalone |
 | [013](013-silnik-wyszukiwania-i-opoznien.md) | Silnik wyszukiwania po wymaganiach, cykli i opóźnienia startu | `metrics`, `api` | osoba A | 011 (012) | scalone |
 | [014](014-widok-mapy-cieplnej-okien.md) | Widok `windows`: mapa cieplna „data startu × parametr" i cykle | widok `windows` | osoba D | 011 | wolne |
-| [015](015-panel-wymagan-i-opoznienia-startu.md) | Widok `windows`: wymagania misji i „Start opóźnił się o N dni" | widok `windows` | osoba F | 011 | w toku |
+| [015](015-panel-wymagan-i-opoznienia-startu.md) | Widok `windows`: wymagania misji i „Start opóźnił się o N dni" | widok `windows` | osoba F | 011 | scalone |
 | [016](016-margines-niepewnosci-i-rozszerzenia.md) | Margines niepewności (tarcza Słońca, elipsa) i zaćmienia | `metrics`, `terrain` | osoba E | 011, 013 | wolne |
 
 ## Kolejność prac w Fazie 2
