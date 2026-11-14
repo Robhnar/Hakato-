@@ -71,3 +71,21 @@ def test_fallback_without_kernels(monkeypatch):
     res = ephemeris.body_positions(0.0, 0.0, [dt])
     assert len(res["sun"]["az_deg"]) == 1
     assert len(res["earth"]["el_deg"]) == 1
+
+
+def test_empty_times_utc():
+    """Pusta lista czasów zwraca puste listy bez błędów."""
+    res = ephemeris.body_positions(0.0, 0.0, [])
+    assert res["sun"]["az_deg"] == []
+    assert res["sun"]["el_deg"] == []
+    assert res["earth"]["az_deg"] == []
+    assert res["earth"]["el_deg"] == []
+
+
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+def test_single_time_utc_spice():
+    """Pojedynczy punkt czasowy w SPICE zwraca dokładnie jeden wynik."""
+    dt = datetime(2026, 7, 15, 12, 0, tzinfo=UTC)
+    res = ephemeris.body_positions(0.0, 0.0, [dt])
+    assert len(res["sun"]["az_deg"]) == 1
+    assert len(res["earth"]["az_deg"]) == 1

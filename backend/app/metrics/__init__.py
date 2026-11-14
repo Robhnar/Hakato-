@@ -101,7 +101,7 @@ def summarize_body(
             event_type = "rise" if v1 else "set"
             events.append((t_cross, event_type))
 
-    windows = []
+    raw_windows: list[dict[str, str]] = []
     total_visible_s = 0.0
 
     if visible[0]:
@@ -113,28 +113,52 @@ def summarize_body(
         if event_type == "rise":
             win_start = t_event
         elif event_type == "set" and win_start is not None:
-            windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_event)})
+            raw_windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_event)})
             total_visible_s += (t_event - win_start).total_seconds()
             win_start = None
 
     if win_start is not None:
-        windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_end)})
+        raw_windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_end)})
         total_visible_s += (t_end - win_start).total_seconds()
 
+    # Scal sąsiadujące okna i usuń okna o zerowej długości (np. punktowe dotknięcie horyzontu)
+    windows: list[dict[str, str]] = []
+    for w in raw_windows:
+        if w["start_utc"] == w["end_utc"]:
+            continue
+        if windows and windows[-1]["end_utc"] == w["start_utc"]:
+            windows[-1]["end_utc"] = w["end_utc"]
+        else:
+            windows.append(w)
+
+    visible_at_start = bool(windows and windows[0]["start_utc"] == iso_z(t_start))
+
     if total_duration_s > 0:
+        total_visible_s = sum(
+            (
+                to_utc(datetime.fromisoformat(w["end_utc"]))
+                - to_utc(datetime.fromisoformat(w["start_utc"]))
+            ).total_seconds()
+            for w in windows
+        )
         visible_fraction = round(max(0.0, min(1.0, total_visible_s / total_duration_s)), 4)
     else:
-        visible_fraction = 1.0 if visible[0] else 0.0
+        visible_fraction = 1.0 if visible_at_start else 0.0
 
     hours_until_change = None
-    if events:
-        hours_until_change = round((events[0][0] - t_start).total_seconds() / 3600.0, 3)
+    if visible_at_start:
+        first_end = to_utc(datetime.fromisoformat(windows[0]["end_utc"]))
+        if first_end < t_end:
+            hours_until_change = round((first_end - t_start).total_seconds() / 3600.0, 3)
+    elif windows:
+        first_start = to_utc(datetime.fromisoformat(windows[0]["start_utc"]))
+        hours_until_change = round((first_start - t_start).total_seconds() / 3600.0, 3)
 
     return {
         "visible_fraction": visible_fraction,
         "max_el_deg": max(el_deg),
         "windows": windows,
-        "visible_at_start": visible[0],
+        "visible_at_start": visible_at_start,
         "hours_until_change": hours_until_change,
     }
 
