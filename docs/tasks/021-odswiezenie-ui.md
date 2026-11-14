@@ -52,13 +52,13 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 
 ## Czego nie sprawdzono
 
-- Układ przy 1440, 1024 i 390 px: pomiar przepełnienia i zakładek w pięciu widokach oraz zrzuty Sky, Timeline, Compare, Windows i Map przy 1024 px; przy 390 px bez zrzutów, tylko pomiar.
-- Klawiatura: automatycznie sprawdzone nazwy dostępne i wskaźnik fokusu wszystkich elementów interaktywnych, brak fokusu na kanwie globusa; nie przechodziłem Tabem ani strzałkami ręcznie, nie testowałem czytnika ekranu.
-- Przegląd skillami `design:accessibility-review` i `design:design-critique` wykonany; poprawki: cele dotykowe 44 px na telefonie, szerokość przycisków scenariusza, wspólny lewy margines widoków, układ Windows w jednej kolumnie poniżej 1200 px.
-- Kontrast tekstu: tokeny ≥ 5.6:1, komórki mapy cieplnej ≥ 4.61:1; linie danych (≥ 3:1) nie liczone.
-- Etykiety osi wykresów Sky i Timeline renderują się małą czcionką (ok. 8–10 px przy 1024 px); nie zmieniałem.
-- Numery rang 1–5 na globusie bywają chowane przez kolizje podpisów.
-- Zrzuty do opisu PR trzeba zrobić przy otwieraniu PR.
+- Czytnik ekranu (NVDA/VoiceOver) – nie testowany.
+- Zrzuty z 390 px zrobione tylko dla Mapy z nakładką; pozostałe widoki przy 390 px sprawdzone pomiarem przepełnienia, bez oglądania zrzutów.
+- Kontrast linii danych na wykresach (≥ 3:1) – nie liczony; tekst: tokeny ≥ 5.6:1, komórki mapy cieplnej ≥ 4.61:1.
+- Podpis zwycięzcy (rang 1) na globusie bywa chowany przez kolizję z podpisem scenariusza; nazwa i wynik są w panelu.
+- Zrzuty do opisu PR leżą lokalnie w `.playwright-mcp/` (poza repozytorium): `pr-map-overlay-1440.png`, `pr-map-390.png`, `pr-timeline-1024.png`.
+
+Sprawdzone ręcznie: Tab (nagłówek → panel boczny → pola, obrys 2 px na każdym elemencie), Spacja na przełączniku i presecie, strzałki na suwaku (45 → 55%), fokus zostaje na presecie po zmianie; lot `South pole`; 10 przełączeń Map ↔ Sky bez błędów WebGL; `Retry`; debounce wag; przegląd skillami `design:accessibility-review` i `design:design-critique` z poprawkami (cele dotykowe 44 px, marginesy widoków, układ Windows, rozmiar etykiet osi, numery rang, przyciski panelu na telefonie).
 
 ## Znalezione poza zakresem (backend, do opisu PR)
 

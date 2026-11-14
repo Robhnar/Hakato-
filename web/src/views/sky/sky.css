@@ -40,14 +40,14 @@
 .sky-axis-label {
   fill: var(--muted);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
 
 .sky-axis-title {
   fill: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -129,7 +129,7 @@
 
 .sky-body-label {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 15px;
 }
 
 .sky-body-label-sun {

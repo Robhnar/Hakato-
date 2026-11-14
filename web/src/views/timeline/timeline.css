@@ -131,14 +131,14 @@
 .timeline-row-label {
   fill: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .timeline-row-percent {
   fill: var(--muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 /* Wykres wysokości */
@@ -154,14 +154,14 @@
 .timeline-below-label {
   fill: var(--muted);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 14px;
   letter-spacing: 0.04em;
 }
 
 .timeline-axis-label {
   fill: var(--muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -200,7 +200,7 @@
 
 .timeline-line-label {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .timeline-line-label-sun {
