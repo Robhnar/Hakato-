@@ -60,6 +60,15 @@ function matchingSiteId(sites: Site[], scenario: Scenario): string {
   return match?.id ?? ''
 }
 
+/** Krótki opis zakładki w trybie Expert (czytelność jak w trybie prowadzonym). */
+const VIEW_BLURB: Record<string, string> = {
+  sky: 'Where the Sun and Earth move above the horizon',
+  timeline: 'Hour by hour: light, darkness and Earth contact',
+  compare: 'Your scenarios side by side',
+  map: 'Lighting across the south pole region',
+  windows: 'Best landing dates over the coming years',
+}
+
 /** Stabilny klucz selecta — unika niespójności float (np. 708.7 * 3). */
 function durationKey(hours: number): string {
   return hours.toFixed(4)
@@ -268,8 +277,22 @@ function Shell({ sites }: { sites: Site[] }) {
       </div>
 
       {mode === 'expert' && (
-      <>
+      <div className="expert">
+      <header className="guide-intro expert-intro">
+        <h2>Expert tools</h2>
+        <p>
+          Set up one or more landing scenarios, then explore them in detail: sky paths, hour-by-hour
+          timeline, side-by-side comparison, a lighting map and a multi-year window search.
+        </p>
+      </header>
 
+      <fieldset className="guide-step expert-step">
+        <legend>
+          <span className="guide-step-no">1</span> Where and when?
+        </legend>
+        <p className="expert-step-help">
+          Pick a known site or type your own coordinates, then set when the window starts and how long it lasts.
+        </p>
       <section className="controls" aria-label="Scenario setup">
         <label>
           Landing site
@@ -375,7 +398,16 @@ function Shell({ sites }: { sites: Site[] }) {
           </select>
         </label>
       </section>
+      </fieldset>
 
+      <fieldset className="guide-step expert-step">
+        <legend>
+          <span className="guide-step-no">2</span> Scenarios to compare
+        </legend>
+        <p className="expert-step-help">
+          Each scenario is one site and time. The highlighted one is being edited above; add up to{' '}
+          {MAX_SCENARIOS} to compare them side by side.
+        </p>
       <section className="scenario-bar" aria-label="Scenarios">
         <nav className="chips" aria-label="Scenario list">
           {scenarios.map((scenario) => (
@@ -413,10 +445,17 @@ function Shell({ sites }: { sites: Site[] }) {
           {atLimit && <span className="hint">Limit {MAX_SCENARIOS} scenarios</span>}
         </div>
       </section>
+      </fieldset>
 
+      <h2 className="expert-heading">
+        <span className="guide-step-no">3</span> At a glance: {active.name}
+      </h2>
       <SummaryStrip scenario={active} />
 
-      <nav className="tabs" aria-label="Views">
+      <h2 className="expert-heading">
+        <span className="guide-step-no">4</span> Explore in detail
+      </h2>
+      <nav className="tabs expert-tabs" aria-label="Views">
         {VIEWS.map((view) => (
           <button
             key={view.id}
@@ -425,12 +464,13 @@ function Shell({ sites }: { sites: Site[] }) {
             aria-pressed={view.id === viewId}
             onClick={() => setViewId(view.id)}
           >
-            {view.label}
+            <span className="expert-tab-title">{view.label}</span>
+            {VIEW_BLURB[view.id] && <span className="expert-tab-blurb">{VIEW_BLURB[view.id]}</span>}
           </button>
         ))}
       </nav>
 
-      <main>
+      <main className="expert-main">
         <Suspense fallback={<p role="status">Loading view…</p>}>
           <View
             scenarios={scenarios}
@@ -443,7 +483,7 @@ function Shell({ sites }: { sites: Site[] }) {
           />
         </Suspense>
       </main>
-      </>
+      </div>
       )}
     </div>
   )

@@ -266,3 +266,133 @@ button.selected {
     flex: 1 1 auto;
   }
 }
+
+/* Tryb Expert w stylu trybu prowadzonego (020): kroki, opisy, większe kontrolki. */
+.expert {
+  font-size: 1rem;
+}
+
+.expert .controls select,
+.expert .controls input,
+.expert .controls button {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.expert-intro {
+  margin-bottom: 4px;
+}
+
+.expert-step-help {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.expert-step .controls {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-bottom: 0;
+  gap: 12px;
+}
+
+.expert label {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.expert .coords legend {
+  font-size: 0.85rem;
+}
+
+.expert .controls select,
+.expert .controls input,
+.expert .controls button,
+.expert .scenario-bar button {
+  min-height: 44px;
+}
+
+.expert .chips button.selected {
+  border-width: 2px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+}
+
+.expert .scenario-bar {
+  margin-bottom: 0;
+}
+
+.expert .scenario-actions {
+  margin-bottom: 0;
+}
+
+.expert-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  margin: 20px 0 10px;
+}
+
+.expert-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.expert-tabs button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 64px;
+  padding: 12px 14px;
+  text-align: left;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.expert-tabs button:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.expert-tabs button.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  color: var(--text);
+}
+
+.expert-tabs button:focus-visible,
+.expert .chips button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.expert-tab-title {
+  font-weight: 600;
+}
+
+.expert-tabs button.selected .expert-tab-title {
+  color: var(--accent);
+}
+
+.expert-tab-blurb {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.expert-main {
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .expert-tabs {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .expert-tabs button {
+    width: 100%;
+  }
+}
