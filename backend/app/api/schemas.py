@@ -51,10 +51,29 @@ class BodySummary(BaseModel):
     hours_until_change: float | None
 
 
+class SolarUncertainty(BaseModel):
+    """Opcjonalne wyniki z zadania 016."""
+
+    typical_sunlight_hours: float | None = None
+    worst_case_sunlight_hours: float | None = None
+    best_case_sunlight_hours: float | None = None
+    horizon_margin_deg: float | None = None
+    solar_radius_deg: float | None = None
+
+
+class Eclipse(BaseModel):
+    start_utc: str
+    end_utc: str
+    max_obscuration_fraction: float
+    duration_hours: float
+
+
 class Summary(BaseModel):
     sun: BodySummary
     earth: BodySummary
     meta: Meta
+    uncertainty: SolarUncertainty | None = None
+    eclipses: list[Eclipse] | None = None
 
 
 # --- Wyszukiwarka okien lądowania (zadanie 011) ---
@@ -68,11 +87,8 @@ class SlotCycles(BaseModel):
     libration_phase_deg: float | None = None
 
 
-class SlotUncertainty(BaseModel):
-    """Opcjonalne pole pod zadanie 016 (margines niepewności)."""
-
-    worst_case_sunlight_hours: float | None = None
-    horizon_margin_deg: float | None = None
+class SlotUncertainty(SolarUncertainty):
+    """Margines niepewności dla pojedynczego okna wyszukiwarki."""
 
 
 class CalendarSlot(BaseModel):
@@ -91,6 +107,7 @@ class CalendarSlot(BaseModel):
     score: float
     cycles: SlotCycles
     uncertainty: SlotUncertainty | None = None
+    eclipses: list[Eclipse] | None = None
 
 
 class SlipAnalysis(BaseModel):
