@@ -40,3 +40,4 @@ CLAUDE.local.md
 # Duże dane pobierane skryptami (jądra SPICE, modele wysokości)
 data/raw/
 *.egg-info/
+.playwright-mcp/

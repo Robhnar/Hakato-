@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Scenario } from '../../app/scenario'
-import type { CursorBodies, OptimalCandidate } from '../../api/types'
+import type { CursorBodies } from '../../api/types'
 import {
   angularDistanceDeg,
   buildOverlayPixels,
@@ -12,6 +12,7 @@ import {
   sunVisibleAt,
   WEIGHT_PRESETS,
   ZONE_COLORS,
+  ZONE_ORDER,
   zoneAt,
 } from './heatmap'
 
@@ -31,25 +32,6 @@ function bodies(
 function pixelAt(pixels: Uint8ClampedArray, width: number, x: number, y: number): number[] {
   const start = (y * width + x) * 4
   return [...pixels.slice(start, start + 4)]
-}
-
-const candidate: OptimalCandidate = {
-  id: 'test-site',
-  name: 'Test site',
-  lat_deg: -89.45,
-  lon_deg: -137,
-  elevation_m: null,
-  is_catalog_site: false,
-  score: 100,
-  sun_visible_fraction: 1,
-  earth_visible_fraction: 1,
-  overlap_fraction: 1,
-  sunlight_hours: 24,
-  earth_hours: 24,
-  overlap_hours: 24,
-  max_darkness_hours: 0,
-  sun_visible_at_cursor: true,
-  earth_visible_at_cursor: true,
 }
 
 describe('angularDistanceDeg', () => {
@@ -154,15 +136,16 @@ describe('pixelForLatLon / buildOverlayPixels', () => {
     expect(pixelAt(pixels, width, center.x, center.y)).toEqual([...ZONE_COLORS.sweet_spot])
   })
 
-  it('brightens pixels near high-scoring ranking candidates', () => {
-    const cursor = bodies([0, 0], [0, 180])
-    const plain = buildOverlayPixels(width, height, cursor)
-    const ranked = buildOverlayPixels(width, height, cursor, [candidate])
-    const point = pixelForLatLon(width, height, candidate.lat_deg, candidate.lon_deg)
+  it('alfa żadnej strefy nie zasłania terenu', () => {
+    for (const zone of ZONE_ORDER) expect(ZONE_COLORS[zone][3]).toBeLessThanOrEqual(120)
+  })
 
-    expect(pixelAt(ranked, width, point.x, point.y)).not.toEqual(
-      pixelAt(plain, width, point.x, point.y),
-    )
+  it('wygładza granicę strefy w pasie ±0.6°', () => {
+    const pixels = buildOverlayPixels(720, 360, bodies([0, 0], [0, 0]))
+    const p = pixelForLatLon(720, 360, 0, 90)
+    const alpha = pixelAt(pixels, 720, p.x, p.y)[3]
+    expect(alpha).toBeGreaterThan(ZONE_COLORS.sweet_spot[3])
+    expect(alpha).toBeLessThan(ZONE_COLORS.shadow[3])
   })
 })
 
