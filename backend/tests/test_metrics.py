@@ -107,7 +107,22 @@ def test_summary_merges_instantaneous_dip_to_zero():
     horizon = [0.0, 0.0, 0.0]
     visible = [True, False, True]
     s = summarize_body(hours(3), el, visible, horizon)
-    # Scalone do jednego ciągłego okna
+    # Scalone do jednego ciągłego okna, brak zachodu w zadanym zakresie
     assert s["windows"] == [
         {"start_utc": "2027-01-01T00:00:00Z", "end_utc": "2027-01-01T02:00:00Z"}
     ]
+    assert s["visible_at_start"] is True
+    assert s["hours_until_change"] is None
+    assert s["visible_fraction"] == 1.0
+
+
+def test_summary_discards_zero_duration_spike():
+    # Chwilowe dotknięcie ponad horyzont dające okno o długości 0 sekund
+    el = [-1.0, 1e-10, -1.0]
+    horizon = [0.0, 0.0, 0.0]
+    visible = [False, True, False]
+    s = summarize_body(hours(3), el, visible, horizon)
+    assert s["windows"] == []
+    assert s["visible_fraction"] == 0.0
+    assert s["visible_at_start"] is False
+    assert s["hours_until_change"] is None
