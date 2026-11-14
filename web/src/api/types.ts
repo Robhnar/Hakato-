@@ -85,6 +85,8 @@ export interface SlotCycles {
   lunar_day_index: number
   seasonal_phase_deg: number
   draconic_year_phase_deg: number
+  draconic_year_note?: string | null
+  libration_phase_deg?: number | null
 }
 
 export interface SlotUncertainty {
@@ -103,6 +105,7 @@ export interface CalendarSlot {
   earth_hours: number
   earth_visible_fraction: number
   earth_visible_at_start: boolean
+  max_earth_el_deg?: number | null
   passes_requirements: boolean
   score: number
   cycles: SlotCycles

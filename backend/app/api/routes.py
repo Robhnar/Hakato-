@@ -92,6 +92,37 @@ def summary(
     return deepcopy(_cached_summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
 
 
+@lru_cache(maxsize=32)
+def _cached_windows(
+    lat_deg: float,
+    lon_deg: float,
+    search_start_utc: datetime,
+    search_end_utc: datetime,
+    duration_hours: float,
+    min_sun_el_at_landing_deg: float,
+    min_sunlight_hours: float,
+    max_darkness_hours: float,
+    require_earth_at_landing: bool,
+    min_earth_fraction: float,
+    reference_start_utc: datetime | None,
+    slip_days: float,
+) -> dict:
+    return metrics.search_windows(
+        lat_deg=lat_deg,
+        lon_deg=lon_deg,
+        search_start_utc=search_start_utc,
+        search_end_utc=search_end_utc,
+        duration_hours=duration_hours,
+        min_sun_el_at_landing_deg=min_sun_el_at_landing_deg,
+        min_sunlight_hours=min_sunlight_hours,
+        max_darkness_hours=max_darkness_hours,
+        require_earth_at_landing=require_earth_at_landing,
+        min_earth_fraction=min_earth_fraction,
+        reference_start_utc=reference_start_utc,
+        slip_days=slip_days,
+    )
+
+
 @router.get("/windows", response_model=schemas.WindowsResponse)
 def windows(
     lat_deg: Lat,
@@ -99,7 +130,7 @@ def windows(
     search_start_utc: datetime,
     search_end_utc: datetime,
     duration_hours: Annotated[float, Query(gt=0, le=10_000)] = 708.7,
-    min_sun_el_at_landing_deg: float = 0.0,
+    min_sun_el_at_landing_deg: float = -90.0,
     min_sunlight_hours: float = 0.0,
     max_darkness_hours: Annotated[float, Query(ge=0)] = 708.7,
     require_earth_at_landing: bool = False,
@@ -107,21 +138,24 @@ def windows(
     reference_start_utc: datetime | None = None,
     slip_days: float = 0.0,
 ) -> dict:
-    """Zaślepka kontraktu (011). Docelowy silnik: zadania 012/013."""
-    del (
-        lat_deg,
-        lon_deg,
-        duration_hours,
-        min_sun_el_at_landing_deg,
-        min_sunlight_hours,
-        max_darkness_hours,
-        require_earth_at_landing,
-        min_earth_fraction,
-        reference_start_utc,
-        slip_days,
-    )
     if to_utc(search_end_utc) <= to_utc(search_start_utc):
         raise HTTPException(422, "search_end_utc musi być późniejszy niż search_start_utc")
-    from .windows_stub import windows_fixture
-
-    return deepcopy(windows_fixture())
+    try:
+        return deepcopy(
+            _cached_windows(
+                lat_deg,
+                lon_deg,
+                search_start_utc,
+                search_end_utc,
+                duration_hours,
+                min_sun_el_at_landing_deg,
+                min_sunlight_hours,
+                max_darkness_hours,
+                require_earth_at_landing,
+                min_earth_fraction,
+                reference_start_utc,
+                slip_days,
+            )
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc

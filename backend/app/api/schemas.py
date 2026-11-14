@@ -63,7 +63,9 @@ class Summary(BaseModel):
 class SlotCycles(BaseModel):
     lunar_day_index: int
     seasonal_phase_deg: float
-    draconic_year_phase_deg: float
+    draconic_year_phase_deg: float = 0.0
+    draconic_year_note: str | None = None
+    libration_phase_deg: float | None = None
 
 
 class SlotUncertainty(BaseModel):
@@ -84,6 +86,7 @@ class CalendarSlot(BaseModel):
     earth_hours: float
     earth_visible_fraction: float
     earth_visible_at_start: bool
+    max_earth_el_deg: float | None = None
     passes_requirements: bool
     score: float
     cycles: SlotCycles
