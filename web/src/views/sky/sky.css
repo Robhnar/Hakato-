@@ -1,195 +1,154 @@
-.sky-view {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px;
-}
+/* Style widoku nieba — tylko ten katalog (zadanie 006). */
 
-.sky-view__header {
+.sky {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 12px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.sky-view__header p {
-  color: var(--muted);
+.sky h2 {
   margin: 0;
+}
+
+.sky-hint {
+  margin: 0;
+  color: var(--muted, #9aa4b5);
   font-size: 0.85rem;
 }
 
-.sky-view__legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
-.sky-view__legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.sky-view__swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.sky-view__swatch--sun {
-  background: #f2c14e;
-}
-
-.sky-view__swatch--earth {
-  background: #72b7ff;
-}
-
-.sky-view__chart {
-  width: 100%;
+.sky-panel {
+  background: var(--panel, #151a23);
+  border: 1px solid var(--border, #2a3140);
+  border-radius: 8px;
+  padding: 8px 8px 4px;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: #0c111a;
 }
 
-.sky-view__chart svg {
+.sky-svg {
   display: block;
   width: 100%;
   height: auto;
+  max-height: 420px;
 }
 
-.sky-view__grid {
-  stroke: #2a3140;
+.sky-horizon {
+  fill: #3a4558;
+  stroke: #6b778c;
+  stroke-width: 1.2;
+}
+
+.sky-zero {
+  stroke: color-mix(in srgb, var(--muted, #9aa4b5) 55%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.sky-grid {
+  stroke: color-mix(in srgb, var(--border, #2a3140) 80%, transparent);
   stroke-width: 1;
 }
 
-.sky-view__tick,
-.sky-view__axis-label {
-  fill: var(--muted);
-  font-size: 12px;
+.sky-axis-label {
+  fill: var(--muted, #9aa4b5);
+  font-size: 11px;
 }
 
-.sky-view__axis-label {
-  font-size: 13px;
-}
-
-.sky-view__horizon-fill {
-  fill: #8d7961;
-  fill-opacity: 0.42;
-}
-
-.sky-view__horizon-line {
+.sky-trail-sun {
   fill: none;
-  stroke: #d3b68c;
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
-}
-
-.sky-view__trail {
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.62;
-  vector-effect: non-scaling-stroke;
-}
-
-.sky-view__trail--sun {
   stroke: #f2c14e;
-}
-
-.sky-view__trail--earth {
-  stroke: #72b7ff;
-}
-
-.sky-view__marker--sun {
-  stroke: #f2c14e;
-  fill: #f2c14e;
-}
-
-.sky-view__marker--earth {
-  stroke: #72b7ff;
-  fill: #72b7ff;
-}
-
-.sky-view__cursor {
-  stroke: #e6e9ef;
-  stroke-dasharray: 4 5;
   stroke-width: 1.5;
-  opacity: 0.6;
+  stroke-opacity: 0.55;
 }
 
-.sky-view__marker {
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
+.sky-trail-earth {
+  fill: none;
+  stroke: #6eb6ff;
+  stroke-width: 1.5;
+  stroke-opacity: 0.55;
 }
 
-.sky-view__marker--hidden {
-  fill: #151a23;
+.sky-body-sun {
+  fill: #f2c14e;
+  stroke: #fff3c4;
+  stroke-width: 1.5;
+}
+
+.sky-body-earth {
+  fill: #4f9de0;
+  stroke: #cfe8ff;
+  stroke-width: 1.5;
+}
+
+.sky-body-occulted {
+  fill: none;
   stroke-dasharray: 3 2;
+  opacity: 0.85;
 }
 
-.sky-view__readouts {
+.sky-body-sun.sky-body-occulted {
+  stroke: #f2c14e;
+}
+
+.sky-body-earth.sky-body-occulted {
+  stroke: #6eb6ff;
+}
+
+.sky-readout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.sky-view__readout {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
-}
-
-.sky-view__readout h3 {
-  margin: 0 0 6px;
-  font-size: 0.95rem;
-}
-
-.sky-view__readout dl {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 3px 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
   margin: 0;
   font-size: 0.85rem;
 }
 
-.sky-view__readout dt {
-  color: var(--muted);
-}
-
-.sky-view__readout dd {
+.sky-readout dt {
   margin: 0;
-  font-variant-numeric: tabular-nums;
+  color: var(--muted, #9aa4b5);
+  font-weight: 600;
 }
 
-.sky-view__visibility {
-  margin: 8px 0 0;
+.sky-readout dd {
+  margin: 2px 0 0;
+}
+
+.sky-sun-label {
+  color: #f2c14e;
+}
+
+.sky-earth-label {
+  color: #6eb6ff;
+}
+
+.sky-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   font-size: 0.8rem;
+  color: var(--muted, #9aa4b5);
 }
 
-.sky-view__visibility--visible {
-  color: #a9d8a4;
+.sky-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: -1px;
 }
 
-.sky-view__visibility--hidden {
-  color: var(--muted);
+.sky-legend-swatch-sun {
+  background: #f2c14e;
 }
 
-@media (max-width: 600px) {
-  .sky-view {
-    padding: 12px;
-  }
+.sky-legend-swatch-earth {
+  background: #4f9de0;
+}
 
-  .sky-view__header {
-    flex-direction: column;
-  }
-
-  .sky-view__tick {
-    font-size: 10px;
-  }
+.sky-legend-swatch-horizon {
+  background: #3a4558;
+  border: 1px solid #6b778c;
+  border-radius: 2px;
 }
