@@ -14,6 +14,7 @@ import {
   toIsoZ,
   validateCoords,
 } from './app/scenario'
+import GuidePanel from './app/guide/GuidePanel'
 import SummaryStrip from './app/SummaryStrip'
 import { VIEWS } from './app/views'
 
@@ -95,6 +96,8 @@ function Shell({ sites }: { sites: Site[] }) {
   ])
   const [activeId, setActiveId] = useState(scenarios[0].id)
   const [viewId, setViewId] = useState(VIEWS[0].id)
+  // Tryb prowadzony dla laików (020) jest domyślny; Expert = dotychczasowe narzędzia.
+  const [mode, setMode] = useState<'simple' | 'expert'>('simple')
   const [cursor, setCursor] = useState<string | null>(null)
   const [latDraft, setLatDraft] = useState('')
   const [lonDraft, setLonDraft] = useState('')
@@ -225,14 +228,44 @@ function Shell({ sites }: { sites: Site[] }) {
     setCursor(start_utc)
   }
 
+  function openExpert(site: Site, start_utc: string, duration_hours: number, nextView: string) {
+    const nextScenario = {
+      ...active,
+      name: site.name,
+      lat_deg: site.lat_deg,
+      lon_deg: site.lon_deg,
+      start_utc,
+      duration_hours,
+    }
+    setScenarios((list) => list.map((scenario) => (scenario.id === active.id ? nextScenario : scenario)))
+    syncCoordDrafts(nextScenario)
+    setCursor(start_utc)
+    setViewId(nextView)
+    setMode('expert')
+    window.scrollTo({ top: 0 })
+  }
+
   const View = VIEWS.find((view) => view.id === viewId)?.component ?? VIEWS[0].component
 
   return (
     <div className="app">
       <header>
         <h1>Lunar Landing Site Navigator</h1>
-        <p className="tagline">Compare landing sites and dates for solar power and Earth line-of-sight.</p>
+        <p className="tagline">Find when and where to land on the Moon, with sunlight for power and Earth in view.</p>
+        <nav className="mode-switch" aria-label="Mode">
+          <button type="button" aria-pressed={mode === 'simple'} onClick={() => setMode('simple')}>
+            Plan a landing
+          </button>
+          <button type="button" aria-pressed={mode === 'expert'} onClick={() => setMode('expert')}>
+            Expert tools
+          </button>
+        </nav>
       </header>
+
+      {mode === 'simple' ? (
+        <GuidePanel sites={sites} onOpenExpert={openExpert} />
+      ) : (
+      <>
 
       <section className="controls" aria-label="Scenario setup">
         <label>
@@ -407,6 +440,8 @@ function Shell({ sites }: { sites: Site[] }) {
           />
         </Suspense>
       </main>
+      </>
+      )}
     </div>
   )
 }

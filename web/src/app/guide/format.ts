@@ -74,8 +74,8 @@ export function monthRangeToSearch(
   if (!fromParsed || !toParsed) return { error: 'Choose both months.' }
   const fromAbs = fromParsed.year * 12 + fromParsed.month
   const toAbs = toParsed.year * 12 + toParsed.month
-  if (toAbs < fromAbs) return { error: 'The end month must be after the start month.' }
-  if (toAbs - fromAbs + 1 > 24) return { error: 'Please choose at most 2 years.' }
+  if (toAbs < fromAbs) return { error: 'The latest month can’t be before the earliest month.' }
+  if (toAbs - fromAbs + 1 > 24) return { error: 'Choose a period of 2 years or less.' }
   const endAbs = toAbs + 1
   return {
     search_start_utc: `${monthKey(fromParsed.year, fromParsed.month)}-01T00:00:00Z`,

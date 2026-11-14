@@ -83,13 +83,13 @@ test('monthRangeToSearch rejects empty or malformed months', () => {
 
 test('monthRangeToSearch rejects an end before the start', () => {
   expect(monthRangeToSearch('2028-12', '2028-03')).toEqual({
-    error: 'The end month must be after the start month.',
+    error: 'The latest month can’t be before the earliest month.',
   })
 })
 
 test('monthRangeToSearch rejects more than 24 months', () => {
   expect(monthRangeToSearch('2028-01', '2030-01')).toEqual({
-    error: 'Please choose at most 2 years.',
+    error: 'Choose a period of 2 years or less.',
   })
 })
 
