@@ -1,6 +1,6 @@
 # 014 – Widok wyszukiwarki: mapa cieplna „data startu × parametr" i cykle
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** osoba D (wykonane zastępczo — brak PR D)
 - **Moduł:** frontend – widok `windows` (mapa cieplna i wizualizacja cykli)
 - **Gałąź:** `feat/014-mapa-cieplna-okien`

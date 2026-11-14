@@ -1,6 +1,6 @@
 # 016 – Margines niepewności (elipsa lądowania, tarcza Słońca) i zjawiska dodatkowe
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** osoba E
 - **Moduł:** `metrics`, `terrain`, `ephemeris`
 - **Gałąź:** `feat/016-niepewnosc-i-zacmienia`
