@@ -1,6 +1,6 @@
 # 021 – Odświeżenie UI: „konsola misji", wykresy, mapa i Optimization Overlay
 
-- **Status:** w toku (projekt i plan gotowe, wdrożenie nierozpoczęte)
+- **Status:** w recenzji (zadania 1–8 wdrożone, część kryteriów niezweryfikowana – patrz „Czego nie sprawdzono")
 - **Właściciel:** Claude Code
 - **Moduł:** frontend – powłoka i wszystkie widoki (`web/src/`)
 - **Gałąź:** `feat/021-odswiezenie-ui`
@@ -39,9 +39,9 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 - [ ] Żaden element nie zasłania wykresów, mapy ani zakładek przy 1440, 1024 i 390 px.
 - [ ] Czas i współrzędne wszędzie w jednym formacie (`19 May 2027 19:13 UTC`, `89.45°S 137.30°W`).
 - [ ] „South pole" ustawia biegun w środku kadru; miejsca mają podpisy.
-- [ ] Nakładka nie zasłania terenu; kandydaci widoczni jako punkty w skali wyniku; remisy oznaczone.
-- [ ] Brak emoji w interfejsie; kontrast tekstu ≥ 4.5:1.
-- [ ] `npm run lint`, `npm run build`, `npm test` przechodzą.
+- [x] Nakładka nie zasłania terenu; kandydaci widoczni jako punkty w skali wyniku; remisy oznaczone.
+- [x] Brak emoji w interfejsie; kontrast tekstu ≥ 4.5:1.
+- [x] `npm run lint`, `npm run build`, `npm test` przechodzą.
 
 ## Notatki
 
@@ -49,3 +49,12 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 - Plan krok po kroku (9 zadań): `docs/superpowers/plans/2026-11-14-odswiezenie-ui.md`.
 - Ustalone z właścicielem: kierunek „konsola misji", przebudowa układu Expert, strefy nakładki zostają (poprawione) + nowa warstwa kandydatów.
 - Znalezione przy przeglądzie, naprawiane w tym zadaniu: przyklejony pasek Sun/Earth zasłania ok. 1/3 ekranu; kółko myszy nad globusem blokuje przewijanie strony; „South pole view" ustawia kamerę na 60°S; długość geograficzna siatki wyświetlana jako `315.0°E`.
+
+## Czego nie sprawdzono
+
+- Układ przy 1024 px; przy 1440 px sprawdzony ręcznie, przy 390 px tylko brak poziomego przewijania strony.
+- Nawigacja klawiaturą po wszystkich widokach i kolejność fokusu.
+- Kontrast: policzony dla tokenów tekstu i komórek mapy cieplnej (po poprawce progu ≥ 4.61:1); linie danych (≥ 3:1) nie liczone.
+- `Retry` po zatrzymaniu backendu, liczba zapytań przy przeciąganiu suwaka, lot `South pole`, zwalnianie zasobów WebGL po wielu przełączeniach Map ↔ Sky.
+- Tryb prowadzony nadal używa grup `fieldset` (plan zadania 3 każe je usunąć) – do decyzji przy recenzji.
+- Numery rang 1–5 na globusie bywają chowane przez kolizje podpisów.

@@ -21,8 +21,8 @@ interface Props {
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-/** Od tego miejsca na skali tło jest jasne i tekst musi być ciemny. */
-const DARK_TEXT_FROM = 0.6
+/** Próg zmiany tekstu na czarny; czarny/biały daje >= 4.5:1 na całej skali (zad. 021/9). */
+const DARK_TEXT_FROM = 0.48
 
 function monthOf(iso: string): string {
   const month = Number(iso.slice(5, 7))
@@ -100,7 +100,7 @@ export default function CalendarHeatmap({
                     }`}
                     style={{
                       background: colorForValue(value, min, max, meta.invert),
-                      color: position > DARK_TEXT_FROM ? 'var(--bg)' : 'var(--text)',
+                      color: position > DARK_TEXT_FROM ? '#000' : '#fff',
                     }}
                     title={labelText}
                     aria-label={`Lunar day ${slot.cycles.lunar_day_index}, ${labelText}`}
