@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Site(BaseModel):
@@ -132,4 +132,48 @@ class WindowsResponse(BaseModel):
     matches: list[CalendarSlot]
     slip_analysis: SlipAnalysis | None = None
     cycles_summary: CyclesSummary
+    meta: Meta
+
+
+# --- Optymalny punkt lądowania (zadanie 017) ---
+
+
+class OptimalWeights(BaseModel):
+    w_sun: float
+    w_earth: float
+    w_overlap: float
+
+
+class CursorBodies(BaseModel):
+    cursor_utc: str
+    subsolar_lat_deg: float
+    subsolar_lon_deg: float
+    subearth_lat_deg: float
+    subearth_lon_deg: float
+
+
+class OptimalCandidate(BaseModel):
+    id: str
+    name: str
+    lat_deg: float
+    lon_deg: float
+    elevation_m: float | None = None
+    is_catalog_site: bool
+    score: float = Field(ge=0, le=100)
+    sun_visible_fraction: float = Field(ge=0, le=1)
+    earth_visible_fraction: float = Field(ge=0, le=1)
+    overlap_fraction: float = Field(ge=0, le=1)
+    sunlight_hours: float = Field(ge=0)
+    earth_hours: float = Field(ge=0)
+    overlap_hours: float = Field(ge=0)
+    max_darkness_hours: float = Field(ge=0)
+    sun_visible_at_cursor: bool
+    earth_visible_at_cursor: bool
+
+
+class OptimalSiteResponse(BaseModel):
+    optimal: OptimalCandidate
+    ranking: list[OptimalCandidate]
+    cursor_bodies: CursorBodies
+    weights: OptimalWeights
     meta: Meta

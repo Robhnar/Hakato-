@@ -14,6 +14,7 @@ import os
 from datetime import UTC, datetime
 
 from app import metrics
+from app.api.optimal_site_stub import optimal_site_stub
 from app.api.windows_stub import windows_fixture
 from app.config import DATA_DIR, FIXTURES_DIR
 
@@ -55,6 +56,9 @@ def _build() -> dict[str, object]:
         "timeline.json": metrics.timeline(LAT_DEG, LON_DEG, START, END, STEP_MINUTES, horizon),
         "summary.json": metrics.summary(LAT_DEG, LON_DEG, START, END, horizon=horizon),
         "windows.json": windows_fixture(),
+        "optimal_site.json": optimal_site_stub(
+            START, END, START, w_sun=0.45, w_earth=0.25, w_overlap=0.30
+        ),
     }
 
 
