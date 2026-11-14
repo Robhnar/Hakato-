@@ -53,6 +53,15 @@ Realizacja propozycji ze zgłoszenia **#29** jako przełączanej warstwy **ON/OF
 | [018](018-silnik-optymalnego-punktu.md) | Silnik predykcji optymalnego punktu lądowania i polarnej siatki referencyjnej | `metrics`, `ephemeris`, `terrain` | osoba A | 017 | scalone |
 | [019](019-warstwa-on-off-mapa-cieplna-globus.md) | Widok `map`: przełączana warstwa ON/OFF mapy cieplnej i optymalnego punktu na globusie 3D | widok `map` (`MoonGlobe.tsx`) | osoba F | 017 | scalone |
 
+## Lista – Faza 4 (Odświeżenie interfejsu i poprawki po audycie)
+
+| Nr | Zadanie | Moduł | Przydzielona osoba | Zależy od | Status |
+| --- | --- | --- | --- | --- | --- |
+| [020](020-tryb-prowadzony.md) | Tryb prowadzony „Plan a landing" dla osób nietechnicznych | frontend – powłoka | Claude Code | – | scalone |
+| [021](021-odswiezenie-ui.md) | Odświeżenie UI: „konsola misji", wykresy, mapa i Optimization Overlay | frontend – powłoka i widoki | Claude Code | 020 | scalone |
+| [022](022-blokada-spice.md) | Blokada wywołań SPICE (równoległe zapytania przewracały backend) | `ephemeris`, `metrics` | Claude Code | – | scalone |
+| [023](023-poprawki-z-audytu.md) | Poprawki z audytu backendu: kalendarz, zakres SPICE, wagi | `metrics`, `ephemeris`, `api` | Claude Code | – | scalone |
+
 ## Kolejność prac w Fazie 3
 
 1. **Krok 1 (blokujący kontrakt):** Zadanie **017** (**osoba C**) — dodaje schemat `OptimalSiteResponse` dla `GET /api/optimal-site`, `contracts/fixtures/optimal_site.json` oraz metodę `api.optimalSite()`.

@@ -1,6 +1,6 @@
 # 022 – Blokada wywołań SPICE (równoległe zapytania przewracały backend)
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** Claude Code
 - **Moduł:** `ephemeris`, `metrics` (wywołania SPICE w `optimal_site`)
 - **Gałąź:** `feat/022-blokada-spice`

@@ -1,7 +1,7 @@
 # 020 – Tryb prowadzony „Plan a landing” dla osób nietechnicznych
 
-- **Status:** w recenzji
-- **Właściciel:** Claude Code (części zlecone DeepSeek przez OpenCode)
+- **Status:** scalone
+- **Właściciel:** Claude Code
 - **Moduł:** frontend – powłoka (`web/src/App.tsx`, `web/src/app/`)
 - **Gałąź:** `feat/020-tryb-prowadzony`
 - **Zależy od:** 005, 011, 013 (scalone)
