@@ -1,0 +1,33 @@
+# NASA / partner data and references
+
+At least one NASA Resource from the challenge is required for Global Awards eligibility. Hakato uses several.
+
+## NASA data used in the product
+
+| Source | Challenge Resources? | How Hakato uses it |
+| --- | --- | --- |
+| **NAIF SPICE kernels** (via spiceypy) | Related to Horizons-quality ephemerides | Runtime Sun/Earth az/el from the landing site; `meta.ephemeris = "spice"` when kernels are present |
+| **JPL Horizons System** | Yes — listed in challenge Resources | Offline validation of SPICE results (control points), not called at request time |
+| **LOLA digital elevation** (PDS / LRO) | Yes — topography via LOLA / Quickmap ecosystem | Horizon profiles for polar sites (`meta.horizon = "lola"` when profile exists) |
+| **LROC Quickmap** | Yes | Site reconnaissance and coordinate cross-check for the catalogue |
+| **Moon Trek** | Yes | Design reference for globe/terrain intuition (not a runtime dependency) |
+| **NASA Artemis candidate regions** press release | NASA content | Seed for south-pole candidate sites in the catalogue |
+
+Challenge Resources snapshot: `lunar-landing-site-navigator-resources.md` in the repo root.
+
+## Catalogue and imagery
+
+- Landing-site list: `data/sites.json` (19 entries: Apollo, CLPS, international, commercial, Artemis candidates).
+- Provenance per site: `data/sites.sources.md`.
+- Globe texture: `web/public/moon_lroc_color_2k.jpg` (LROC-derived colour mosaic; attribute LROC / NASA / ASU as appropriate on slides).
+
+## Software references (non-exhaustive)
+
+- FastAPI, Uvicorn, Pydantic
+- spiceypy / NAIF CSPICE
+- NumPy
+- React, Vite, TypeScript, Vitest
+- oxlint
+- GitHub Actions
+
+Full dependency pins: `backend/pyproject.toml`, `web/package.json`.

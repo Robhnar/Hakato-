@@ -1,7 +1,7 @@
 # 010 – Zgłoszenie do Space Apps: opis, demo, prezentacja
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba E, po zadaniu 004; każdy dostarcza opis swojej części)
+- **Status:** w recenzji
+- **Właściciel:** osoba C (wsparcie zespołu; brief sugerował E)
 - **Moduł:** – (bez kodu aplikacji)
 - **Gałąź:** `feat/010-zgloszenie`
 - **Zależy od:** –
@@ -29,6 +29,17 @@ Poza zakresem:
 
 ## Kryteria ukończenia
 
-- [ ] `docs/submission/wymagania.md` istnieje i ma termin oddania.
-- [ ] Każde twierdzenie w opisie zgadza się ze stanem aplikacji na `main` (sprawdź pole `meta`: nie piszemy o danych LOLA, jeśli działa płaski horyzont).
-- [ ] Demo przećwiczone na wersji z `main`, nie na gałęzi roboczej.
+- [x] `docs/submission/wymagania.md` istnieje i ma termin oddania.
+- [x] Każde twierdzenie w opisie zgadza się ze stanem aplikacji na `main` (sprawdź pole `meta`: nie piszemy o danych LOLA, jeśli działa płaski horyzont).
+- [ ] Demo przećwiczone na wersji z `main`, nie na gałęzi roboczej. *(konspekt + skrypt gotowe; nagranie/PDF robi człowiek z zespołu i wkleja link w formularzu)*
+
+## Oddane w PR
+
+- `docs/submission/wymagania.md`
+- `docs/submission/form-fields.md`
+- `docs/submission/project-description.md`
+- `docs/submission/data-and-references.md`
+- `docs/submission/ai-disclosure.md`
+- `docs/submission/demo-script.md`
+- `docs/submission/slides-outline.md`
+- `docs/submission/README.md`
