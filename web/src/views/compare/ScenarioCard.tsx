@@ -85,12 +85,12 @@ export default function ScenarioCard({
             best={columnBest.earthMaxEl}
           />
           <Metric
-            label="Sun now"
+            label="Sun at start"
             value={describeNow(data.sun.visible_at_start, data.sun.hours_until_change)}
             best={false}
           />
           <Metric
-            label="Earth now"
+            label="Earth at start"
             value={describeNow(data.earth.visible_at_start, data.earth.hours_until_change)}
             best={false}
           />
