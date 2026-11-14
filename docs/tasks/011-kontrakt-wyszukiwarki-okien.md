@@ -1,7 +1,7 @@
 # 011 – Kontrakt i szkielet wyszukiwarki okien lądowania (`/api/windows` + widok `windows`)
 
 - **Status:** wolne
-- **Właściciel:** osoba C (wspólnie z integratorem)
+- **Właściciel:** osoba C
 - **Moduł:** `api`, `contracts`, frontend – powłoka i widok `windows`
 - **Gałąź:** `feat/011-kontrakt-okna`
 - **Zależy od:** –
