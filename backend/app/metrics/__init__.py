@@ -101,7 +101,7 @@ def summarize_body(
             event_type = "rise" if v1 else "set"
             events.append((t_cross, event_type))
 
-    windows = []
+    raw_windows: list[dict[str, str]] = []
     total_visible_s = 0.0
 
     if visible[0]:
@@ -113,13 +113,21 @@ def summarize_body(
         if event_type == "rise":
             win_start = t_event
         elif event_type == "set" and win_start is not None:
-            windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_event)})
+            raw_windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_event)})
             total_visible_s += (t_event - win_start).total_seconds()
             win_start = None
 
     if win_start is not None:
-        windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_end)})
+        raw_windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_end)})
         total_visible_s += (t_end - win_start).total_seconds()
+
+    # Scal sąsiadujące okna, jeśli koniec jednego pokrywa się dokładnie z początkiem kolejnego
+    windows: list[dict[str, str]] = []
+    for w in raw_windows:
+        if windows and windows[-1]["end_utc"] == w["start_utc"]:
+            windows[-1]["end_utc"] = w["end_utc"]
+        else:
+            windows.append(w)
 
     if total_duration_s > 0:
         visible_fraction = round(max(0.0, min(1.0, total_visible_s / total_duration_s)), 4)

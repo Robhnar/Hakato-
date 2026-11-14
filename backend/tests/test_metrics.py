@@ -99,3 +99,15 @@ def test_summary_open_at_end_of_range():
     ]
     assert s["hours_until_change"] == pytest.approx(0.5)
     assert s["visible_fraction"] == pytest.approx(0.5)
+
+
+def test_summary_merges_instantaneous_dip_to_zero():
+    # Ciało dotyka horyzontu dokładnie w próbce (1.0 -> 0.0 -> 1.0)
+    el = [1.0, 0.0, 1.0]
+    horizon = [0.0, 0.0, 0.0]
+    visible = [True, False, True]
+    s = summarize_body(hours(3), el, visible, horizon)
+    # Scalone do jednego ciągłego okna
+    assert s["windows"] == [
+        {"start_utc": "2027-01-01T00:00:00Z", "end_utc": "2027-01-01T02:00:00Z"}
+    ]
