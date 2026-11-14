@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timedelta
 
 from .. import ephemeris, terrain
 from ..timeutil import iso_z, time_range, to_utc
-from . import summarize_body
+from . import horizon_elevation_at, summarize_body
 from .uncertainty import detect_eclipses, solar_visibility_uncertainty
 
 SYNODIC_MONTH_DAYS = 29.530588853
@@ -100,17 +100,9 @@ def evaluate_slot(
 
     positions = ephemeris.body_positions(lat_deg, lon_deg, times)
 
-    h_elevation_sun = [
-        terrain.horizon_elevation_at(horizon_profile, a)
-        if hasattr(terrain, "horizon_elevation_at")
-        else _horizon_at(horizon_profile, a)
-        for a in positions["sun"]["az_deg"]
-    ]
+    h_elevation_sun = [horizon_elevation_at(horizon_profile, a) for a in positions["sun"]["az_deg"]]
     h_elevation_earth = [
-        terrain.horizon_elevation_at(horizon_profile, a)
-        if hasattr(terrain, "horizon_elevation_at")
-        else _horizon_at(horizon_profile, a)
-        for a in positions["earth"]["az_deg"]
+        horizon_elevation_at(horizon_profile, a) for a in positions["earth"]["az_deg"]
     ]
 
     sun_vis = [e > h for e, h in zip(positions["sun"]["el_deg"], h_elevation_sun)]
@@ -171,15 +163,6 @@ def evaluate_slot(
     }
 
 
-def _horizon_at(profile: dict, az_deg: float) -> float:
-    values = profile["elevation_deg"]
-    x = (az_deg % 360.0) / profile["azimuth_step_deg"]
-    i = int(x)
-    frac = x - i
-    n = len(values)
-    return values[i % n] * (1.0 - frac) + values[(i + 1) % n] * frac
-
-
 from .calendar_store import load_precomputed_calendar
 
 MAX_SEARCH_YEARS = 10
@@ -233,6 +216,12 @@ def search_windows(
     cached_slots = None
     if abs(duration_hours - 708.7) < 2.0:
         cached_slots = load_precomputed_calendar(lat_deg, lon_deg)
+        if cached_slots:
+            starts = [to_utc(datetime.fromisoformat(slot["start_utc"])) for slot in cached_slots]
+            month = timedelta(days=SYNODIC_MONTH_DAYS)
+            # Kalendarz pokrywa tylko część zakresu: nie wolno gubić reszty, liczymy na żądanie.
+            if not (min(starts) <= start_utc + month and max(starts) >= end_utc - month):
+                cached_slots = None
 
     matching_cached = [
         slot

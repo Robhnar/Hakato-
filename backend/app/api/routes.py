@@ -20,6 +20,7 @@ MAX_SAMPLES = 20_000
 Lat = Annotated[float, Query(ge=-90, le=90)]
 Lon = Annotated[float, Query(ge=-180, le=180)]
 Step = Annotated[float, Query(ge=1, le=1440)]
+Weight = Annotated[float, Query(ge=0, allow_inf_nan=False)]
 
 
 MIN_YEAR = 1850
@@ -76,7 +77,10 @@ def timeline(
     lat_deg: Lat, lon_deg: Lon, start_utc: datetime, end_utc: datetime, step_minutes: Step = 60
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
-    return deepcopy(_cached_timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    try:
+        return deepcopy(_cached_timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @lru_cache(maxsize=32)
@@ -99,7 +103,10 @@ def summary(
     step_minutes: Step = metrics.SUMMARY_STEP_MINUTES,
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
-    return deepcopy(_cached_summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    try:
+        return deepcopy(_cached_summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @lru_cache(maxsize=32)
@@ -198,9 +205,9 @@ def optimal_site(
     end_utc: datetime,
     cursor_utc: datetime | None = None,
     step_minutes: Step = 60.0,
-    w_sun: float = 0.45,
-    w_earth: float = 0.25,
-    w_overlap: float = 0.30,
+    w_sun: Weight = 0.45,
+    w_earth: Weight = 0.25,
+    w_overlap: Weight = 0.30,
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
     try:
