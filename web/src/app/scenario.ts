@@ -27,6 +27,34 @@ export interface ViewProps {
 /** Jeden dzień księżycowy (miesiąc synodyczny) w godzinach. */
 export const LUNAR_DAY_HOURS = 708.7
 
+/** Limit scenariuszy w powłoce (zadanie 005). */
+export const MAX_SCENARIOS = 4
+
+export const DURATION_PRESETS: { label: string; hours: number }[] = [
+  { label: '24 hours', hours: 24 },
+  { label: '1 lunar day', hours: LUNAR_DAY_HOURS },
+  { label: '3 lunar days', hours: LUNAR_DAY_HOURS * 3 },
+]
+
+export type CoordError = 'lat' | 'lon' | 'both' | null
+
+/** Walidacja współrzędnych selenograficznych ME (−90…90, −180…180). */
+export function validateCoords(lat_deg: number, lon_deg: number): CoordError {
+  const latBad = !Number.isFinite(lat_deg) || lat_deg < -90 || lat_deg > 90
+  const lonBad = !Number.isFinite(lon_deg) || lon_deg < -180 || lon_deg > 180
+  if (latBad && lonBad) return 'both'
+  if (latBad) return 'lat'
+  if (lonBad) return 'lon'
+  return null
+}
+
+export function coordErrorMessage(error: CoordError): string | null {
+  if (error === 'lat') return 'Latitude must be between −90 and 90 degrees.'
+  if (error === 'lon') return 'Longitude must be between −180 and 180 degrees.'
+  if (error === 'both') return 'Latitude must be −90…90 and longitude −180…180.'
+  return null
+}
+
 export function toIsoZ(date: Date): string {
   return `${date.toISOString().slice(0, 19)}Z`
 }
@@ -61,4 +89,9 @@ export function scenarioFromSite(
     start_utc,
     duration_hours,
   }
+}
+
+/** Kopia scenariusza z nowym id (powielanie w powłoce). */
+export function duplicateScenario(scenario: Scenario): Scenario {
+  return { ...scenario, id: `s${nextId++}` }
 }

@@ -1,7 +1,7 @@
 # 003 – Metryki: dokładne okna i czas do zachodu
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba A, po zadaniu 001)
+- **Status:** w recenzji
+- **Właściciel:** Przemek (Osoba A)
 - **Moduł:** `metrics`
 - **Gałąź:** `feat/003-metryki-okna`
 - **Zależy od:** – (można zacząć od razu; pełny sens po scaleniu 001 i 002)
@@ -38,6 +38,6 @@ Udostępnia `metrics.timeline()` i `metrics.summary()` (`docs/ARCHITECTURE.md`).
 
 ## Kryteria ukończenia
 
-- [ ] Testy z interpolacją przechodzą; istniejące testy metryk nadal przechodzą albo są świadomie zaktualizowane (opisz w PR).
-- [ ] Fixtures odświeżone (`python -m scripts.export_fixtures`).
-- [ ] `ruff` i `pytest` zielone.
+- [x] Testy z interpolacją przechodzą; istniejące testy metryk nadal przechodzą albo są świadomie zaktualizowane (opisz w PR).
+- [x] Fixtures odświeżone (`python -m scripts.export_fixtures`).
+- [x] `ruff` i `pytest` zielone.

@@ -1,14 +1,13 @@
 """Moduł metryk: łączy efemerydy z terenem. Kontrakt w docs/ARCHITECTURE.md.
 
-Wersja podstawowa: widoczność środka tarczy, dokładność do jednego kroku próbkowania.
-Zadanie 003 doprecyzowuje momenty wschodów i zachodów oraz dodaje metryki zasilania.
+Precyzyjne wyznaczanie wschodów i zachodów z interpolacją liniową momentu przejścia
+różnicy wysokości ciała i horyzontu przez zero (dokładność rzędu minuty przy kroku 10 min).
 """
 
-import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .. import ephemeris, terrain
-from ..timeutil import iso_z, time_range
+from ..timeutil import iso_z, time_range, to_utc
 
 BODIES = ("sun", "earth")
 SUMMARY_STEP_MINUTES = 10.0
@@ -18,7 +17,7 @@ def horizon_elevation_at(profile: dict, az_deg: float) -> float:
     """Wysokość horyzontu na dowolnym azymucie - interpolacja liniowa z zawinięciem 359 -> 0."""
     values = profile["elevation_deg"]
     x = (az_deg % 360.0) / profile["azimuth_step_deg"]
-    i = math.floor(x)
+    i = int(x)
     frac = x - i
     n = len(values)
     return values[i % n] * (1.0 - frac) + values[(i + 1) % n] * frac
@@ -49,28 +48,90 @@ def timeline(
     return out
 
 
-def summarize_body(times_utc: list[str], el_deg: list[float], visible: list[bool]) -> dict:
-    """Metryki jednego ciała z gotowego przebiegu. Próbki muszą być równo odległe w czasie."""
+def _interpolate_crossing(t0: datetime, t1: datetime, diff0: float, diff1: float) -> datetime:
+    """Liniowa interpolacja chwili przejścia różnicy wysokości ciała i horyzontu przez 0."""
+    span_s = (t1 - t0).total_seconds()
+    denom = diff1 - diff0
+    if abs(denom) < 1e-12:
+        fraction = 0.5
+    else:
+        fraction = -diff0 / denom
+        fraction = max(0.0, min(1.0, fraction))
+    return t0 + timedelta(seconds=round(span_s * fraction))
+
+
+def summarize_body(
+    times_utc: list[str],
+    el_deg: list[float],
+    visible: list[bool],
+    horizon_el_deg: list[float] | None = None,
+) -> dict:
+    """Metryki jednego ciała z gotowego przebiegu.
+
+    Jeśli przekazano horizon_el_deg, momenty przejścia (wschód/zachód) są precyzyjnie
+    interpolowane z różnicy (el_deg - horizon_el_deg).
+    """
+    n = len(times_utc)
+    if n == 0:
+        return {
+            "visible_fraction": 0.0,
+            "max_el_deg": 0.0,
+            "windows": [],
+            "visible_at_start": False,
+            "hours_until_change": None,
+        }
+
+    dt_list = [to_utc(datetime.fromisoformat(t)) for t in times_utc]
+    t_start = dt_list[0]
+    t_end = dt_list[-1]
+    total_duration_s = (t_end - t_start).total_seconds()
+
+    diffs = (
+        [e - h for e, h in zip(el_deg, horizon_el_deg)]
+        if horizon_el_deg is not None
+        else [1.0 if v else -1.0 for v in visible]
+    )
+
+    events: list[tuple[datetime, str]] = []
+
+    for i in range(n - 1):
+        v0, v1 = visible[i], visible[i + 1]
+        if v0 != v1:
+            t_cross = _interpolate_crossing(dt_list[i], dt_list[i + 1], diffs[i], diffs[i + 1])
+            event_type = "rise" if v1 else "set"
+            events.append((t_cross, event_type))
+
     windows = []
-    run_start = None
-    for i, vis in enumerate(visible):
-        if vis and run_start is None:
-            run_start = i
-        if run_start is not None and (not vis or i == len(visible) - 1):
-            last = i if vis else i - 1
-            windows.append({"start_utc": times_utc[run_start], "end_utc": times_utc[last]})
-            run_start = None
+    total_visible_s = 0.0
+
+    if visible[0]:
+        win_start = t_start
+    else:
+        win_start = None
+
+    for t_event, event_type in events:
+        if event_type == "rise":
+            win_start = t_event
+        elif event_type == "set" and win_start is not None:
+            windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_event)})
+            total_visible_s += (t_event - win_start).total_seconds()
+            win_start = None
+
+    if win_start is not None:
+        windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_end)})
+        total_visible_s += (t_end - win_start).total_seconds()
+
+    if total_duration_s > 0:
+        visible_fraction = round(max(0.0, min(1.0, total_visible_s / total_duration_s)), 4)
+    else:
+        visible_fraction = 1.0 if visible[0] else 0.0
 
     hours_until_change = None
-    for i, vis in enumerate(visible):
-        if vis != visible[0]:
-            t0 = datetime.fromisoformat(times_utc[0])
-            ti = datetime.fromisoformat(times_utc[i])
-            hours_until_change = round((ti - t0).total_seconds() / 3600.0, 3)
-            break
+    if events:
+        hours_until_change = round((events[0][0] - t_start).total_seconds() / 3600.0, 3)
 
     return {
-        "visible_fraction": round(sum(visible) / len(visible), 4),
+        "visible_fraction": visible_fraction,
         "max_el_deg": max(el_deg),
         "windows": windows,
         "visible_at_start": visible[0],
@@ -86,11 +147,16 @@ def summary(
     step_minutes: float = SUMMARY_STEP_MINUTES,
     horizon: dict | None = None,
 ) -> dict:
-    """Metryki scenariusza: udział czasu z widocznością, okna, czas do najbliższej zmiany."""
-    tl = timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes, horizon)
-    out = {
-        body: summarize_body(tl["times_utc"], tl[body]["el_deg"], tl[body]["visible"])
-        for body in BODIES
-    }
+    """Metryki scenariusza: precyzyjne okna i czas do najbliższej zmiany."""
+    profile = horizon if horizon is not None else terrain.horizon_profile(lat_deg, lon_deg)
+    tl = timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes, profile)
+
+    out = {}
+    for body in BODIES:
+        h_elevations = [horizon_elevation_at(profile, a) for a in tl[body]["az_deg"]]
+        out[body] = summarize_body(
+            tl["times_utc"], tl[body]["el_deg"], tl[body]["visible"], h_elevations
+        )
+
     out["meta"] = tl["meta"]
     return out
