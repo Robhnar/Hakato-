@@ -4,11 +4,16 @@ Ten plik czyta każdy model AI pracujący w tym repo (Claude Code przez `CLAUDE.
 
 Nad projektem pracuje równolegle kilka osób, każda ze swoim asystentem. Zasady poniżej istnieją po to, żeby te prace dało się scalić bez konfliktów.
 
+## Projekt
+
+Budujemy rozwiązanie wyzwania Lunar Landing Site Navigator (NASA Space Apps 2026). Treść wyzwania jest w `lunar-landing-site-navigator-details.md`, dozwolone źródła danych w `lunar-landing-site-navigator-resources.md`.
+
 ## Zanim zaczniesz
 
 1. Przeczytaj plik swojego zadania w `docs/tasks/`. Jeśli użytkownik nie wskazał zadania, zapytaj o nie, zamiast zgadywać.
 2. Przeczytaj `docs/ARCHITECTURE.md` – podział na moduły i kontrakty między nimi.
-3. Pobierz aktualny `main` i utwórz gałąź `feat/<nr-zadania>-<krótki-opis>` (np. `feat/003-logowanie`).
+3. Uruchom projekt i testy według `README.md`, żeby mieć pewność, że startujesz z działającego stanu.
+4. Pobierz aktualny `main` i utwórz gałąź `feat/<nr-zadania>-<krótki-opis>` (np. `feat/003-logowanie`).
 
 ## Zasady pracy
 
@@ -19,6 +24,7 @@ Nad projektem pracuje równolegle kilka osób, każda ze swoim asystentem. Zasad
 - **Żadnych sekretów w repo.** Klucze i hasła trzymaj w `.env` (jest w `.gitignore`); nową zmienną dopisz do `.env.example` bez wartości.
 - **Nowa zależność** (biblioteka, usługa) – wymień ją w opisie PR razem z powodem.
 - **Bez refaktorów przy okazji.** Formatowanie i porządki w cudzym kodzie powodują konflikty u innych.
+- **Pracujesz autonomicznie (tryb agentowy)?** Te same zasady: jedna gałąź, jedno zadanie, żadnych zmian poza zakresem, żadnego scalania. Kończysz na otwartym PR.
 - **Nie zostawiaj atrap.** Jeśli coś jest zaślepką albo nie działa, napisz to wprost w opisie PR.
 
 ## Oddawanie pracy
