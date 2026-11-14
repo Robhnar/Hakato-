@@ -138,3 +138,44 @@ def test_search_windows_rejects_out_of_range():
             search_start_utc=start_bad,
             search_end_utc=end_bad,
         )
+
+
+def _site_with_calendar():
+    import json
+
+    from app.config import DATA_DIR
+
+    sites = json.loads((DATA_DIR / "sites.json").read_text(encoding="utf-8"))
+    for site in sites:
+        if (DATA_DIR / "calendars" / f"{site['id']}.json").is_file():
+            return site
+    pytest.skip("Brak prekomputowanego kalendarza w data/calendars/")
+
+
+@pytest.mark.parametrize(
+    "start,end,marker",
+    [
+        (
+            "2026-06-01T00:00:00Z",
+            "2027-03-01T00:00:00Z",
+            "2027-01-01",
+        ),  # zaczyna się przed kalendarzem
+        ("2035-06-01T00:00:00Z", "2036-06-01T00:00:00Z", "2035-12-31"),  # kończy się po kalendarzu
+    ],
+)
+def test_search_beyond_calendar_range_is_computed_not_dropped(start, end, marker):
+    """Zakres wychodzący poza kalendarz 2027-2035 nie może gubić slotów spoza kalendarza."""
+    site = _site_with_calendar()
+    result = search_windows(
+        lat_deg=site["lat_deg"],
+        lon_deg=site["lon_deg"],
+        search_start_utc=datetime.fromisoformat(start),
+        search_end_utc=datetime.fromisoformat(end),
+        duration_hours=708.7,
+    )
+    starts = sorted(s["start_utc"] for s in result["grid"])
+    assert starts, "wyszukiwanie nie zwróciło żadnego okna"
+    if marker == "2027-01-01":
+        assert starts[0] < marker, f"brak slotów sprzed kalendarza, pierwszy: {starts[0]}"
+    else:
+        assert starts[-1] > marker, f"brak slotów po kalendarzu, ostatni: {starts[-1]}"
