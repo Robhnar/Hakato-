@@ -1,0 +1,240 @@
+/* Widok osi czasu. Kolory: żółty = Słońce/zasilanie, niebieski = Ziemia/łączność.
+   Rozróżnienie opiera się na jasności i fakturze (pas "Both" to podział), nie na barwie. */
+
+.timeline {
+  --tl-sun: #f2c14e;
+  --tl-earth: #6ba3ff;
+  --tl-off: #1b2130;
+
+  display: grid;
+  gap: 10px;
+}
+
+.timeline-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.timeline-head h2 {
+  margin: 0;
+}
+
+.timeline-meta,
+.timeline-share {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.timeline-chip {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+
+.timeline-chip-sun {
+  background: var(--tl-sun);
+}
+
+.timeline-chip-earth {
+  background: var(--tl-earth);
+}
+
+.timeline-chip-both {
+  background: linear-gradient(180deg, var(--tl-sun) 0 50%, var(--tl-earth) 50% 100%);
+}
+
+.timeline-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+}
+
+.timeline-cursor-label {
+  margin-left: auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-canvas {
+  position: relative;
+  padding-top: 46px;
+}
+
+.timeline-plot {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  /* Outline zamiast border: obramowanie nie zawęża content boxu, do którego mapuje się viewBox. */
+  outline: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: pointer;
+  touch-action: none;
+}
+
+.timeline[aria-busy='true'] .timeline-plot {
+  opacity: 0.55;
+}
+
+.timeline-plot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.timeline-track {
+  fill: var(--tl-off);
+}
+
+.timeline-band {
+  filter: saturate(1);
+}
+
+.timeline-band-sun {
+  fill: var(--tl-sun);
+}
+
+.timeline-band-earth {
+  fill: var(--tl-earth);
+}
+
+.timeline-band-both {
+  fill: url(#timeline-both-fill);
+}
+
+.timeline-both-stop-sun {
+  stop-color: var(--tl-sun);
+}
+
+.timeline-both-stop-earth {
+  stop-color: var(--tl-earth);
+}
+
+.timeline-chart-bg {
+  fill: #10151f;
+}
+
+.timeline-row-label {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.timeline-axis-label {
+  fill: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-tick {
+  stroke: color-mix(in srgb, var(--border) 55%, transparent);
+  stroke-width: 1;
+}
+
+.timeline-zero {
+  stroke: #566076;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.timeline-line {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.timeline-line-sun {
+  stroke: var(--tl-sun);
+}
+
+.timeline-line-earth {
+  stroke: var(--tl-earth);
+}
+
+.timeline-cursor {
+  stroke: #ffffff;
+  stroke-width: 1.6;
+  pointer-events: none;
+}
+
+.timeline-cursor-handle {
+  fill: var(--tl-sun);
+  stroke: #ffffff;
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.timeline-badge {
+  position: absolute;
+  top: 4px;
+  transform: translateX(14px);
+  max-width: min(230px, 45%);
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(11, 14, 20, 0.92);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.timeline-badge-left {
+  transform: translateX(calc(-100% - 14px));
+}
+
+.timeline-badge p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+@media (max-width: 700px) {
+  .timeline-legend {
+    margin-left: 0;
+  }
+
+  .timeline-cursor-label {
+    margin-left: 0;
+  }
+
+  .timeline-badge {
+    max-width: min(180px, 45%);
+    font-size: 0.75rem;
+    white-space: normal;
+  }
+
+  /* Tekst w SVG skaluje się razem z wykresem — na wąskim ekranie podbijamy go
+     i pokazujemy co drugi tick, żeby etykiety nie nachodziły na siebie. */
+  .timeline-axis-label {
+    font-size: 22px;
+  }
+
+  .timeline-row-label {
+    font-size: 20px;
+  }
+
+  .timeline-ticks > g:nth-child(even) {
+    display: none;
+  }
+}
