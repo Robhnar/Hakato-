@@ -61,6 +61,7 @@ Realizacja propozycji ze zgłoszenia **#29** jako przełączanej warstwy **ON/OF
 | [021](021-odswiezenie-ui.md) | Odświeżenie UI: „konsola misji", wykresy, mapa i Optimization Overlay | frontend – powłoka i widoki | Claude Code | 020 | scalone |
 | [022](022-blokada-spice.md) | Blokada wywołań SPICE (równoległe zapytania przewracały backend) | `ephemeris`, `metrics` | Claude Code | – | scalone |
 | [023](023-poprawki-z-audytu.md) | Poprawki z audytu backendu: kalendarz, zakres SPICE, wagi | `metrics`, `ephemeris`, `api` | Claude Code | – | scalone |
+| [024](024-wybor-miejsca-na-mapie.md) | Tryb prowadzony: wybór miejsca na mapie | frontend – tryb prowadzony | Claude Code | 020, 021 | scalone |
 
 ## Kolejność prac w Fazie 3
 
