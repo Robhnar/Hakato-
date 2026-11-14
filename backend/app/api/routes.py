@@ -13,7 +13,7 @@ from . import schemas
 
 router = APIRouter(prefix="/api")
 
-MAX_SAMPLES = 10_000
+MAX_SAMPLES = 20_000
 
 Lat = Annotated[float, Query(ge=-90, le=90)]
 Lon = Annotated[float, Query(ge=-180, le=180)]
