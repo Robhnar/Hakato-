@@ -21,18 +21,38 @@ lądowania. Katalog nie sugeruje większej dokładności niż źródło.
 
 - NASA wymienia Nobile Rim 1 jako kandydujący region Artemis III:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Współrzędne krateru Nobile jako punkt odniesienia:
+- Środek krateru Nobile: 85,28°S, 53,27°E:
   https://en.wikipedia.org/wiki/Nobile_(crater)
-- To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
+- Katalog pokazuje środek pobliskiego krateru jako punkt odniesienia regionu
+  kandydackiego, a nie punkt na jego obrzeżu ani wybrane lądowisko.
 - Mapa: https://quickmap.lroc.asu.edu/
 
 ### de-gerlache-rim-2
 
 - NASA wymienia de Gerlache Rim 2 jako kandydujący region Artemis III:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Współrzędne krateru de Gerlache jako punkt odniesienia:
+- Współrzędne środka krateru de Gerlache:
   https://en.wikipedia.org/wiki/De_Gerlache_(crater)
-- To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
+- Katalog pokazuje środek krateru jako punkt odniesienia w regionie
+  kandydackim, a nie punkt na obrzeżu ani wybrane lądowisko. Wartości
+  współrzędnych zweryfikowano na mapie LROC QuickMap:
+  https://quickmap.lroc.asu.edu/
+- Mapa: https://quickmap.lroc.asu.edu/
+
+### connecting-ridge-site-001
+
+- Boazman et al. identyfikują site 001 na Connecting Ridge przy
+  89,45°S, 137,31°W (222,69°E):
+  https://doi.org/10.3847/PSJ/aca590
+- W katalogu zachowano zachodnią długość jako wartość ujemną (`-137.31`).
+  To opublikowany punkt orientacyjny w regionie kandydackim, a nie zatwierdzone
+  miejsce lądowania.
+- NASA opisuje Connecting Ridge jako jeden z rozważanych regionów Artemis III:
+  https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
+- Opublikowane wyniki oświetlenia zależą od modelu terenu, punktu obserwacji
+  i wysokości. Katalog nie przypisuje temu punktowi gwarantowanej łączności
+  ani dostępności światła w konkretnym terminie; aplikacja nie ma tu profilu
+  horyzontu z danych LOLA.
 - Mapa: https://quickmap.lroc.asu.edu/
 
 ## Program Apollo
