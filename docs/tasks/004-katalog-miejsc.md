@@ -1,7 +1,7 @@
 # 004 – Katalog miejsc lądowania i szybkość API
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba E, potem zadanie 010)
+- **Status:** w recenzji
+- **Właściciel:** osoba E
 - **Moduł:** `data`, `api`
 - **Gałąź:** `feat/004-katalog-miejsc`
 - **Zależy od:** –
@@ -38,9 +38,9 @@ Udostępnia `GET /api/sites` – kształt wpisu bez zmian (`docs/ARCHITECTURE.md
 
 ## Kryteria ukończenia
 
-- [ ] Co najmniej 15 miejsc, każde ze źródłem.
-- [ ] Fixtures odświeżone (`python -m scripts.export_fixtures`).
-- [ ] `ruff` i `pytest` zielone.
+- [x] Co najmniej 15 miejsc, każde ze źródłem.
+- [x] Fixtures odświeżone (`python -m scripts.export_fixtures`).
+- [x] `ruff` i `pytest` zielone.
 
 ## Notatki
 
