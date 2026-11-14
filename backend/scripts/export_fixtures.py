@@ -55,6 +55,9 @@ def _build() -> dict[str, object]:
         "timeline.json": metrics.timeline(LAT_DEG, LON_DEG, START, END, STEP_MINUTES, horizon),
         "summary.json": metrics.summary(LAT_DEG, LON_DEG, START, END, horizon=horizon),
         "windows.json": windows_fixture(),
+        "optimal_site.json": metrics.find_optimal_site(
+            START, END, cursor_utc=START, step_minutes=STEP_MINUTES
+        ),
     }
 
 

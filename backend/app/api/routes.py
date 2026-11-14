@@ -159,3 +159,52 @@ def windows(
         )
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+@lru_cache(maxsize=16)
+def _cached_optimal_site(
+    start_utc: datetime,
+    end_utc: datetime,
+    cursor_utc: datetime | None,
+    step_minutes: float,
+    w_sun: float,
+    w_earth: float,
+    w_overlap: float,
+) -> dict:
+    return metrics.find_optimal_site(
+        start_utc=start_utc,
+        end_utc=end_utc,
+        cursor_utc=cursor_utc,
+        step_minutes=step_minutes,
+        w_sun=w_sun,
+        w_earth=w_earth,
+        w_overlap=w_overlap,
+    )
+
+
+@router.get("/optimal-site", response_model=schemas.OptimalSiteResponse)
+def optimal_site(
+    start_utc: datetime,
+    end_utc: datetime,
+    cursor_utc: datetime | None = None,
+    step_minutes: Step = 60.0,
+    w_sun: float = 0.45,
+    w_earth: float = 0.25,
+    w_overlap: float = 0.30,
+) -> dict:
+    if to_utc(end_utc) <= to_utc(start_utc):
+        raise HTTPException(422, "end_utc musi być późniejszy niż start_utc")
+    try:
+        return deepcopy(
+            _cached_optimal_site(
+                start_utc,
+                end_utc,
+                cursor_utc,
+                step_minutes,
+                w_sun,
+                w_earth,
+                w_overlap,
+            )
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc

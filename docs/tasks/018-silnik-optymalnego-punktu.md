@@ -1,10 +1,11 @@
 # 018 – Silnik predykcji optymalnego punktu lądowania i polarnej siatki referencyjnej
 
-- **Status:** wolne
+- **Status:** w recenzji
 - **Właściciel:** osoba A
 - **Moduł:** `metrics`, `ephemeris`, `terrain`, `api`
 - **Gałąź:** `feat/018-silnik-optimal-site`
 - **Zależy od:** 017
+
 
 ## Cel
 
@@ -49,7 +50,8 @@ Implementuje odpowiedź `OptimalSiteResponse` z zadania 017 dla `GET /api/optima
 
 ## Kryteria ukończenia
 
-- [ ] Dla każdego kandydata spełniona jest nierówność $0 \le F_{\text{overlap}} \le \min(F_{\text{sun}}, F_{\text{earth}}) \le 1$.
-- [ ] `ranking` jest posortowany nierosnąco według `score`, a `optimal == ranking[0]`.
-- [ ] Zapytanie `GET /api/optimal-site` dla okna 1 dnia księżycowego odpowiada w czasie $< 1\text{ s}$ (a z cache $< 50\text{ ms}$).
-- [ ] `ruff` i `pytest` przechodzą.
+- [x] Dla każdego kandydata spełniona jest nierówność $0 \le F_{\text{overlap}} \le \min(F_{\text{sun}}, F_{\text{earth}}) \le 1$.
+- [x] `ranking` jest posortowany nierosnąco według `score`, a `optimal == ranking[0]`.
+- [x] Zapytanie `GET /api/optimal-site` dla okna 1 dnia księżycowego odpowiada w czasie $< 1\text{ s}$ (a z cache $< 50\text{ ms}$).
+- [x] `ruff` i `pytest` przechodzą.
+
