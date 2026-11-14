@@ -1,6 +1,6 @@
 # 015 – Widok wyszukiwarki: wymagania misji i symulator „Start opóźnił się o N dni"
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** osoba F
 - **Moduł:** frontend – widok `windows` (panel wymagań, ranking dat i analiza opóźnienia)
 - **Gałąź:** `feat/015-wymagania-i-opoznienie`
@@ -47,7 +47,7 @@ Korzysta z `api.windows()` oraz `ViewProps` (`applyWindow`, `active`) z zadania 
 
 ## Kryteria ukończenia
 
-- [ ] Zmiana wymagań (np. zaostrzenie `max_darkness_hours`) natychmiast aktualizuje listę pasujących okien i odfiltrowuje okna ze zbyt długą nocą.
-- [ ] Przesunięcie suwaka „Launch delayed by +N days" pokazuje zmianę godzin słońca i najdłuższej nocy oraz pozwala jednym kliknięciem przejść do najbliższego równoważnego okna.
-- [ ] Funkcje pomocnicze w `requirements.ts` mają testy jednostkowe (`vitest`).
-- [ ] `npm run lint`, `npm run build`, `npm test` zielone.
+- [x] Zmiana wymagań (np. zaostrzenie `max_darkness_hours`) natychmiast aktualizuje listę pasujących okien i odfiltrowuje okna ze zbyt długą nocą.
+- [x] Przesunięcie suwaka „Launch delayed by +N days" pokazuje zmianę godzin słońca i najdłuższej nocy oraz pozwala jednym kliknięciem przejść do najbliższego równoważnego okna.
+- [x] Funkcje pomocnicze w `requirements.ts` mają testy jednostkowe (`vitest`).
+- [x] `npm run lint`, `npm run build`, `npm test` zielone.
