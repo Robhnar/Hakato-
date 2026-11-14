@@ -89,3 +89,18 @@ def test_single_time_utc_spice():
     res = ephemeris.body_positions(0.0, 0.0, [dt])
     assert len(res["sun"]["az_deg"]) == 1
     assert len(res["earth"]["az_deg"]) == 1
+
+
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+def test_body_positions_is_thread_safe():
+    """Równoległe wywołania muszą dać te same wyniki co sekwencyjne (SPICE nie jest wątkowo bezpieczny)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    start = datetime(2026, 12, 1, tzinfo=UTC)
+    windows = [[start + timedelta(days=i, hours=h) for h in range(0, 48, 6)] for i in range(24)]
+    expected = [ephemeris.body_positions(-89.5, 0.0, w) for w in windows]
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        got = list(pool.map(lambda w: ephemeris.body_positions(-89.5, 0.0, w), windows * 4))
+
+    assert got == expected * 4
