@@ -41,8 +41,9 @@ function sameRequirements(a: MissionRequirements, b: MissionRequirements): boole
 }
 
 /**
- * Formularz wymagań misji (zadanie 015). Sterowany przez rodzica: każda zmiana
- * leci od razu do góry, gdzie lista dopasowań jest filtrowana po stronie klienta.
+ * Formularz wymagań misji (zadania 015 i 021). Sterowany przez rodzica: każda
+ * zmiana leci od razu do góry, gdzie lista dopasowań jest filtrowana po stronie
+ * klienta. Cztery grupy w jednej siatce, bez ramek w ramkach.
  */
 export default function RequirementsPanel({ value, onChange }: Props) {
   const errors = validateRequirements(value)
@@ -55,7 +56,7 @@ export default function RequirementsPanel({ value, onChange }: Props) {
   return (
     <section className="windows-req" aria-label="Mission requirements">
       <div className="windows-req-head">
-        <h3>Mission requirements</h3>
+        <h3 className="windows-panel-title">Mission requirements</h3>
         {hasErrors && (
           <p className="windows-validation" role="alert">
             Fix the highlighted values before searching.
@@ -64,32 +65,42 @@ export default function RequirementsPanel({ value, onChange }: Props) {
       </div>
 
       <div className="windows-profiles" role="group" aria-label="Mission profile presets">
-        {MISSION_PROFILES.map((profile) => (
-          <button
-            key={profile.id}
-            type="button"
-            className={sameRequirements(value, profile.requirements) ? 'selected' : ''}
-            onClick={() => onChange({ ...profile.requirements })}
-          >
-            {profile.label}
-          </button>
-        ))}
+        {MISSION_PROFILES.map((profile) => {
+          const selected = sameRequirements(value, profile.requirements)
+          return (
+            <button
+              key={profile.id}
+              type="button"
+              className={`windows-tab${selected ? ' selected' : ''}`}
+              aria-pressed={selected}
+              onClick={() => onChange({ ...profile.requirements })}
+            >
+              {profile.label}
+            </button>
+          )
+        })}
       </div>
 
       <div className="windows-req-grid">
-        <fieldset className="windows-fieldset">
-          <legend>Mission duration</legend>
+        <section className="windows-req-group" aria-labelledby="windows-req-duration">
+          <h4 className="label" id="windows-req-duration">
+            Mission duration
+          </h4>
           <div className="windows-presets">
-            {DURATION_PRESETS.map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                className={value.duration_hours === preset.hours ? 'selected' : ''}
-                onClick={() => update({ duration_hours: preset.hours })}
-              >
-                {preset.label}
-              </button>
-            ))}
+            {DURATION_PRESETS.map((preset) => {
+              const selected = value.duration_hours === preset.hours
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className={selected ? 'selected' : ''}
+                  aria-pressed={selected}
+                  onClick={() => update({ duration_hours: preset.hours })}
+                >
+                  {preset.label}
+                </button>
+              )
+            })}
           </div>
           <label className="windows-field" htmlFor="windows-duration">
             Custom duration (hours)
@@ -106,10 +117,12 @@ export default function RequirementsPanel({ value, onChange }: Props) {
             />
           </label>
           <FieldError id="windows-duration-error" message={errors.duration_hours} />
-        </fieldset>
+        </section>
 
-        <fieldset className="windows-fieldset">
-          <legend>Landing lighting</legend>
+        <section className="windows-req-group" aria-labelledby="windows-req-lighting">
+          <h4 className="label" id="windows-req-lighting">
+            Landing lighting
+          </h4>
           <label className="windows-field" htmlFor="windows-min-sun">
             Minimum Sun elevation at landing (°)
             <input
@@ -146,21 +159,27 @@ export default function RequirementsPanel({ value, onChange }: Props) {
             />
           </label>
           <FieldError id="windows-min-sunlight-error" message={errors.min_sunlight_hours} />
-        </fieldset>
+        </section>
 
-        <fieldset className="windows-fieldset">
-          <legend>Battery / darkness</legend>
+        <section className="windows-req-group" aria-labelledby="windows-req-darkness">
+          <h4 className="label" id="windows-req-darkness">
+            Battery / darkness
+          </h4>
           <div className="windows-presets">
-            {BATTERY_PRESETS.map((hours) => (
-              <button
-                key={hours}
-                type="button"
-                className={value.max_darkness_hours === hours ? 'selected' : ''}
-                onClick={() => update({ max_darkness_hours: hours })}
-              >
-                {hours} h
-              </button>
-            ))}
+            {BATTERY_PRESETS.map((hours) => {
+              const selected = value.max_darkness_hours === hours
+              return (
+                <button
+                  key={hours}
+                  type="button"
+                  className={selected ? 'selected' : ''}
+                  aria-pressed={selected}
+                  onClick={() => update({ max_darkness_hours: hours })}
+                >
+                  {hours} h
+                </button>
+              )
+            })}
           </div>
           <label className="windows-field" htmlFor="windows-max-darkness">
             Maximum uninterrupted darkness (hours)
@@ -179,10 +198,12 @@ export default function RequirementsPanel({ value, onChange }: Props) {
             />
           </label>
           <FieldError id="windows-max-darkness-error" message={errors.max_darkness_hours} />
-        </fieldset>
+        </section>
 
-        <fieldset className="windows-fieldset">
-          <legend>Earth communications</legend>
+        <section className="windows-req-group" aria-labelledby="windows-req-comms">
+          <h4 className="label" id="windows-req-comms">
+            Earth communications
+          </h4>
           <label className="windows-check" htmlFor="windows-require-earth">
             <input
               id="windows-require-earth"
@@ -211,7 +232,7 @@ export default function RequirementsPanel({ value, onChange }: Props) {
             />
           </label>
           <FieldError id="windows-earth-percent-error" message={errors.min_earth_fraction} />
-        </fieldset>
+        </section>
       </div>
     </section>
   )

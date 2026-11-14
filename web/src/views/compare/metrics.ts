@@ -1,49 +1,72 @@
+// Wiersze tabeli porównania scenariuszy (zadanie 021).
+// Każdy wiersz to jedna metryka: sposób porównania (do wyboru najlepszej
+// wartości w wierszu) i gotowy tekst do wyświetlenia. Logika rankingu siedzi
+// w `pickBest.ts` i zostaje bez zmian.
+
 import type { Summary } from '../../api/types'
+import { formatDeg, formatHours, formatPercent } from '../../app/format'
 import { isBest } from './pickBest'
 
-export interface ScenarioMetrics {
-  sunFraction: number | null
-  earthFraction: number | null
-  sunMaxEl: number | null
-  earthMaxEl: number | null
+export interface CompareRow {
+  id: string
+  label: string
+  /** Liczba do porównania w wierszu; `null` = wiersz bez „najlepszej” wartości. */
+  metric: ((summary: Summary) => number) | null
+  format: (summary: Summary) => string
 }
 
-export function emptyMetrics(): ScenarioMetrics {
-  return { sunFraction: null, earthFraction: null, sunMaxEl: null, earthMaxEl: null }
+/** Stan ciała na starcie okna: widoczne + kiedy zajdzie/wzejdzie. */
+function describeAtStart(visible: boolean, hoursUntilChange: number | null): string {
+  if (hoursUntilChange === null) return `${visible ? 'up' : 'down'} · no change`
+  const change = `${visible ? 'sets' : 'rises'} in ${formatHours(hoursUntilChange)}`
+  return `${visible ? 'up' : 'down'} · ${change}`
 }
 
-export function metricsFromSummary(summary: Summary | null): ScenarioMetrics {
-  if (!summary) return emptyMetrics()
-  return {
-    sunFraction: summary.sun.visible_fraction,
-    earthFraction: summary.earth.visible_fraction,
-    sunMaxEl: summary.sun.max_el_deg,
-    earthMaxEl: summary.earth.max_el_deg,
-  }
-}
+export const COMPARE_ROWS: CompareRow[] = [
+  {
+    id: 'sun-time',
+    label: 'Sun time',
+    metric: (summary) => summary.sun.visible_fraction,
+    format: (summary) => formatPercent(summary.sun.visible_fraction),
+  },
+  {
+    id: 'earth-time',
+    label: 'Earth time',
+    metric: (summary) => summary.earth.visible_fraction,
+    format: (summary) => formatPercent(summary.earth.visible_fraction),
+  },
+  {
+    id: 'sun-max-el',
+    label: 'Sun max elevation',
+    metric: (summary) => summary.sun.max_el_deg,
+    format: (summary) => formatDeg(summary.sun.max_el_deg),
+  },
+  {
+    id: 'earth-max-el',
+    label: 'Earth max elevation',
+    metric: (summary) => summary.earth.max_el_deg,
+    format: (summary) => formatDeg(summary.earth.max_el_deg),
+  },
+  {
+    id: 'sun-at-start',
+    label: 'Sun at start',
+    metric: null,
+    format: (summary) =>
+      describeAtStart(summary.sun.visible_at_start, summary.sun.hours_until_change),
+  },
+  {
+    id: 'earth-at-start',
+    label: 'Earth at start',
+    metric: null,
+    format: (summary) =>
+      describeAtStart(summary.earth.visible_at_start, summary.earth.hours_until_change),
+  },
+]
 
-/** Flagę „best” dla każdej metryki w wierszu. */
-export function columnBests(rows: ScenarioMetrics[]): {
-  sunFraction: boolean[]
-  earthFraction: boolean[]
-  sunMaxEl: boolean[]
-  earthMaxEl: boolean[]
-} {
-  return {
-    sunFraction: rows.map((_, i) => isBest(rows.map((r) => r.sunFraction), i)),
-    earthFraction: rows.map((_, i) => isBest(rows.map((r) => r.earthFraction), i)),
-    sunMaxEl: rows.map((_, i) => isBest(rows.map((r) => r.sunMaxEl), i)),
-    earthMaxEl: rows.map((_, i) => isBest(rows.map((r) => r.earthMaxEl), i)),
-  }
-}
-
-export function sameMetrics(a: ScenarioMetrics | null | undefined, b: ScenarioMetrics | null): boolean {
-  if (a === b) return true
-  if (!a || !b) return a === b
-  return (
-    a.sunFraction === b.sunFraction &&
-    a.earthFraction === b.earthFraction &&
-    a.sunMaxEl === b.sunMaxEl &&
-    a.earthMaxEl === b.earthMaxEl
-  )
+/** Flaga „najlepsza w wierszu” dla każdej kolumny; brak danych = brak flagi. */
+export function rowBests(row: CompareRow, summaries: (Summary | null)[]): boolean[] {
+  const metric = row.metric
+  if (!metric) return summaries.map(() => false)
+  const values = summaries.map((summary) => (summary ? metric(summary) : null))
+  return summaries.map((_, index) => isBest(values, index))
 }

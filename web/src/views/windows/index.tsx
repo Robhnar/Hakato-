@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import { useAsync } from '../../api/useAsync'
 import type { WindowsResponse } from '../../api/types'
+import { formatCoords, formatUtcDate } from '../../app/format'
 import type { ViewProps } from '../../app/scenario'
 import CalendarHeatmap from './CalendarHeatmap'
 import CyclesLegend from './CyclesLegend'
@@ -89,10 +90,14 @@ export default function WindowsView({ active, applyWindow }: ViewProps) {
       <header className="windows-header">
         <h2>Landing windows</h2>
         <p className="windows-meta">
-          Search {searchStart.slice(0, 10)} → {searchEnd.slice(0, 10)} · {active.name} (
-          {active.lat_deg.toFixed(3)}°, {active.lon_deg.toFixed(3)}°)
+          Search <span className="num">{formatUtcDate(searchStart)}</span> →{' '}
+          <span className="num">{formatUtcDate(searchEnd)}</span> · {active.name} ·{' '}
+          <span className="num">{formatCoords(active.lat_deg, active.lon_deg)}</span>
           {data && (
-            <> · ephemeris “{data.meta.ephemeris}”, horizon “{data.meta.horizon}”</>
+            <>
+              {' '}
+              · ephemeris {data.meta.ephemeris} · horizon {data.meta.horizon}
+            </>
           )}
         </p>
       </header>
