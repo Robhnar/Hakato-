@@ -4,7 +4,7 @@
 - **Właściciel:** Claude Code
 - **Moduł:** `metrics`, `ephemeris`, `api`
 - **Gałąź:** `feat/023-poprawki-z-audytu`
-- **Zależy od:** – (równolegle PR #44 / zadanie 022; patrz „Notatki")
+- **Zależy od:** – (niezależne od PR #44 / zadania 022)
 
 ## Cel
 
@@ -42,5 +42,5 @@ Bez zmian formatów odpowiedzi. Zmienia się tylko kod odpowiedzi dla błędnych
 ## Notatki
 
 - Źródło: audyt repozytorium (ustalenia 2, 3, 4, 5, 6).
-- PR #44 (zadanie 022, blokada SPICE) zmienia te same pliki `ephemeris/__init__.py` i `optimal_site.py` w sąsiednich liniach; drugi z dwóch PR-ów może wymagać prostego scalenia konfliktu (zachować i zamek, i `check_spice_range`).
+- PR #44 (zadanie 022, blokada SPICE) zmienia te same pliki `ephemeris/__init__.py` i `optimal_site.py` w sąsiednich liniach, ale oba PR-y scalają się bez konfliktu (sprawdzone próbnym `git merge`; po połączeniu 86 testów przechodzi).
 - Nie sprawdzono: zachowania przy opóźnieniu startu tuż przed 2150 r. (poszukiwanie „najbliższego równoważnego okna" sięga 365 dni w przód i da 422, jeśli wyjdzie poza pokrycie).
