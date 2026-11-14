@@ -1,149 +1,255 @@
-/* Style widoku porównania — tylko ten katalog (zadanie 008). */
+/* Style widoku porównania — tabela metryk i pasy okien (zadania 008, 021). */
 
-.compare h2 {
-  margin: 0 0 6px;
+.compare {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 20px 24px;
+  min-width: 0;
 }
 
-.compare-hint,
-.compare-empty > p {
-  color: var(--muted, #9aa4b5);
-  margin: 0 0 12px;
-  font-size: 0.9rem;
-}
-
-.compare-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-}
-
-.compare-card {
-  background: var(--panel, #151a23);
-  border: 1px solid var(--border, #2a3140);
-  border-radius: 8px;
-  padding: 12px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.compare-card:focus-visible {
-  outline: 2px solid var(--accent, #f2c14e);
-  outline-offset: 2px;
-}
-
-.compare-card-active {
-  border-color: var(--accent, #f2c14e);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, #f2c14e) 50%, transparent);
-}
-
-.compare-card-head h3 {
+.compare-head h2 {
   margin: 0 0 4px;
   font-size: 1rem;
-}
-
-.compare-card-meta {
-  margin: 0 0 10px;
-  font-size: 0.8rem;
-  color: var(--muted, #9aa4b5);
-}
-
-.compare-metrics {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin: 0 0 12px;
-}
-
-.compare-metric {
-  margin: 0;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: var(--bg, #0b0e14);
-  border: 1px solid transparent;
-}
-
-.compare-metric dt {
-  font-size: 0.75rem;
-  color: var(--muted, #9aa4b5);
-}
-
-.compare-metric dd {
-  margin: 2px 0 0;
   font-weight: 600;
 }
 
-.compare-metric.best {
-  border-color: color-mix(in srgb, var(--accent, #f2c14e) 70%, transparent);
+.compare-hint {
+  margin: 0;
+  max-width: 70ch;
 }
 
-.compare-best-tag {
-  color: var(--accent, #f2c14e);
-  font-weight: 500;
+.compare-note {
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 2px solid var(--line);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+/* Tabela przewija się poziomo sama, nie cała scena. */
+.compare-scroll {
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+.compare-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.compare-table th,
+.compare-table td {
+  border-bottom: 1px solid var(--line);
+}
+
+.compare-table thead th {
+  border-bottom-color: var(--text);
+  vertical-align: bottom;
+}
+
+.compare-metric-head {
+  width: 1%;
+  padding: 0 16px 6px 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.compare-scenario-head {
+  padding: 0;
+  text-align: left;
+  vertical-align: bottom;
+}
+
+/* Nagłówek kolumny jest przyciskiem: kliknięcie wybiera scenariusz.
+   Aktywny dostaje kreskę 2 px z globalnej reguły [aria-pressed='true']. */
+.compare-scenario {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  height: auto;
+  min-width: 180px;
+  padding: 6px 16px 8px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+}
+
+.compare-scenario-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.compare-scenario-meta {
+  color: var(--muted);
   font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.compare-metric-name {
+  padding: 8px 16px 8px 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.compare-value {
+  padding: 8px 16px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.compare-best {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.compare-best .num {
+  font-weight: 600;
+}
+
+.compare-best-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  vertical-align: middle;
+}
+
+.compare-errors {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
 }
 
 .compare-error {
-  color: var(--error, #ef6b6b);
+  color: var(--error);
   font-size: 0.85rem;
 }
 
-.compare-loading,
-.compare-lane-loading,
-.compare-lane-error {
-  font-size: 0.85rem;
-  color: var(--muted, #9aa4b5);
-  margin: 0 0 8px;
+.compare-lane-loading {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 
 .compare-lane-error {
-  color: var(--error, #ef6b6b);
+  margin: 0;
+  color: var(--error);
+  font-size: 0.8rem;
 }
+
+/* --- Pasy okien na wspólnej osi godzin --- */
 
 .compare-lanes {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+}
+
+.compare-lanes h3 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.compare-lane {
+  display: grid;
+  gap: 4px;
+  padding-left: 10px;
+  border-left: 2px solid transparent;
+}
+
+.compare-lane-active {
+  border-left-color: var(--text);
+}
+
+.compare-lane-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.compare-lane-name {
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.compare-lane-tracks {
+  display: grid;
+  gap: 3px;
 }
 
 .compare-track {
   display: grid;
-  grid-template-columns: 48px 1fr;
+  grid-template-columns: 48px minmax(0, 1fr);
   gap: 8px;
   align-items: center;
 }
 
 .compare-track-label {
-  font-size: 0.75rem;
-  color: var(--muted, #9aa4b5);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.compare-track-label-sun {
+  color: var(--sun);
+}
+
+.compare-track-label-earth {
+  color: var(--earth);
 }
 
 .compare-track-bar {
   position: relative;
-  height: 14px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--border, #2a3140) 80%, transparent);
-  overflow: hidden;
+  display: block;
+  height: 8px;
+  background: var(--line);
 }
 
 .compare-band {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-radius: 3px;
 }
 
 .compare-band-sun {
-  background: color-mix(in srgb, var(--accent, #f2c14e) 85%, #fff);
+  background: var(--sun);
 }
 
 .compare-band-earth {
-  background: color-mix(in srgb, #6ba3ff 85%, #fff);
+  background: var(--earth);
 }
 
 .compare-axis {
   display: flex;
   justify-content: space-between;
-  font-size: 0.7rem;
-  color: var(--muted, #9aa4b5);
   padding-left: 56px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+@media (max-width: 700px) {
+  .compare {
+    padding: 12px 12px 20px;
+  }
+
+  .compare-scenario {
+    min-width: 150px;
+  }
 }

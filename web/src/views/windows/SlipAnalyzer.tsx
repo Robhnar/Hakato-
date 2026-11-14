@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import type { CalendarSlot, SlipAnalysis } from '../../api/types'
+import { formatHours, formatPercent, formatUtc } from '../../app/format'
 import {
   SLIP_MAX_DAYS,
   SLIP_MIN_DAYS,
@@ -31,6 +32,13 @@ interface Deltas {
 
 const DASH = '—'
 
+// Znaczniki ISO w zdaniu z backendu zamieniamy na ludzki czas (zadanie 021).
+const ISO_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?Z/g
+
+function humanizeDates(text: string): string {
+  return text.replace(ISO_PATTERN, (iso) => formatUtc(iso))
+}
+
 /** Okno z siatki, w którego przedziale [start, end) mieści się podana chwila. */
 function slotAt(grid: CalendarSlot[], utc: string): CalendarSlot | null {
   const ms = Date.parse(utc)
@@ -42,21 +50,6 @@ function slotAt(grid: CalendarSlot[], utc: string): CalendarSlot | null {
     if (ms >= start && ms < end) return slot
   }
   return null
-}
-
-function formatUtc(iso: string): string {
-  const ms = Date.parse(iso)
-  if (!Number.isFinite(ms)) return iso || DASH
-  const value = new Date(ms).toISOString()
-  return `${value.slice(0, 10)} ${value.slice(11, 16)} UTC`
-}
-
-function formatHours(value: number): string {
-  return Number.isFinite(value) ? `${value.toFixed(1)} h` : DASH
-}
-
-function formatPercent(fraction: number): string {
-  return Number.isFinite(fraction) ? `${Math.round(fraction * 100)}%` : DASH
 }
 
 /** Wpisana liczba, jeśli mieści się w zakresie 1…90; inaczej null. */
@@ -141,7 +134,7 @@ export default function SlipAnalyzer({
   return (
     <section className="windows-slip" aria-label="Launch slip simulator">
       <div className="windows-slip-head">
-        <h3>Launch slip simulator</h3>
+        <h3 className="windows-panel-title">Launch slip simulator</h3>
         {!slipAnalysis && (
           <span className="windows-slip-hint">
             Backend slip analysis is unavailable; comparing the calendar grid locally.
@@ -187,7 +180,7 @@ export default function SlipAnalyzer({
       </div>
 
       <div className="windows-slip-compare">
-        <SlotCard title="Original date" slot={original} ok={originalOk} />
+        <SlotCard title="Original" slot={original} ok={originalOk} />
         <SlotCard title={`Delayed (+${days} d)`} slot={delayed} ok={delayedOk} />
       </div>
 
@@ -248,7 +241,7 @@ export default function SlipAnalyzer({
       </div>
 
       {slipAnalysis?.explanation && (
-        <p className="windows-slip-explanation">{slipAnalysis.explanation}</p>
+        <p className="windows-slip-explanation">{humanizeDates(slipAnalysis.explanation)}</p>
       )}
     </section>
   )
@@ -270,20 +263,22 @@ function SlotCard({
       {slot ? (
         <>
           <p className="windows-slot-date">
-            <time dateTime={slot.start_utc}>{formatUtc(slot.start_utc)}</time>
+            <time className="num" dateTime={slot.start_utc}>
+              {formatUtc(slot.start_utc)}
+            </time>
           </p>
           <dl className="windows-slot-metrics">
             <div>
               <dt>Sunlight</dt>
-              <dd>{formatHours(slot.sunlight_hours)}</dd>
+              <dd className="num">{formatHours(slot.sunlight_hours)}</dd>
             </div>
             <div>
               <dt>Longest night</dt>
-              <dd>{formatHours(slot.max_darkness_hours)}</dd>
+              <dd className="num">{formatHours(slot.max_darkness_hours)}</dd>
             </div>
             <div>
               <dt>Earth link</dt>
-              <dd>{formatPercent(slot.earth_visible_fraction)}</dd>
+              <dd className="num">{formatPercent(slot.earth_visible_fraction)}</dd>
             </div>
           </dl>
           {ok !== null && (

@@ -28,31 +28,41 @@ const PERIODS: { key: keyof CyclesSummary; label: string; hint: string }[] = [
   },
 ]
 
-/** Krótka legenda cykli astronomicznych dla wybranego okna (014). */
+/** Cykle astronomiczne pod mapą cieplną (zadania 014 i 021); domyślnie zwinięte. */
 export default function CyclesLegend({ cycles, focus }: Props) {
   return (
-    <section className="windows-cycles" aria-label="Astronomical cycles">
-      <h3>Cycles</h3>
-      <ul className="windows-cycles-list">
+    <details className="windows-cycles">
+      <summary className="windows-cycles-summary">
+        <span className="label">Cycles</span>
+        <span className="windows-cycles-peek">
+          synodic {formatPeriod(cycles.synodic_month_days, 'synodic_month_days')} · draconic{' '}
+          {formatPeriod(cycles.draconic_year_days, 'draconic_year_days')}
+        </span>
+      </summary>
+
+      <dl className="windows-cycles-list">
         {PERIODS.map((period) => (
-          <li key={period.key}>
-            <strong>
-              {period.label}: {formatPeriod(cycles[period.key], period.key)}
-            </strong>
-            <span className="windows-hint"> — {period.hint}</span>
-          </li>
+          <div key={period.key} className="windows-cycles-item">
+            <dt>
+              {period.label}{' '}
+              <span className="num">{formatPeriod(cycles[period.key], period.key)}</span>
+            </dt>
+            <dd className="windows-hint">{period.hint}</dd>
+          </div>
         ))}
-      </ul>
+      </dl>
+
       {focus ? (
         <p className="windows-cycles-focus">
-          Selected window phase: seasonal {focus.cycles.seasonal_phase_deg.toFixed(1)}° · draconic year{' '}
-          {focus.cycles.draconic_year_phase_deg.toFixed(1)}° · lunar day index{' '}
-          {focus.cycles.lunar_day_index}.
+          Selected window phase: seasonal{' '}
+          <span className="num">{focus.cycles.seasonal_phase_deg.toFixed(1)}°</span> · draconic year{' '}
+          <span className="num">{focus.cycles.draconic_year_phase_deg.toFixed(1)}°</span> · lunar day{' '}
+          <span className="num">#{focus.cycles.lunar_day_index}</span>
         </p>
       ) : (
         <p className="windows-hint">Hover or select a heatmap cell to see its cycle phase.</p>
       )}
-    </section>
+    </details>
   )
 }
 

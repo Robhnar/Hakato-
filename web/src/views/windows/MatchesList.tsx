@@ -1,4 +1,6 @@
 import type { CalendarSlot } from '../../api/types'
+import { formatDeg, formatHours, formatPercent, formatUtc } from '../../app/format'
+import { scoreColor } from '../../app/scale'
 import './windows.css'
 
 interface Props {
@@ -10,30 +12,11 @@ interface Props {
 
 const DASH = '—'
 
-function formatUtc(iso: string): string {
-  const ms = Date.parse(iso)
-  if (!Number.isFinite(ms)) return iso || DASH
-  const value = new Date(ms).toISOString()
-  return `${value.slice(0, 10)} ${value.slice(11, 16)} UTC`
-}
-
-function formatHours(value: number): string {
-  return Number.isFinite(value) ? `${value.toFixed(1)} h` : DASH
-}
-
-function formatDegrees(value: number): string {
-  return Number.isFinite(value) ? `${value.toFixed(1)}°` : DASH
-}
-
-function formatPercent(fraction: number): string {
-  return Number.isFinite(fraction) ? `${Math.round(fraction * 100)}%` : DASH
-}
-
 function formatScore(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : DASH
 }
 
-/** Ranking okien spełniających wymagania (zadanie 015). */
+/** Ranking okien spełniających wymagania (zadania 015 i 021). */
 export default function MatchesList({ matches, durationHours, onUse, limit }: Props) {
   const rows =
     limit === undefined ? matches : matches.slice(0, Math.max(0, Math.trunc(limit)))
@@ -45,8 +28,8 @@ export default function MatchesList({ matches, durationHours, onUse, limit }: Pr
   return (
     <section className="windows-matches" aria-label="Matching windows">
       <div className="windows-matches-head">
-        <h3>Matching windows</h3>
-        <span className="windows-matches-count">{countLabel}</span>
+        <h3 className="windows-panel-title">Matching windows</h3>
+        <span className="num windows-matches-count">{countLabel}</span>
       </div>
 
       {rows.length === 0 ? (
@@ -89,11 +72,13 @@ export default function MatchesList({ matches, durationHours, onUse, limit }: Pr
                 <tr key={`${slot.start_utc}-${index}`}>
                   <td className="windows-num">{index + 1}</td>
                   <td>
-                    <time dateTime={slot.start_utc}>{formatUtc(slot.start_utc)}</time>
+                    <time className="num" dateTime={slot.start_utc}>
+                      {formatUtc(slot.start_utc)}
+                    </time>
                   </td>
                   <td className="windows-num">{formatHours(slot.sunlight_hours)}</td>
                   <td className="windows-num">{formatHours(slot.max_darkness_hours)}</td>
-                  <td className="windows-num">{formatDegrees(slot.sun_el_at_start_deg)}</td>
+                  <td className="windows-num">{formatDeg(slot.sun_el_at_start_deg)}</td>
                   <td
                     className="windows-num"
                     title={
@@ -104,7 +89,16 @@ export default function MatchesList({ matches, durationHours, onUse, limit }: Pr
                   >
                     {formatPercent(slot.earth_visible_fraction)}
                   </td>
-                  <td className="windows-num">{formatScore(slot.score)}</td>
+                  <td className="windows-num">
+                    <span className="windows-score-cell">
+                      <span
+                        className="windows-score-bar"
+                        style={{ background: scoreColor(slot.score / 100) }}
+                        aria-hidden="true"
+                      />
+                      <span>{formatScore(slot.score)}</span>
+                    </span>
+                  </td>
                   <td className="windows-table-action">
                     <button
                       type="button"
