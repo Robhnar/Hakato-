@@ -36,3 +36,7 @@ Thumbs.db
 CLAUDE.local.md
 .cursor/
 .aider*
+
+# Duże dane pobierane skryptami (jądra SPICE, modele wysokości)
+data/raw/
+*.egg-info/

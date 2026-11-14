@@ -12,7 +12,13 @@ Co ma działać po zakończeniu i po co. Dwa–trzy zdania z perspektywy użytko
 
 ## Zakres
 
-- Co trzeba zrobić.
+Obowiązkowo:
+
+- Co musi być w PR.
+
+Jeśli zostanie czas:
+
+- Co można dodać później.
 
 Poza zakresem:
 
