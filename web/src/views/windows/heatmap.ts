@@ -1,4 +1,5 @@
 import type { CalendarSlot } from '../../api/types'
+import { scoreColor } from '../../app/scale'
 
 /** Parametry dostępne na mapie cieplnej (014). */
 export type HeatMetric =
@@ -51,25 +52,24 @@ export function scaleBounds(values: number[]): { min: number; max: number } {
   return { min, max }
 }
 
-/** t∈[0,1] → kolor od chłodnego (słabo) do ciepłego (dobrze). */
+/** t∈[0,1] → kolor ze wspólnej skali wyniku (ciemny = słabo, jasny = dobrze). */
 export function heatColor(t: number): string {
-  const x = Math.min(1, Math.max(0, t))
-  // navy → teal → amber
-  const stops = [
-    { t: 0, r: 30, g: 41, b: 59 },
-    { t: 0.45, r: 14, g: 116, b: 144 },
-    { t: 0.75, r: 234, g: 179, b: 8 },
-    { t: 1, r: 249, g: 115, b: 22 },
-  ]
-  let i = 0
-  while (i < stops.length - 2 && x > stops[i + 1].t) i += 1
-  const a = stops[i]
-  const b = stops[i + 1]
-  const u = (x - a.t) / (b.t - a.t || 1)
-  const r = Math.round(a.r + (b.r - a.r) * u)
-  const g = Math.round(a.g + (b.g - a.g) * u)
-  const bl = Math.round(a.b + (b.b - a.b) * u)
-  return `rgb(${r}, ${g}, ${bl})`
+  return scoreColor(t)
+}
+
+/**
+ * Pozycja wartości na skali koloru (0…1). `invert=true` (np. najdłuższa noc):
+ * niższa wartość dostaje jaśniejszy, czyli lepszy kolor.
+ */
+export function colorPosition(
+  value: number,
+  min: number,
+  max: number,
+  invert = false,
+): number {
+  const span = max - min || 1
+  const t = (value - min) / span
+  return invert ? 1 - t : t
 }
 
 /**
@@ -81,10 +81,7 @@ export function colorForValue(
   max: number,
   invert = false,
 ): string {
-  const span = max - min || 1
-  let t = (value - min) / span
-  if (invert) t = 1 - t
-  return heatColor(t)
+  return heatColor(colorPosition(value, min, max, invert))
 }
 
 /** Grupuje sloty po roku startu (etykiety osi). */

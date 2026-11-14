@@ -1,154 +1,281 @@
-/* Style widoku nieba — tylko ten katalog (zadanie 006). */
+/* Widok nieba (zadanie 021): wykres panoramy, suwak czasu i odczyt w stylu
+   konsoli misji. Bursztyn = Słońce, błękit = Ziemia — nigdzie indziej. */
 
 .sky {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .sky h2 {
   margin: 0;
 }
 
-.sky-hint {
-  margin: 0;
-  color: var(--muted, #9aa4b5);
-  font-size: 0.85rem;
-}
-
 .sky-panel {
-  background: var(--panel, #151a23);
-  border: 1px solid var(--border, #2a3140);
-  border-radius: 8px;
-  padding: 8px 8px 4px;
-  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg);
 }
 
 .sky-svg {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 420px;
+  max-height: 460px;
 }
 
-.sky-horizon {
-  fill: #3a4558;
-  stroke: #6b778c;
-  stroke-width: 1.2;
+/* Siatka i podziałki */
+
+.sky-grid {
+  stroke: var(--line);
+  stroke-width: 1;
 }
 
 .sky-zero {
-  stroke: color-mix(in srgb, var(--muted, #9aa4b5) 55%, transparent);
+  stroke: var(--muted);
   stroke-width: 1;
-  stroke-dasharray: 4 4;
-}
-
-.sky-grid {
-  stroke: color-mix(in srgb, var(--border, #2a3140) 80%, transparent);
-  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 0.7;
 }
 
 .sky-axis-label {
-  fill: var(--muted, #9aa4b5);
-  font-size: 11px;
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sky-axis-title {
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Terrain: ciemne wypełnienie, wyraźna górna krawędź. */
+
+.sky-terrain {
+  fill: #1d1e21;
+}
+
+.sky-terrain-edge {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+/* Ślady: ciągły = widoczny, przerywany = za terenem. */
+
+.sky-trail {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .sky-trail-sun {
-  fill: none;
-  stroke: #f2c14e;
-  stroke-width: 1.5;
-  stroke-opacity: 0.55;
+  stroke: var(--sun);
 }
 
 .sky-trail-earth {
+  stroke: var(--earth);
+}
+
+.sky-trail-hidden {
+  stroke-dasharray: 4 4;
+  opacity: 0.6;
+}
+
+/* Początek okna (puste kółko) i koniec (kreska). */
+
+.sky-start {
   fill: none;
-  stroke: #6eb6ff;
-  stroke-width: 1.5;
-  stroke-opacity: 0.55;
+  stroke-width: 1;
 }
 
-.sky-body-sun {
-  fill: #f2c14e;
-  stroke: #fff3c4;
-  stroke-width: 1.5;
+.sky-end {
+  stroke-width: 1;
 }
 
-.sky-body-earth {
-  fill: #4f9de0;
-  stroke: #cfe8ff;
-  stroke-width: 1.5;
+.sky-mark-sun {
+  stroke: var(--sun);
 }
 
-.sky-body-occulted {
-  fill: none;
-  stroke-dasharray: 3 2;
-  opacity: 0.85;
+.sky-mark-earth {
+  stroke: var(--earth);
 }
 
-.sky-body-sun.sky-body-occulted {
-  stroke: #f2c14e;
+/* Znaczniki pozycji przy kursorze czasu. */
+
+.sky-marker {
+  stroke-width: 1;
 }
 
-.sky-body-earth.sky-body-occulted {
-  stroke: #6eb6ff;
+.sky-marker-sun {
+  fill: var(--sun);
+  stroke: var(--sun);
 }
 
-.sky-readout {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 8px;
-  margin: 0;
-  font-size: 0.85rem;
+.sky-marker-earth {
+  fill: var(--earth);
+  stroke: var(--earth);
 }
 
-.sky-readout dt {
-  margin: 0;
-  color: var(--muted, #9aa4b5);
-  font-weight: 600;
+/* Zasłonięty: puste kółko z przerywanym obrysem — czytelne bez koloru. */
+.sky-marker-occulted {
+  fill: var(--bg);
+  stroke-dasharray: 2 2;
 }
 
-.sky-readout dd {
-  margin: 2px 0 0;
+.sky-body-label {
+  font-family: var(--font-mono);
+  font-size: 15px;
 }
 
-.sky-sun-label {
-  color: #f2c14e;
+.sky-body-label-sun {
+  fill: var(--sun);
 }
 
-.sky-earth-label {
-  color: #6eb6ff;
+.sky-body-label-earth {
+  fill: var(--earth);
 }
+
+/* Suwak czasu */
+
+.sky-cursor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sky-slider {
+  flex: 1 1 auto;
+  min-width: 120px;
+  accent-color: var(--text);
+  cursor: pointer;
+}
+
+.sky-cursor-time {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* Legenda: jedna linia pod wykresem */
 
 .sky-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 18px;
+  gap: 6px 18px;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.8rem;
-  color: var(--muted, #9aa4b5);
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .sky-legend-swatch {
   display: inline-block;
   width: 10px;
   height: 10px;
-  border-radius: 50%;
   margin-right: 6px;
   vertical-align: -1px;
 }
 
-.sky-legend-swatch-sun {
-  background: #f2c14e;
+.sky-legend-sun {
+  background: var(--sun);
 }
 
-.sky-legend-swatch-earth {
-  background: #4f9de0;
+.sky-legend-earth {
+  background: var(--earth);
 }
 
-.sky-legend-swatch-horizon {
-  background: #3a4558;
-  border: 1px solid #6b778c;
-  border-radius: 2px;
+.sky-legend-terrain {
+  background: #1d1e21;
+  border: 1px solid var(--muted);
+}
+
+.sky-legend-dash {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  margin-right: 6px;
+  vertical-align: 2px;
+  border-top: 1px dashed var(--muted);
+}
+
+/* Odczyt pod wykresem: dwa wiersze, liczby mono do prawej */
+
+.sky-readout-wrap {
+  overflow-x: auto;
+}
+
+.sky-readout {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sky-readout th,
+.sky-readout td {
+  padding: 4px 8px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sky-readout thead th {
+  border-bottom: 1px solid var(--line);
+  font-weight: 400;
+}
+
+.sky-readout tbody tr + tr th,
+.sky-readout tbody tr + tr td {
+  border-top: 1px solid var(--line);
+}
+
+.sky-readout th:first-child,
+.sky-readout td:first-child {
+  text-align: left;
+}
+
+.sky-body-name {
+  font-weight: 400;
+}
+
+.sky-body-name-sun {
+  color: var(--sun);
+}
+
+.sky-body-name-earth {
+  color: var(--earth);
+}
+
+.sky-state-visible {
+  color: var(--text);
+}
+
+.sky-state-occulted {
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .sky-readout {
+    font-size: 11px;
+  }
+
+  .sky-readout th,
+  .sky-readout td {
+    padding: 4px 6px;
+  }
+}
+
+/* Telefon: wykres nie kurczy się poniżej czytelnej skali (etykiety >= ok. 10 px), panel przewija się poziomo. */
+@media (max-width: 640px) {
+  .sky-panel {
+    overflow-x: auto;
+  }
+
+  .sky-svg {
+    min-width: 640px;
+  }
 }

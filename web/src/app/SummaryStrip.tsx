@@ -1,71 +1,100 @@
 import { api } from '../api/client'
-import type { BodySummary, Meta } from '../api/types'
+import type { BodySummary } from '../api/types'
 import { useAsync } from '../api/useAsync'
+import { formatDeg, formatHours, formatPercent } from './format'
 import { type Scenario, toRangeQuery } from './scenario'
 
-function BodyCard({ label, body }: { label: string; body: BodySummary }) {
-  const state = body.visible_at_start ? 'Visible at start' : 'Below horizon at start'
-  const change =
-    body.hours_until_change === null
-      ? 'No rise/set in this window'
-      : `${body.visible_at_start ? 'Sets' : 'Rises'} in ${body.hours_until_change.toFixed(1)} h`
-  const share = `${(body.visible_fraction * 100).toFixed(0)}% of window`
+// Status Słońca i Ziemi jako cztery wiersze panelu bocznego (zadanie 021).
+// Ostrzeżenia o źródłach danych są w plakietkach nagłówka (`DataBadge`).
 
+function changeText(body: BodySummary): string {
+  if (body.hours_until_change === null) return 'no rise or set'
+  const verb = body.visible_at_start ? 'sets' : 'rises'
+  return `${verb} in ${formatHours(body.hours_until_change)}`
+}
+
+function BodyRow({
+  label,
+  kind,
+  body,
+}: {
+  label: string
+  kind: 'sun' | 'earth'
+  body: BodySummary
+}) {
   return (
-    <div className={`body-card ${body.visible_at_start ? 'on' : 'off'}`}>
-      <h2>{label}</h2>
-      <p className="body-state">{state}</p>
-      <p>{change}</p>
-      <p className="muted">{share} · max elev. {body.max_el_deg.toFixed(2)}°</p>
+    <div className={`body-row body-row-${kind}`}>
+      <span className="label">{label}</span>
+      <div className="body-row-lines">
+        <p>
+          {body.visible_at_start ? 'up at start' : 'down at start'}{' '}
+          <span className="muted">· {formatPercent(body.visible_fraction)} of window</span>
+        </p>
+        <p>{changeText(body)}</p>
+        <p className="muted num">max {formatDeg(body.max_el_deg)}</p>
+      </div>
     </div>
   )
 }
 
-function DataNotes({ meta }: { meta: Meta }) {
+/** Plakietki źródła danych do nagłówka: przybliżone efemerydy i płaski horyzont. */
+export function DataBadge({ scenario }: { scenario: Scenario }) {
+  const query = toRangeQuery(scenario)
+  const { data } = useAsync(() => api.summary(query), JSON.stringify(query))
+  if (!data) return null
+
+  const approximateEphemeris = data.meta.ephemeris === 'placeholder'
+  const flatHorizon = data.meta.horizon === 'flat' || data.meta.horizon === 'mixed'
+  if (!approximateEphemeris && !flatHorizon) return null
+
   return (
     <>
-      {meta.ephemeris === 'placeholder' && (
-        <p className="warning" role="status">
-          Approximate data: ephemeris is a placeholder model, not SPICE.
-        </p>
+      {approximateEphemeris && (
+        <span
+          className="badge badge-warning"
+          role="status"
+          title="Sun and Earth positions come from an approximate model, not NASA SPICE kernels."
+        >
+          approx. ephemeris
+        </span>
       )}
-      {(meta.horizon === 'flat' || meta.horizon === 'mixed') && (
-        <p className="hint" role="status">
-          Terrain not modelled at this site – flat horizon assumed.
-        </p>
+      {flatHorizon && (
+        <span
+          className="badge"
+          title="Terrain is not modelled at this site; a flat horizon is assumed."
+        >
+          flat horizon
+        </span>
       )}
     </>
   )
 }
 
-/** Podsumowanie aktywnego scenariusza — zawsze widoczne bez przewijania. */
+/** Podsumowanie aktywnego scenariusza — zawsze widoczne w panelu bocznym. */
 export default function SummaryStrip({ scenario }: { scenario: Scenario }) {
   const query = toRangeQuery(scenario)
   const { data, error, loading } = useAsync(() => api.summary(query), JSON.stringify(query))
 
   if (error) {
     return (
-      <section className="summary summary-sticky error" aria-live="polite">
-        <p>Could not load summary: {error}</p>
+      <section className="summary" aria-live="polite">
+        <p className="error">Could not load summary: {error}</p>
       </section>
     )
   }
 
   if (!data) {
     return (
-      <section className="summary summary-sticky" aria-busy={loading} aria-live="polite">
-        <p>{loading ? 'Loading power and communications status…' : ''}</p>
+      <section className="summary" aria-busy={loading} aria-live="polite">
+        <p className="muted">{loading ? 'Loading power and communications status…' : ''}</p>
       </section>
     )
   }
 
   return (
-    <section className="summary summary-sticky" aria-live="polite">
-      <div className="summary-grid">
-        <BodyCard label="Sun (power)" body={data.sun} />
-        <BodyCard label="Earth (comms)" body={data.earth} />
-      </div>
-      <DataNotes meta={data.meta} />
+    <section className="summary" aria-live="polite">
+      <BodyRow label="SUN" kind="sun" body={data.sun} />
+      <BodyRow label="EARTH" kind="earth" body={data.earth} />
     </section>
   )
 }

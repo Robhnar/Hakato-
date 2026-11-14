@@ -1,15 +1,11 @@
-// Panel warstwy optymalnego punktu (zadanie 019). Widoczny tylko przy
-// włączonej nakładce ON. Pokazuje presety wag, kartę wyznaczonego miejsca,
-// ranking kandydatów i legendę stref.
+// Panel Optimization Overlay (zadanie 021): profil misji, suwaki wag, wybrany
+// kandydat, ranking z remisami i legenda. Dokowany z prawej strony globusa.
 
-import {
-  normalizeWeights,
-  WEIGHT_PRESETS,
-  ZONE_COLORS,
-  ZONE_LABELS,
-  ZONE_ORDER,
-} from './heatmap'
-import type { OptimalSiteResponse, OptimalWeights } from '../../api/types'
+import type { OptimalWeights, OptimalSiteResponse } from '../../api/types'
+import { formatCoords, formatHours, formatPercent, wrapLon } from '../../app/format'
+import { scoreColor, scoreRampCss } from '../../app/scale'
+import { setWeight, weightsToPercent, type RankedCandidate } from './candidates'
+import { WEIGHT_PRESETS, ZONE_COLORS, ZONE_LABELS, ZONE_ORDER } from './heatmap'
 
 interface Props {
   data: OptimalSiteResponse | null
@@ -17,24 +13,21 @@ interface Props {
   error: string | null
   weights: OptimalWeights
   onWeightsChange: (weights: OptimalWeights) => void
+  ranked: RankedCandidate[]
+  selectedId: string | null
+  highlightId: string | null
+  onSelect: (id: string) => void
+  onHighlight: (id: string | null) => void
   onMove: (lat_deg: number, lon_deg: number) => void
+  onClose: () => void
+  onRetry: () => void
 }
 
-function latitude(lat_deg: number): string {
-  return `${Math.abs(lat_deg).toFixed(1)}°${lat_deg >= 0 ? 'N' : 'S'}`
-}
-
-function longitude(lon_deg: number): string {
-  return `${Math.abs(lon_deg).toFixed(1)}°${lon_deg >= 0 ? 'E' : 'W'}`
-}
-
-function percent(fraction: number): string {
-  return Number.isFinite(fraction) ? `${Math.round(fraction * 100)}%` : '—'
-}
-
-function hours(value: number): string {
-  return Number.isFinite(value) ? `${value.toFixed(1)} h` : '—'
-}
+const SLIDERS = [
+  { key: 'w_sun', pct: 'sun', label: 'Sun power', color: 'var(--sun)' },
+  { key: 'w_earth', pct: 'earth', label: 'Earth link', color: 'var(--earth)' },
+  { key: 'w_overlap', pct: 'overlap', label: 'Both at once', color: 'var(--ok)' },
+] as const
 
 function sameWeights(a: OptimalWeights, b: OptimalWeights): boolean {
   return (
@@ -44,10 +37,22 @@ function sameWeights(a: OptimalWeights, b: OptimalWeights): boolean {
   )
 }
 
-/** Krótki opis wag do nagłówka panelu. */
-function weightsLabel(weights: OptimalWeights): string {
-  const w = normalizeWeights(weights)
-  return `Sun ${percent(w.w_sun)} · Earth ${percent(w.w_earth)} · Overlap ${percent(w.w_overlap)}`
+function rankText(row: RankedCandidate): string {
+  return `${row.tied ? '=' : ''}${row.rank}`
+}
+
+function Bar({ label, color, fraction, hours }: { label: string; color: string; fraction: number; hours: number }) {
+  return (
+    <div className="optimal-bar">
+      <span className="optimal-bar-label">{label}</span>
+      <span className="optimal-bar-track" aria-hidden="true">
+        <span style={{ width: `${Math.round(Math.min(1, Math.max(0, fraction)) * 100)}%`, background: color }} />
+      </span>
+      <span className="num">
+        {formatPercent(fraction)} · {formatHours(hours)}
+      </span>
+    </div>
+  )
 }
 
 export default function OptimalZonePanel({
@@ -56,126 +61,170 @@ export default function OptimalZonePanel({
   error,
   weights,
   onWeightsChange,
+  ranked,
+  selectedId,
+  highlightId,
+  onSelect,
+  onHighlight,
   onMove,
+  onClose,
+  onRetry,
 }: Props) {
+  const percent = weightsToPercent(weights)
+  const selected = ranked.find((row) => row.candidate.id === selectedId) ?? null
+  const busy = loading && data !== null
+
   return (
-    <section className="optimal-panel" aria-label="Optimal landing zone">
+    <aside className="optimal-panel" aria-label="Optimal zones">
       <div className="optimal-panel-head">
-        <h3>Optimal landing zone</h3>
-        <p className="optimal-weights">{weightsLabel(weights)}</p>
+        <h3 className="label">Optimal zones</h3>
+        {busy && (
+          <span className="muted" role="status">
+            Updating…
+          </span>
+        )}
+        <button type="button" aria-label="Hide optimal zones" onClick={onClose}>
+          ×
+        </button>
       </div>
 
-      <div className="optimal-presets" role="group" aria-label="Weight profile presets">
-        {WEIGHT_PRESETS.map((preset) => {
-          const active = sameWeights(weights, preset.weights)
-          return (
-            <button
-              key={preset.id}
-              type="button"
-              aria-pressed={active}
-              className={active ? 'selected' : ''}
-              onClick={() => onWeightsChange({ ...preset.weights })}
-            >
-              {preset.label}
-            </button>
-          )
-        })}
-      </div>
+      <div className="optimal-body" aria-busy={busy} style={{ opacity: busy ? 0.5 : 1 }}>
+        <p className="label">Mission profile</p>
+        <div className="optimal-presets" role="group" aria-label="Mission profile">
+          {WEIGHT_PRESETS.map((preset) => {
+            const active = sameWeights(weights, preset.weights)
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                aria-pressed={active}
+                className={active ? 'selected' : ''}
+                onClick={() => onWeightsChange({ ...preset.weights })}
+              >
+                {preset.label}
+              </button>
+            )
+          })}
+        </div>
 
-      {error && (
-        <p className="optimal-status error" role="alert">
-          Optimal zone data unavailable: {error}
-        </p>
-      )}
-      {!data && !error && loading && (
-        <p className="optimal-status" role="status">
-          Searching for the optimal zone…
-        </p>
-      )}
-      {data && loading && (
-        <p className="optimal-status" role="status">
-          Updating overlay…
-        </p>
-      )}
+        {SLIDERS.map(({ key, pct, label, color }) => (
+          <label key={key} className="optimal-slider">
+            <span className="optimal-slider-label">
+              <span className="optimal-dot" style={{ background: color }} aria-hidden="true" />
+              {label}
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={percent[pct]}
+              onChange={(event) => onWeightsChange(setWeight(weights, key, Number(event.target.value)))}
+            />
+            <span className="num">{percent[pct]}%</span>
+          </label>
+        ))}
 
-      {data && (
-        <>
-          <div className="optimal-card">
-            <div className="optimal-card-head">
-              <h4>{data.optimal.name}</h4>
-              <span className="optimal-score">{data.optimal.score.toFixed(1)} / 100</span>
-            </div>
-            <p className="optimal-coords">
-              {latitude(data.optimal.lat_deg)}, {longitude(data.optimal.lon_deg)}
-              {data.optimal.elevation_m != null && Number.isFinite(data.optimal.elevation_m)
-                ? ` · ${Math.round(data.optimal.elevation_m)} m elevation`
-                : ''}
-            </p>
-
-            <dl className="optimal-metrics">
-              <div className="optimal-metric">
-                <dt>Sunlight</dt>
-                <dd>
-                  {percent(data.optimal.sun_visible_fraction)} / {hours(data.optimal.sunlight_hours)}
-                </dd>
-              </div>
-              <div className="optimal-metric">
-                <dt>Earth link</dt>
-                <dd>
-                  {percent(data.optimal.earth_visible_fraction)} / {hours(data.optimal.earth_hours)}
-                </dd>
-              </div>
-              <div className="optimal-metric">
-                <dt>Sweet spot (overlap)</dt>
-                <dd>
-                  {percent(data.optimal.overlap_fraction)} / {hours(data.optimal.overlap_hours)}
-                </dd>
-              </div>
-              <div className="optimal-metric">
-                <dt>Max darkness</dt>
-                <dd>{hours(data.optimal.max_darkness_hours)}</dd>
-              </div>
-            </dl>
-
-            <button
-              type="button"
-              className="optimal-move"
-              onClick={() => onMove(data.optimal.lat_deg, data.optimal.lon_deg)}
-            >
-              Move active scenario to optimal zone
+        {error && (
+          <div className="optimal-status error" role="alert">
+            Could not score sites: {error}{' '}
+            <button type="button" onClick={onRetry}>
+              Retry
             </button>
           </div>
+        )}
+        {!data && !error && loading && (
+          <p className="optimal-status muted" role="status">
+            Scoring sites…
+          </p>
+        )}
 
-          {data.ranking.length > 0 && (
-            <ol className="optimal-ranking" aria-label="Top candidates">
-              {data.ranking.slice(0, 5).map((candidate) => (
-                <li key={candidate.id}>
-                  <span>
-                    {candidate.name} · {latitude(candidate.lat_deg)}, {longitude(candidate.lon_deg)}
-                  </span>
-                  <span className="optimal-ranking-score">{candidate.score.toFixed(1)}</span>
-                </li>
-              ))}
-            </ol>
-          )}
-        </>
-      )}
+        {data && selected && (
+          <section className="optimal-card" aria-label="Selected site">
+            <p className="label">
+              <span className="num">#{rankText(selected)}</span>
+            </p>
+            <h4>{selected.label}</h4>
+            <p className="num optimal-coords">
+              {formatCoords(selected.candidate.lat_deg, selected.candidate.lon_deg)}
+              {selected.candidate.elevation_m != null && Number.isFinite(selected.candidate.elevation_m)
+                ? ` · ${Math.round(selected.candidate.elevation_m)} m`
+                : ''}
+            </p>
+            <p className="optimal-score num">
+              {selected.candidate.score.toFixed(1)} <span className="muted">/ 100</span>
+            </p>
+            <Bar label="Sun" color="var(--sun)" fraction={selected.candidate.sun_visible_fraction} hours={selected.candidate.sunlight_hours} />
+            <Bar label="Earth" color="var(--earth)" fraction={selected.candidate.earth_visible_fraction} hours={selected.candidate.earth_hours} />
+            <Bar label="Both" color="var(--ok)" fraction={selected.candidate.overlap_fraction} hours={selected.candidate.overlap_hours} />
+            <p className="optimal-darkness">
+              <span className="muted">Longest darkness</span>{' '}
+              <span className="num">{formatHours(selected.candidate.max_darkness_hours)}</span>
+            </p>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => onMove(selected.candidate.lat_deg, wrapLon(selected.candidate.lon_deg))}
+            >
+              Move scenario here
+            </button>
+          </section>
+        )}
 
-      <ul className="optimal-legend" aria-label="Overlay legend">
-        {ZONE_ORDER.map((zone) => {
-          const [r, g, b, a] = ZONE_COLORS[zone]
-          return (
-            <li key={zone}>
-              <span
-                className="optimal-swatch"
-                style={{ background: `rgba(${r}, ${g}, ${b}, ${a / 255})` }}
-                aria-hidden="true"
-              />
-              {ZONE_LABELS[zone]}
-            </li>
-          )
-        })}
-      </ul>
-    </section>
+        {data && ranked.length === 0 && <p className="muted">No candidate sites returned for this window.</p>}
+        {ranked.length > 0 && (
+          <>
+            <table className="optimal-ranking" aria-label="Ranking">
+              <tbody>
+                {ranked.slice(0, 8).map((row) => (
+                  <tr key={row.candidate.id} className={row.candidate.id === selectedId ? 'is-selected' : ''}>
+                    <td colSpan={4}>
+                      <button
+                        type="button"
+                        className="optimal-row"
+                        onMouseEnter={() => onHighlight(row.candidate.id)}
+                        onMouseLeave={() => onHighlight(null)}
+                        onFocus={() => onHighlight(row.candidate.id)}
+                        onBlur={() => onHighlight(null)}
+                        onClick={() => onSelect(row.candidate.id)}
+                        aria-current={row.candidate.id === selectedId}
+                        data-highlight={row.candidate.id === highlightId}
+                      >
+                        <span className="num optimal-rank">{rankText(row)}</span>
+                        <span className="optimal-name">{row.label}</span>
+                        <span className="optimal-minibar" aria-hidden="true">
+                          <span style={{ width: `${Math.min(100, Math.max(0, row.candidate.score))}%`, background: scoreColor(row.candidate.score / 100) }} />
+                        </span>
+                        <span className="num">{row.candidate.score.toFixed(1)}</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="muted">{ranked.length} sites scored · catalogue + polar grid</p>
+          </>
+        )}
+
+        <ul className="optimal-legend" aria-label="Overlay legend">
+          {ZONE_ORDER.map((zone) => {
+            const [r, g, b, a] = ZONE_COLORS[zone]
+            return (
+              <li key={zone}>
+                <span className="optimal-swatch" style={{ background: `rgba(${r}, ${g}, ${b}, ${a / 255})` }} aria-hidden="true" />
+                {ZONE_LABELS[zone]}
+              </li>
+            )
+          })}
+        </ul>
+        <div className="optimal-ramp">
+          <span className="num">0</span>
+          <span className="optimal-ramp-bar" style={{ background: scoreRampCss() }} aria-hidden="true" />
+          <span className="num">100</span>
+        </div>
+        <p className="muted">Zones show this instant on a smooth sphere.</p>
+        <p className="muted">Scores cover the whole window and include terrain.</p>
+      </div>
+    </aside>
   )
 }

@@ -1,81 +1,179 @@
-import { useCallback, useMemo, useState } from 'react'
-import type { ViewProps } from '../../app/scenario'
+import { useEffect, useState } from 'react'
+import { api } from '../../api/client'
+import type { RangeQuery, Summary } from '../../api/types'
+import { formatCoords, formatHours, formatUtc } from '../../app/format'
+import type { Scenario, ViewProps } from '../../app/scenario'
+import { toRangeQuery } from '../../app/scenario'
+import { COMPARE_ROWS, rowBests } from './metrics'
+import WindowLane from './WindowLane'
 import './compare.css'
-import ScenarioCard from './ScenarioCard'
-import {
-  columnBests,
-  emptyMetrics,
-  sameMetrics,
-  type ScenarioMetrics,
-} from './metrics'
 
-// Porównanie scenariuszy (zadanie 008). Powłoka zarządza listą; tu tylko metryki i pasy.
+// Porównanie scenariuszy (zadania 008 i 021). Powłoka zarządza listą; tutaj
+// jedna tabela: wiersz = metryka, kolumna = scenariusz, plus pasy okien pod nią.
+
+interface SummariesState {
+  data: Record<string, Summary | null>
+  errors: Record<string, string>
+  loading: boolean
+}
+
+/**
+ * Podsumowania wszystkich scenariuszy naraz. Poprzednie dane zostają na ekranie
+ * do czasu odpowiedzi, żeby tabela nie mrugała przy zmianie scenariusza.
+ */
+function useSummaries(scenarios: Scenario[]): SummariesState {
+  const key = JSON.stringify(
+    scenarios.map((scenario) => ({ id: scenario.id, query: toRangeQuery(scenario) })),
+  )
+  const [state, setState] = useState<SummariesState>({ data: {}, errors: {}, loading: true })
+
+  useEffect(() => {
+    let cancelled = false
+    const items = JSON.parse(key) as { id: string; query: RangeQuery }[]
+    Promise.all(
+      items.map(({ id, query }) =>
+        api.summary(query).then(
+          (summary) => ({ id, summary, error: null as string | null }),
+          (error: unknown) => ({ id, summary: null, error: String(error) }),
+        ),
+      ),
+    ).then((results) => {
+      if (cancelled) return
+      const data: Record<string, Summary | null> = {}
+      const errors: Record<string, string> = {}
+      for (const result of results) {
+        data[result.id] = result.summary
+        if (result.error) errors[result.id] = result.error
+      }
+      setState({ data, errors, loading: false })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [key])
+
+  return state
+}
 
 export default function CompareView({ scenarios, active, selectScenario }: ViewProps) {
-  const [metricsById, setMetricsById] = useState<Record<string, ScenarioMetrics | null>>({})
-
-  const onMetrics = useCallback((scenarioId: string, metrics: ScenarioMetrics | null) => {
-    setMetricsById((previous) => {
-      const current = previous[scenarioId]
-      if (sameMetrics(current, metrics)) return previous
-      return { ...previous, [scenarioId]: metrics }
-    })
-  }, [])
-
-  const orderedMetrics = useMemo(
-    () => scenarios.map((scenario) => metricsById[scenario.id] ?? emptyMetrics()),
-    [scenarios, metricsById],
+  const { data, errors, loading } = useSummaries(scenarios)
+  const summaries = scenarios.map((scenario) => data[scenario.id] ?? null)
+  const maxHours = scenarios.reduce(
+    (longest, scenario) => Math.max(longest, scenario.duration_hours),
+    0,
   )
-  const bests = useMemo(() => columnBests(orderedMetrics), [orderedMetrics])
-
-  if (scenarios.length < 2) {
-    return (
-      <div className="compare compare-empty">
-        <h2>Compare</h2>
-        <p>
-          Add a second scenario in the shell (different site or start time) to compare solar power
-          and Earth line-of-sight side by side.
-        </p>
-        <ScenarioCard
-          scenario={scenarios[0]}
-          active
-          onSelect={() => selectScenario(scenarios[0].id)}
-          columnBest={{
-            sunFraction: false,
-            earthFraction: false,
-            sunMaxEl: false,
-            earthMaxEl: false,
-          }}
-          onMetrics={onMetrics}
-        />
-      </div>
-    )
-  }
+  const failed = scenarios.filter((scenario) => errors[scenario.id])
 
   return (
     <div className="compare">
-      <h2>Compare scenarios</h2>
-      <p className="compare-hint">
-        Hours on the tracks are measured from each scenario&apos;s own start. Click a card to make
-        it active.
-      </p>
-      <div className="compare-grid">
-        {scenarios.map((scenario, index) => (
-          <ScenarioCard
+      <header className="compare-head">
+        <h2>Compare scenarios</h2>
+        <p className="muted compare-hint">
+          Click a column header to make that scenario active. Window bars share one time axis
+          measured from each scenario&apos;s own start.
+        </p>
+      </header>
+
+      {scenarios.length < 2 && (
+        <p className="compare-note" role="status">
+          Add a second scenario (+ in the left panel) to compare sites or dates.
+        </p>
+      )}
+
+      {loading && !scenarios.some((scenario) => data[scenario.id]) && (
+        <p className="muted" role="status">
+          Loading summaries…
+        </p>
+      )}
+
+      <div className="compare-scroll">
+        <table className="compare-table">
+          <thead>
+            <tr>
+              <th scope="col" className="compare-metric-head">
+                <span className="label">Metric</span>
+              </th>
+              {scenarios.map((scenario) => (
+                <th key={scenario.id} scope="col" className="compare-scenario-head">
+                  <button
+                    type="button"
+                    className="compare-scenario"
+                    aria-pressed={scenario.id === active.id}
+                    onClick={() => selectScenario(scenario.id)}
+                  >
+                    <span className="compare-scenario-name">{scenario.name}</span>
+                    <span className="num compare-scenario-meta">
+                      {formatCoords(scenario.lat_deg, scenario.lon_deg)}
+                    </span>
+                    <span className="num compare-scenario-meta">
+                      {formatUtc(scenario.start_utc)}
+                    </span>
+                  </button>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {COMPARE_ROWS.map((row) => {
+              const bests = rowBests(row, summaries)
+              return (
+                <tr key={row.id}>
+                  <th scope="row" className="compare-metric-name">
+                    {row.label}
+                  </th>
+                  {scenarios.map((scenario, index) => {
+                    const summary = summaries[index]
+                    return (
+                      <td
+                        key={scenario.id}
+                        className={`compare-value${bests[index] ? ' compare-best' : ''}`}
+                      >
+                        <span className="num">
+                          {summary ? row.format(summary) : '—'}
+                        </span>
+                        {bests[index] && (
+                          <span
+                            className="compare-best-dot"
+                            role="img"
+                            aria-label="best in this row"
+                          />
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {failed.length > 0 && (
+        <ul className="compare-errors">
+          {failed.map((scenario) => (
+            <li key={scenario.id} className="compare-error">
+              Summary failed for {scenario.name}: {errors[scenario.id]}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <section className="compare-lanes" aria-label="Visibility windows by scenario">
+        <h3 className="label">Visibility windows</h3>
+        {scenarios.map((scenario) => (
+          <WindowLane
             key={scenario.id}
             scenario={scenario}
+            maxHours={maxHours}
             active={scenario.id === active.id}
-            onSelect={() => selectScenario(scenario.id)}
-            columnBest={{
-              sunFraction: bests.sunFraction[index] ?? false,
-              earthFraction: bests.earthFraction[index] ?? false,
-              sunMaxEl: bests.sunMaxEl[index] ?? false,
-              earthMaxEl: bests.earthMaxEl[index] ?? false,
-            }}
-            onMetrics={onMetrics}
           />
         ))}
-      </div>
+        <div className="compare-axis num" aria-hidden="true">
+          <span>0 h</span>
+          <span>{formatHours(maxHours / 2, 0)}</span>
+          <span>{formatHours(maxHours, 0)}</span>
+        </div>
+      </section>
     </div>
   )
 }

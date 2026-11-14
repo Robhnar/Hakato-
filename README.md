@@ -59,7 +59,7 @@ Wszystkie fazy projektu (**Faza 1: `000`–`010`**, **Faza 2: `011`–`016`**, *
   2. **Timeline** — interaktywna oś czasu wysokości, pasm widoczności i wspólnego kursora `cursor_utc`.
   3. **Compare** — porównanie do 4 scenariuszy lądowania obok siebie.
   4. **Windows** — wieloletnia wyszukiwarka okien lądowania (2027–2035), mapa cieplna „data startu × parametr", filtrowanie po wymaganiach misji (bateria, oświetlenie, łączność), symulator opóźnienia startu **„Launch delayed by +N days"** z najbliższym równoważnym oknem, cykle astronomiczne oraz model tarczy słonecznej ($0{,}53^\circ$), niepewności horyzontu ($\pm 0{,}2^\circ$) i zaćmień.
-  5. **Map** — interaktywny globus 3D Księżyca (`Three.js` + tekstura NASA LROC) z przełączaną warstwą **`Optimal zone overlay: ON / OFF`**, która wizualizuje strefy zasilania (🟡), łączności z Ziemią (🔵) i *sweet spotu* (🟢) oraz wyznacza optymalny punkt lądowania (**Optimal Landing Zone**) na siatce polarnej.
+  5. **Map** — interaktywny globus 3D Księżyca (`Three.js` + tekstura NASA LROC), przelot kamery nad bieguny, siatka współrzędnych, terminator i granica widoczności Ziemi, podpisy miejsc, odczyt współrzędnych pod kursorem; przełącznik **`Optimal zones`** pokazuje delikatne strefy (Sun only, Earth only, Sun + Earth, Neither) oraz kandydatów w skali wyniku z rankingiem, suwakami wag (profil misji) i przyciskiem **`Move scenario here`**.
 
 ## Jak pracujemy
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CalendarSlot } from '../../api/types'
+import { scoreColor } from '../../app/scale'
 import {
   colorForValue,
   groupByStartYear,
@@ -46,6 +47,12 @@ describe('scaleBounds', () => {
 describe('colorForValue', () => {
   it('maps extremes to different colours', () => {
     expect(colorForValue(0, 0, 10, false)).not.toBe(colorForValue(10, 0, 10, false))
+  })
+
+  it('uses the shared score scale', () => {
+    expect(heatColor(0)).toBe(scoreColor(0))
+    expect(heatColor(1)).toBe(scoreColor(1))
+    expect(colorForValue(0, 0, 10, true)).toBe(scoreColor(1))
   })
 
   it('inverts darkness so lower night is warmer', () => {
