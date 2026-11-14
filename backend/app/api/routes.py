@@ -77,7 +77,10 @@ def timeline(
     lat_deg: Lat, lon_deg: Lon, start_utc: datetime, end_utc: datetime, step_minutes: Step = 60
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
-    return deepcopy(_cached_timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    try:
+        return deepcopy(_cached_timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @lru_cache(maxsize=32)
@@ -100,7 +103,10 @@ def summary(
     step_minutes: Step = metrics.SUMMARY_STEP_MINUTES,
 ) -> dict:
     _check_range(start_utc, end_utc, step_minutes)
-    return deepcopy(_cached_summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    try:
+        return deepcopy(_cached_summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @lru_cache(maxsize=32)

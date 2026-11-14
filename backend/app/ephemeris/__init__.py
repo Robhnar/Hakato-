@@ -5,7 +5,7 @@ import threading
 from datetime import datetime
 
 from ..config import DATA_DIR
-from ..timeutil import to_utc
+from ..timeutil import check_spice_range, to_utc
 from . import placeholder
 from .geometry import az_el
 
@@ -80,6 +80,7 @@ def body_positions(lat_deg: float, lon_deg: float, times_utc: list[datetime]) ->
         return out
 
     if are_kernels_loaded():
+        check_spice_range(min(times_utc), max(times_utc))
         iso_times = [to_utc(t).strftime("%Y-%m-%dT%H:%M:%SZ") for t in times_utc]
         ets = spice.str2et(iso_times)
         pos_sun_arr, _ = spice.spkpos("SUN", ets, "MOON_ME", "LT+S", "MOON")
