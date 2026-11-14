@@ -1,0 +1,85 @@
+/* Style widoku mapy. Powłoka trzyma swoje style w src/index.css. */
+
+.map-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.map-toolbar h2 {
+  margin: 0;
+}
+
+.map-globe {
+  height: min(60vh, 480px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: grab;
+  background: radial-gradient(circle at 50% 40%, #131a26 0%, #07090d 70%);
+}
+
+.map-globe:active {
+  cursor: grabbing;
+}
+
+.map-globe canvas {
+  display: block;
+}
+
+.map-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.map-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.map-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.map-dot:first-child {
+  margin-left: 0;
+}
+
+.map-dot-site {
+  background: #9aa4b5;
+}
+
+.map-dot-scenario {
+  background: #d0a640;
+}
+
+.map-dot-active {
+  background: #f2c14e;
+}
+
+.map-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.map-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}

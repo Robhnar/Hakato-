@@ -1,7 +1,7 @@
 # 009 – Mapa: globus Księżyca z miejscami lądowania
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba F, potem zadanie 007)
+- **Status:** w recenzji
+- **Właściciel:** osoba F
 - **Moduł:** frontend – widok `map`
 - **Gałąź:** `feat/009-mapa-globus`
 - **Zależy od:** –
@@ -41,10 +41,10 @@ Kierunek Słońca: API nie podaje punktu podsłonecznego. Na start wyznacz go z 
 
 ## Kryteria ukończenia
 
-- [ ] Znacznik Apollo 11 leży na widocznej stronie, blisko równika, na wschód od środka tarczy; kliknięcie w jego okolicę daje współrzędne zbliżone do katalogowych.
-- [ ] Przeliczenia szerokość/długość ↔ punkt na kuli mają testy, w tym bieguny i długość ±180°.
-- [ ] Zakładka nie zostawia działającej pętli renderowania po jej opuszczeniu.
-- [ ] `npm run lint`, `npm run build`, `npm test` zielone.
+- [x] Znacznik Apollo 11 leży na widocznej stronie, blisko równika, na wschód od środka tarczy; kliknięcie w jego okolicę daje współrzędne zbliżone do katalogowych.
+- [x] Przeliczenia szerokość/długość ↔ punkt na kuli mają testy, w tym bieguny i długość ±180°.
+- [x] Zakładka nie zostawia działającej pętli renderowania po jej opuszczeniu.
+- [x] `npm run lint`, `npm run build`, `npm test` zielone.
 
 ## Notatki
 
