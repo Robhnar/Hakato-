@@ -1,7 +1,7 @@
 # 008 – Porównanie scenariuszy obok siebie
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba C, po zadaniu 005)
+- **Status:** w recenzji
+- **Właściciel:** Michał Majkut (Micello421)
 - **Moduł:** frontend – widok `compare`
 - **Gałąź:** `feat/008-porownanie`
 - **Zależy od:** 005 (wygodne dodawanie scenariuszy); zacząć można wcześniej
@@ -39,10 +39,10 @@ Dostaje `ViewProps` (`web/src/app/scenario.ts`). Korzysta z `api.summary()` i `a
 
 ## Kryteria ukończenia
 
-- [ ] Dwa scenariusze o różnych miejscach pokazują różne liczby i różne pasy okien.
-- [ ] Błąd pobierania jednego scenariusza nie psuje pozostałych.
-- [ ] Funkcja wybierająca najlepszą wartość ma testy (także remis i brak danych).
-- [ ] `npm run lint`, `npm run build`, `npm test` zielone.
+- [x] Dwa scenariusze o różnych miejscach pokazują różne liczby i różne pasy okien.
+- [x] Błąd pobierania jednego scenariusza nie psuje pozostałych.
+- [x] Funkcja wybierająca najlepszą wartość ma testy (także remis i brak danych).
+- [x] `npm run lint`, `npm run build`, `npm test` zielone.
 
 ## Notatki
 
