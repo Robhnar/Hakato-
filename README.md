@@ -16,6 +16,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
+python ../data/scripts/fetch_kernels.py  # Pobiera jądra NAIF SPICE do data/raw/kernels/ (opcjonalne, bez nich działa model przybliżony)
 uvicorn app.main:app --reload
 ```
 
