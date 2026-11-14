@@ -1,0 +1,149 @@
+/* Style widoku porównania — tylko ten katalog (zadanie 008). */
+
+.compare h2 {
+  margin: 0 0 6px;
+}
+
+.compare-hint,
+.compare-empty > p {
+  color: var(--muted, #9aa4b5);
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.compare-card {
+  background: var(--panel, #151a23);
+  border: 1px solid var(--border, #2a3140);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.compare-card:focus-visible {
+  outline: 2px solid var(--accent, #f2c14e);
+  outline-offset: 2px;
+}
+
+.compare-card-active {
+  border-color: var(--accent, #f2c14e);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, #f2c14e) 50%, transparent);
+}
+
+.compare-card-head h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.compare-card-meta {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--muted, #9aa4b5);
+}
+
+.compare-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.compare-metric {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--bg, #0b0e14);
+  border: 1px solid transparent;
+}
+
+.compare-metric dt {
+  font-size: 0.75rem;
+  color: var(--muted, #9aa4b5);
+}
+
+.compare-metric dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.compare-metric.best {
+  border-color: color-mix(in srgb, var(--accent, #f2c14e) 70%, transparent);
+}
+
+.compare-best-tag {
+  color: var(--accent, #f2c14e);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.compare-error {
+  color: var(--error, #ef6b6b);
+  font-size: 0.85rem;
+}
+
+.compare-loading,
+.compare-lane-loading,
+.compare-lane-error {
+  font-size: 0.85rem;
+  color: var(--muted, #9aa4b5);
+  margin: 0 0 8px;
+}
+
+.compare-lane-error {
+  color: var(--error, #ef6b6b);
+}
+
+.compare-lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compare-track {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.compare-track-label {
+  font-size: 0.75rem;
+  color: var(--muted, #9aa4b5);
+}
+
+.compare-track-bar {
+  position: relative;
+  height: 14px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--border, #2a3140) 80%, transparent);
+  overflow: hidden;
+}
+
+.compare-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+}
+
+.compare-band-sun {
+  background: color-mix(in srgb, var(--accent, #f2c14e) 85%, #fff);
+}
+
+.compare-band-earth {
+  background: color-mix(in srgb, #6ba3ff 85%, #fff);
+}
+
+.compare-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--muted, #9aa4b5);
+  padding-left: 56px;
+}
