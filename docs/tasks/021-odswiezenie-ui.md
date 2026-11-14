@@ -1,6 +1,6 @@
 # 021 – Odświeżenie UI: „konsola misji", wykresy, mapa i Optimization Overlay
 
-- **Status:** w recenzji (zadania 1–8 wdrożone, część kryteriów niezweryfikowana – patrz „Czego nie sprawdzono")
+- **Status:** w recenzji (wszystkie kryteria odhaczone; czytnika ekranu nie testowano – patrz „Czego nie sprawdzono")
 - **Właściciel:** Claude Code
 - **Moduł:** frontend – powłoka i wszystkie widoki (`web/src/`)
 - **Gałąź:** `feat/021-odswiezenie-ui`
@@ -37,8 +37,8 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 ## Kryteria ukończenia
 
 - [x] Żaden element nie zasłania wykresów, mapy ani zakładek przy 1440, 1024 i 390 px.
-- [ ] Czas i współrzędne wszędzie w jednym formacie (`19 May 2027 19:13 UTC`, `89.45°S 137.30°W`).
-- [ ] „South pole" ustawia biegun w środku kadru; miejsca mają podpisy.
+- [x] Czas i współrzędne wszędzie w jednym formacie (`19 May 2027 19:13 UTC`, `89.45°S 137.30°W`).
+- [x] „South pole" ustawia biegun w środku kadru; miejsca mają podpisy.
 - [x] Nakładka nie zasłania terenu; kandydaci widoczni jako punkty w skali wyniku; remisy oznaczone.
 - [x] Brak emoji w interfejsie; kontrast tekstu ≥ 4.5:1.
 - [x] `npm run lint`, `npm run build`, `npm test` przechodzą.
