@@ -17,42 +17,38 @@ lądowania. Katalog nie sugeruje większej dokładności niż źródło.
   widoku w pobliżu bieguna; nie jest oficjalnym miejscem lądowania.
 - Mapa topografii i współrzędnych: https://quickmap.lroc.asu.edu/
 
+### shackleton-ridge
+
+- NASA wymienia „Peak Near Shackleton” / Connecting Ridge wśród regionów Artemis III:
+  https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
+- Boazman et al. (2022) identyfikują site 001 na Connecting Ridge przy
+  `89,45°S, 137,31°W` (`222,69°E`):
+  https://doi.org/10.3847/PSJ/aca590
+- Punkt na oświetlonym grzbiecie przy Shackletonie: `-89.45°, -137.3°` (ME, długość ujemna = zachód),
+  dobrany jako kontrast do `south-pole-reference` w zagłębieniu; nie jest oficjalnym miejscem lądowania.
+- Mapa: https://quickmap.lroc.asu.edu/
+
 ### nobile-rim-1
 
 - NASA wymienia Nobile Rim 1 jako kandydujący region Artemis III:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Środek krateru Nobile: 85,28°S, 53,27°E:
+- Punkt w regionie rim (nie środek krateru Nobile): `-85.423°, 36.19° E`
+  (centrum kwadratu regionu wg zestawienia MoonSnag / USGS region square;
+  wcześniej błędnie użyto środka krateru z długością zachodnią).
+- Środek krateru Nobile dla porównania (IAU): `85.28°S 53.27°E` —
   https://en.wikipedia.org/wiki/Nobile_(crater)
-- Katalog pokazuje środek pobliskiego krateru jako punkt odniesienia regionu
-  kandydackiego, a nie punkt na jego obrzeżu ani wybrane lądowisko.
+- To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
 - Mapa: https://quickmap.lroc.asu.edu/
 
 ### de-gerlache-rim-2
 
 - NASA wymienia de Gerlache Rim 2 jako kandydujący region Artemis III:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Współrzędne środka krateru de Gerlache:
+- Punkt w regionie rim (nie dno krateru): `-88.142°, -63.662°`
+  (centrum kwadratu regionu wg zestawienia MoonSnag / USGS region square).
+- Środek krateru de Gerlache dla porównania (IAU): `88.5°S 87.1°W` —
   https://en.wikipedia.org/wiki/De_Gerlache_(crater)
-- Katalog pokazuje środek krateru jako punkt odniesienia w regionie
-  kandydackim, a nie punkt na obrzeżu ani wybrane lądowisko. Wartości
-  współrzędnych zweryfikowano na mapie LROC QuickMap:
-  https://quickmap.lroc.asu.edu/
-- Mapa: https://quickmap.lroc.asu.edu/
-
-### connecting-ridge-site-001
-
-- Boazman et al. identyfikują site 001 na Connecting Ridge przy
-  89,45°S, 137,31°W (222,69°E):
-  https://doi.org/10.3847/PSJ/aca590
-- W katalogu zachowano zachodnią długość jako wartość ujemną (`-137.31`).
-  To opublikowany punkt orientacyjny w regionie kandydackim, a nie zatwierdzone
-  miejsce lądowania.
-- NASA opisuje Connecting Ridge jako jeden z rozważanych regionów Artemis III:
-  https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Opublikowane wyniki oświetlenia zależą od modelu terenu, punktu obserwacji
-  i wysokości. Katalog nie przypisuje temu punktowi gwarantowanej łączności
-  ani dostępności światła w konkretnym terminie; aplikacja nie ma tu profilu
-  horyzontu z danych LOLA.
+- To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
 - Mapa: https://quickmap.lroc.asu.edu/
 
 ## Program Apollo
