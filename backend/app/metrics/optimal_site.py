@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import math
 from datetime import datetime
+from functools import lru_cache
 
 from .. import ephemeris, terrain
 from ..config import DATA_DIR
@@ -36,6 +37,11 @@ POLAR_GRID_SPECS: list[tuple[float, int]] = [
     (-87.0, 12),  # co 30°
     (-85.5, 12),  # co 30°
 ]
+
+
+@lru_cache(maxsize=128)
+def _candidate_horizon(lat_deg: float, lon_deg: float) -> dict:
+    return terrain.horizon_profile(lat_deg, lon_deg)
 
 
 def _sub_body_point(body_pos_km: tuple[float, float, float]) -> tuple[float, float]:
@@ -186,7 +192,7 @@ def find_optimal_site(
     for cand in candidates:
         lat = cand["lat_deg"]
         lon = cand["lon_deg"]
-        profile = terrain.horizon_profile(lat, lon)
+        profile = _candidate_horizon(lat, lon)
 
         sun_visible_flags: list[bool] = []
         earth_visible_flags: list[bool] = []

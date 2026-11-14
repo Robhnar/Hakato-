@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Site(BaseModel):
@@ -135,7 +135,7 @@ class WindowsResponse(BaseModel):
     meta: Meta
 
 
-# --- Predykcja optymalnego punktu lądowania (zadanie 017 / 018) ---
+# --- Optymalny punkt lądowania (zadanie 017) ---
 
 
 class OptimalWeights(BaseModel):
@@ -159,14 +159,14 @@ class OptimalCandidate(BaseModel):
     lon_deg: float
     elevation_m: float | None = None
     is_catalog_site: bool
-    score: float
-    sun_visible_fraction: float
-    earth_visible_fraction: float
-    overlap_fraction: float
-    sunlight_hours: float
-    earth_hours: float
-    overlap_hours: float
-    max_darkness_hours: float
+    score: float = Field(ge=0, le=100)
+    sun_visible_fraction: float = Field(ge=0, le=1)
+    earth_visible_fraction: float = Field(ge=0, le=1)
+    overlap_fraction: float = Field(ge=0, le=1)
+    sunlight_hours: float = Field(ge=0)
+    earth_hours: float = Field(ge=0)
+    overlap_hours: float = Field(ge=0)
+    max_darkness_hours: float = Field(ge=0)
     sun_visible_at_cursor: bool
     earth_visible_at_cursor: bool
 

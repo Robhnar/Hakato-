@@ -59,6 +59,57 @@ export interface Summary {
   eclipses?: Eclipse[] | null
 }
 
+export interface OptimalSiteQuery {
+  start_utc: string
+  end_utc: string
+  cursor_utc?: string
+  step_minutes?: number
+  w_sun?: number
+  w_earth?: number
+  w_overlap?: number
+}
+
+export interface OptimalWeights {
+  w_sun: number
+  w_earth: number
+  w_overlap: number
+}
+
+export interface CursorBodies {
+  cursor_utc: string
+  subsolar_lat_deg: number
+  subsolar_lon_deg: number
+  subearth_lat_deg: number
+  subearth_lon_deg: number
+}
+
+export interface OptimalCandidate {
+  id: string
+  name: string
+  lat_deg: number
+  lon_deg: number
+  elevation_m?: number | null
+  is_catalog_site: boolean
+  score: number
+  sun_visible_fraction: number
+  earth_visible_fraction: number
+  overlap_fraction: number
+  sunlight_hours: number
+  earth_hours: number
+  overlap_hours: number
+  max_darkness_hours: number
+  sun_visible_at_cursor: boolean
+  earth_visible_at_cursor: boolean
+}
+
+export interface OptimalSiteResponse {
+  optimal: OptimalCandidate
+  ranking: OptimalCandidate[]
+  cursor_bodies: CursorBodies
+  weights: OptimalWeights
+  meta: Meta
+}
+
 export interface RangeQuery {
   lat_deg: number
   lon_deg: number
@@ -151,56 +202,3 @@ export interface WindowsResponse {
   cycles_summary: CyclesSummary
   meta: Meta
 }
-
-export interface OptimalWeights {
-  w_sun: number
-  w_earth: number
-  w_overlap: number
-}
-
-export interface CursorBodies {
-  cursor_utc: string
-  subsolar_lat_deg: number
-  subsolar_lon_deg: number
-  subearth_lat_deg: number
-  subearth_lon_deg: number
-}
-
-export interface OptimalCandidate {
-  id: string
-  name: string
-  lat_deg: number
-  lon_deg: number
-  elevation_m?: number | null
-  is_catalog_site: boolean
-  score: number
-  sun_visible_fraction: number
-  earth_visible_fraction: number
-  overlap_fraction: number
-  sunlight_hours: number
-  earth_hours: number
-  overlap_hours: number
-  max_darkness_hours: number
-  sun_visible_at_cursor: boolean
-  earth_visible_at_cursor: boolean
-
-}
-
-export interface OptimalSiteResponse {
-  optimal: OptimalCandidate
-  ranking: OptimalCandidate[]
-  cursor_bodies: CursorBodies
-  weights: OptimalWeights
-  meta: Meta
-}
-
-export interface OptimalSiteQuery {
-  start_utc: string
-  end_utc: string
-  cursor_utc?: string
-  step_minutes?: number
-  w_sun?: number
-  w_earth?: number
-  w_overlap?: number
-}
-
