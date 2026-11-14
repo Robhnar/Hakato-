@@ -1,7 +1,7 @@
 # 014 – Widok wyszukiwarki: mapa cieplna „data startu × parametr" i cykle
 
-- **Status:** wolne
-- **Właściciel:** osoba D
+- **Status:** w recenzji
+- **Właściciel:** osoba D (wykonane zastępczo — brak PR D)
 - **Moduł:** frontend – widok `windows` (mapa cieplna i wizualizacja cykli)
 - **Gałąź:** `feat/014-mapa-cieplna-okien`
 - **Zależy od:** 011
@@ -46,8 +46,8 @@ Korzysta z `api.windows()` i `ViewProps` (`applyWindow`) z zadania 011.
 
 ## Kryteria ukończenia
 
-- [ ] Na danych z `npm run dev:fixtures` oraz z żywego backendu mapa cieplna wyświetla kolejne okna lądowania i pozwala przełączać metryki.
-- [ ] Okna spełniające wymagania (`passes_requirements`) są jednoznacznie wyróżnione wizualnie.
-- [ ] Kliknięcie okna aktualizuje datę startu aktywnego scenariusza w pasku powłoki (`SummaryStrip`).
-- [ ] Funkcje skalowania kolorów i grupowania siatki w `heatmap.ts` mają testy jednostkowe (`vitest`).
-- [ ] `npm run lint`, `npm run build`, `npm test` zielone.
+- [x] Na danych z `npm run dev:fixtures` oraz z żywego backendu mapa cieplna wyświetla kolejne okna lądowania i pozwala przełączać metryki.
+- [x] Okna spełniające wymagania (`passes_requirements`) są jednoznacznie wyróżnione wizualnie.
+- [x] Kliknięcie okna aktualizuje datę startu aktywnego scenariusza w pasku powłoki (`SummaryStrip`).
+- [x] Funkcje skalowania kolorów i grupowania siatki w `heatmap.ts` mają testy jednostkowe (`vitest`).
+- [x] `npm run lint`, `npm run build`, `npm test` zielone.

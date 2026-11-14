@@ -3,6 +3,8 @@ import { api } from '../../api/client'
 import { useAsync } from '../../api/useAsync'
 import type { WindowsResponse } from '../../api/types'
 import type { ViewProps } from '../../app/scenario'
+import CalendarHeatmap from './CalendarHeatmap'
+import CyclesLegend from './CyclesLegend'
 import MatchesList from './MatchesList'
 import RequirementsPanel from './RequirementsPanel'
 import SlipAnalyzer from './SlipAnalyzer'
@@ -80,10 +82,23 @@ export default function WindowsView({ active, applyWindow }: ViewProps) {
         </p>
       </header>
 
-      {/* 014: CalendarHeatmap + CyclesLegend (osoba D) */}
-
       {error && <p className="windows-error">Could not load windows: {error}</p>}
       {!data && !error && <p className="windows-loading">{loading ? 'Loading window search…' : ''}</p>}
+
+      {data && (
+        <div className="windows-viz">
+          <CalendarHeatmap
+            grid={data.grid}
+            durationHours={requirements.duration_hours}
+            onSelect={applyWindow}
+            selectedStartUtc={active.start_utc}
+          />
+          <CyclesLegend
+            cycles={data.cycles_summary}
+            focus={data.grid.find((slot) => slot.start_utc === active.start_utc) ?? null}
+          />
+        </div>
+      )}
 
       <div className="windows-layout">
         <div className="windows-column">
