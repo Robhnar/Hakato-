@@ -1,5 +1,12 @@
 import { expect, test } from 'vitest'
-import { endUtc, scenarioFromSite, toIsoZ, toRangeQuery } from './scenario'
+import {
+  duplicateScenario,
+  endUtc,
+  scenarioFromSite,
+  toIsoZ,
+  toRangeQuery,
+  validateCoords,
+} from './scenario'
 
 const site = { name: 'Test', lat_deg: -89.5, lon_deg: 0 }
 
@@ -26,5 +33,31 @@ test('toRangeQuery carries site and time range', () => {
     start_utc: '2027-01-01T00:00:00Z',
     end_utc: '2027-01-02T00:00:00Z',
     step_minutes: 30,
+  })
+})
+
+test('validateCoords accepts ME ranges', () => {
+  expect(validateCoords(-89.5, 0)).toBeNull()
+  expect(validateCoords(90, 180)).toBeNull()
+  expect(validateCoords(-90, -180)).toBeNull()
+})
+
+test('validateCoords rejects out-of-range values', () => {
+  expect(validateCoords(91, 0)).toBe('lat')
+  expect(validateCoords(0, 181)).toBe('lon')
+  expect(validateCoords(100, 200)).toBe('both')
+  expect(validateCoords(Number.NaN, 0)).toBe('lat')
+})
+
+test('duplicateScenario keeps fields and gets a new id', () => {
+  const original = scenarioFromSite(site, '2027-01-01T00:00:00Z', 24)
+  const copy = duplicateScenario(original)
+  expect(copy.id).not.toBe(original.id)
+  expect(copy).toMatchObject({
+    name: original.name,
+    lat_deg: original.lat_deg,
+    lon_deg: original.lon_deg,
+    start_utc: original.start_utc,
+    duration_hours: original.duration_hours,
   })
 })
