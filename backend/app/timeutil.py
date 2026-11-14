@@ -2,6 +2,21 @@
 
 from datetime import UTC, datetime, timedelta
 
+# Pokrycie jądra SPICE de440s.bsp (1849-12-25 .. 2150-01-21) z marginesem jednej doby.
+SPICE_MIN_UTC = datetime(1849, 12, 26, tzinfo=UTC)
+SPICE_MAX_UTC = datetime(2150, 1, 20, tzinfo=UTC)
+
+
+def check_spice_range(*times: datetime) -> None:
+    """Rzuca ValueError, gdy którykolwiek z czasów leży poza pokryciem SPICE de440s."""
+    for t in times:
+        t_utc = to_utc(t)
+        if not (SPICE_MIN_UTC <= t_utc <= SPICE_MAX_UTC):
+            raise ValueError(
+                f"Time {iso_z(t_utc)} is outside SPICE kernel coverage "
+                f"({iso_z(SPICE_MIN_UTC)} .. {iso_z(SPICE_MAX_UTC)})"
+            )
+
 
 def to_utc(t: datetime) -> datetime:
     """Czas bez strefy traktujemy jako UTC."""

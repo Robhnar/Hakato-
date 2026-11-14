@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
 
+import pytest
 from fastapi.testclient import TestClient
 
+from app import ephemeris
 from app.api import routes
 from app.main import app
 
@@ -102,6 +104,27 @@ def test_optimal_site_contract_stub():
         params={**SCENARIO, "end_utc": "2026-12-01T00:00:00Z"},
     )
     assert invalid_range.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"w_sun": "nan"},
+        {"w_sun": -1},
+        {"w_earth": "inf"},
+    ],
+    ids=["w_sun_nan", "w_sun_negative", "w_earth_inf"],
+)
+def test_optimal_site_rejects_invalid_weights(params):
+    r = client.get(
+        "/api/optimal-site",
+        params={
+            "start_utc": "2027-01-01T00:00:00Z",
+            "end_utc": "2027-01-10T00:00:00Z",
+            **params,
+        },
+    )
+    assert r.status_code == 422
 
 
 def test_rejects_bad_input():
@@ -222,3 +245,62 @@ def test_summary_response_is_cached_by_query(monkeypatch):
     assert different_step != first
     assert calls == 2
     routes._cached_summary.cache_clear()
+
+
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+def test_timeline_rejects_spice_out_of_range():
+    r = client.get(
+        "/api/timeline",
+        params={
+            "lat_deg": -89.5,
+            "lon_deg": 0,
+            "start_utc": "2150-06-01T00:00:00Z",
+            "end_utc": "2150-06-05T00:00:00Z",
+        },
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+def test_optimal_site_rejects_spice_out_of_range_cursor():
+    r = client.get(
+        "/api/optimal-site",
+        params={
+            "start_utc": "2027-01-01T00:00:00Z",
+            "end_utc": "2027-01-10T00:00:00Z",
+            "cursor_utc": "2300-01-01T00:00:00Z",
+        },
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+def test_windows_rejects_spice_out_of_range_search():
+    r = client.get(
+        "/api/windows",
+        params={
+            "lat_deg": -89.5,
+            "lon_deg": 0,
+            "search_start_utc": "2150-03-01T00:00:00Z",
+            "search_end_utc": "2150-08-01T00:00:00Z",
+            "duration_hours": 72,
+        },
+    )
+    assert r.status_code == 422
+
+
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+def test_windows_rejects_spice_out_of_range_reference():
+    r = client.get(
+        "/api/windows",
+        params={
+            "lat_deg": -89.5,
+            "lon_deg": 0,
+            "search_start_utc": "2027-01-01T00:00:00Z",
+            "search_end_utc": "2027-06-01T00:00:00Z",
+            "duration_hours": 72,
+            "reference_start_utc": "2150-06-01T00:00:00Z",
+            "slip_days": 10,
+        },
+    )
+    assert r.status_code == 422

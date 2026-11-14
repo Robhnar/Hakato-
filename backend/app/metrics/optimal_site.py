@@ -15,7 +15,7 @@ from .. import ephemeris, terrain
 from ..config import DATA_DIR
 from ..ephemeris import placeholder
 from ..ephemeris.geometry import az_el
-from ..timeutil import iso_z, time_range, to_utc
+from ..timeutil import check_spice_range, iso_z, time_range, to_utc
 from . import horizon_elevation_at
 from .windows_search import _calculate_max_darkness_hours
 
@@ -154,6 +154,7 @@ def find_optimal_site(
 
     # Pozycje Słońca i Ziemi w układzie MOON_ME dla wszystkich próbek
     if ephemeris.are_kernels_loaded() and spice is not None:
+        check_spice_range(times[0], times[-1], c_dt)
         iso_times = [to_utc(t).strftime("%Y-%m-%dT%H:%M:%SZ") for t in times]
         with ephemeris.SPICE_LOCK:
             ets = spice.str2et(iso_times)
