@@ -97,8 +97,14 @@ function Shell({ sites }: { sites: Site[] }) {
   }
 
   function applyCustomCoords() {
-    const lat_deg = Number(latDraft)
-    const lon_deg = Number(lonDraft)
+    const latRaw = latDraft.trim()
+    const lonRaw = lonDraft.trim()
+    if (latRaw === '' || lonRaw === '') {
+      setCoordError('Enter both latitude and longitude.')
+      return
+    }
+    const lat_deg = Number(latRaw)
+    const lon_deg = Number(lonRaw)
     const error = validateCoords(lat_deg, lon_deg)
     if (error) {
       setCoordError(coordErrorMessage(error))
