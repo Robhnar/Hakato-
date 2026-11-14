@@ -9,17 +9,25 @@
   },
   {
     "id": "nobile-rim-1",
-    "name": "Artemis candidate: Nobile Rim 1",
-    "lat_deg": -85.2,
-    "lon_deg": -53.7,
+    "name": "Artemis candidate: Nobile crater center reference",
+    "lat_deg": -85.28,
+    "lon_deg": 53.27,
     "category": "candidate",
     "landing_utc": null
   },
   {
     "id": "de-gerlache-rim-2",
-    "name": "Artemis candidate: de Gerlache Rim 2",
+    "name": "Artemis candidate: de Gerlache crater center reference",
     "lat_deg": -88.5,
     "lon_deg": -87.6,
+    "category": "candidate",
+    "landing_utc": null
+  },
+  {
+    "id": "connecting-ridge-site-001",
+    "name": "Artemis candidate: Connecting Ridge site 001",
+    "lat_deg": -89.45,
+    "lon_deg": -137.31,
     "category": "candidate",
     "landing_utc": null
   },
