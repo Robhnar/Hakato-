@@ -1,7 +1,7 @@
 # 010 – Zgłoszenie do Space Apps: opis, demo, prezentacja
 
 - **Status:** wolne
-- **Właściciel:** – (do ustalenia; każdy dostarcza opis swojej części)
+- **Właściciel:** – (sugerowana: osoba E, po zadaniu 004; każdy dostarcza opis swojej części)
 - **Moduł:** – (bez kodu aplikacji)
 - **Gałąź:** `feat/010-zgloszenie`
 - **Zależy od:** –

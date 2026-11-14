@@ -22,7 +22,7 @@ Statusy: `wolne` → `w toku` → `w recenzji` → `scalone` (albo `zablokowane`
 | [007](007-os-czasu.md) | Oś czasu: okna zasilania i łączności | widok `timeline` | F (po 009) | wolne |
 | [008](008-porownanie.md) | Porównanie scenariuszy obok siebie | widok `compare` | C (po 005) | wolne |
 | [009](009-mapa-globus.md) | Mapa: globus Księżyca z miejscami lądowania | widok `map` | F | wolne |
-| [010](010-zgloszenie.md) | Zgłoszenie do Space Apps: opis, demo, prezentacja | – | do ustalenia | wolne |
+| [010](010-zgloszenie.md) | Zgłoszenie do Space Apps: opis, demo, prezentacja | – | E (po 004) | wolne |
 
 Litery A–F to sześć osób w zespole; podział jest propozycją i można go zmienić przed startem.
 

@@ -1,7 +1,7 @@
 # 004 – Katalog miejsc lądowania i szybkość API
 
 - **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba E)
+- **Właściciel:** – (sugerowana: osoba E, potem zadanie 010)
 - **Moduł:** `data`, `api`
 - **Gałąź:** `feat/004-katalog-miejsc`
 - **Zależy od:** –
