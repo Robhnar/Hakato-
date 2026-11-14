@@ -47,6 +47,8 @@ test('validateCoords rejects out-of-range values', () => {
   expect(validateCoords(0, 181)).toBe('lon')
   expect(validateCoords(100, 200)).toBe('both')
   expect(validateCoords(Number.NaN, 0)).toBe('lat')
+  // Number('') === 0 would pass ranges; callers must reject empty strings first.
+  expect(validateCoords(0, 0)).toBeNull()
 })
 
 test('duplicateScenario keeps fields and gets a new id', () => {
