@@ -11,6 +11,7 @@ import SlipAnalyzer from './SlipAnalyzer'
 import {
   DEFAULT_REQUIREMENTS,
   filterMatches,
+  passes,
   toQuery,
   validateRequirements,
   type MissionRequirements,
@@ -67,7 +68,13 @@ export default function WindowsView({ active, applyWindow }: ViewProps) {
   )
 
   // Filtrowanie natychmiastowe - używa bieżących wymagań, nie opóźnionych.
-  const matches = data ? filterMatches(data.grid, requirements) : []
+  const liveGrid = data
+    ? data.grid.map((slot) => ({
+        ...slot,
+        passes_requirements: passes(slot, requirements),
+      }))
+    : []
+  const matches = data ? filterMatches(liveGrid, requirements) : []
 
   return (
     <div className="windows">
@@ -88,14 +95,14 @@ export default function WindowsView({ active, applyWindow }: ViewProps) {
       {data && (
         <div className="windows-viz">
           <CalendarHeatmap
-            grid={data.grid}
+            grid={liveGrid}
             durationHours={requirements.duration_hours}
             onSelect={applyWindow}
             selectedStartUtc={active.start_utc}
           />
           <CyclesLegend
             cycles={data.cycles_summary}
-            focus={data.grid.find((slot) => slot.start_utc === active.start_utc) ?? null}
+            focus={liveGrid.find((slot) => slot.start_utc === active.start_utc) ?? null}
           />
         </div>
       )}
