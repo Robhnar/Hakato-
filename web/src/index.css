@@ -59,74 +59,344 @@ body {
   color: var(--bg);
 }
 
+/* --- Powłoka: nagłówek, panel boczny, scena (zadanie 021) --- */
+
 .app {
-  max-width: 1100px;
+  max-width: 1600px;
+  height: 100dvh;
   margin: 0 auto;
-  padding: 12px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-h1 {
-  font-size: 1.35rem;
-  margin: 0 0 4px;
+.app-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--text);
 }
 
 .tagline {
-  margin: 0 0 16px;
+  margin: 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
-h2 {
-  font-size: 0.95rem;
-  margin: 0 0 6px;
-  font-weight: 600;
+/* Przełącznik trybu jako dwie zakładki tekstowe. */
+.mode-tabs {
+  display: flex;
+  align-self: stretch;
+  gap: 4px;
 }
 
-.controls,
-.chips,
-.tabs,
-.scenario-actions {
+.mode-tabs button {
+  border: 0;
+  background: none;
+  height: auto;
+  padding: 0 12px;
+  color: var(--muted);
+}
+
+.mode-tabs button:hover {
+  color: var(--text);
+}
+
+.mode-tabs button[aria-pressed='true'] {
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 var(--text);
+}
+
+.app-badges {
+  margin-left: auto;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  align-items: end;
-  margin-bottom: 12px;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
-.scenario-bar {
-  margin-bottom: 12px;
-}
-
-.controls {
-  background: var(--surface);
+.badge {
+  padding: 3px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 12px;
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
-.coords {
+.badge-warning {
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 45%, var(--line));
+}
+
+.app-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.app-body--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.rail {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 0 16px 24px;
+  border-right: 1px solid var(--line);
+}
+
+.rail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.rail-section:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.rail-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  align-items: end;
-  margin: 0;
-  padding: 8px 10px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  min-width: min(100%, 320px);
 }
 
-.coords legend {
-  padding: 0 4px;
-  color: var(--muted);
-  font-size: 0.75rem;
+.rail-actions {
+  display: flex;
+  gap: 4px;
 }
 
-.coords .error {
-  flex-basis: 100%;
+.rail select,
+.rail input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.icon-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Scenariusze jako lista wierszy: nazwa, data, usuwanie. */
+.scenario-list {
+  list-style: none;
   margin: 0;
+  padding: 0;
+}
+
+.scenario-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-top: 1px solid var(--line);
+}
+
+.scenario-item:first-child {
+  border-top: 0;
+}
+
+.scenario-row {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.scenario-row:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Aktywny scenariusz: jasny tekst i kreska 2 px z lewej. */
+.scenario-row[aria-pressed='true'] {
+  color: var(--text);
+  box-shadow: inset 2px 0 0 var(--text);
+}
+
+.scenario-name {
   font-size: 0.85rem;
+  overflow-wrap: anywhere;
 }
+
+.scenario-date {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.scenario-remove {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.scenario-remove:hover {
+  color: var(--text);
+}
+
+.coord-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.coord-grid .apply {
+  grid-column: 1 / -1;
+}
+
+.coord-readout {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.rail-error {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+/* Status Słońca i Ziemi: dwa bloki wierszy, oddzielone górną linią. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.summary p {
+  margin: 0;
+}
+
+.body-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 2px 8px;
+  align-items: start;
+}
+
+.body-row .label {
+  padding-top: 2px;
+  font-weight: 500;
+}
+
+.body-row-sun .label {
+  color: var(--sun);
+}
+
+.body-row-earth .label {
+  color: var(--earth);
+}
+
+.body-row-lines p {
+  margin: 0 0 2px;
+  font-size: 0.82rem;
+}
+
+.body-row-lines p:last-child {
+  margin-bottom: 0;
+}
+
+/* Scena: zakładki widoków i aktywny widok zajmujący resztę wysokości. */
+.stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.stage-tabs {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 44px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.stage-tabs button {
+  border: 0;
+  background: none;
+  height: auto;
+  padding: 0 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.stage-tabs button:hover {
+  color: var(--text);
+}
+
+.stage-tabs button[aria-pressed='true'] {
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 var(--text);
+}
+
+.stage-view {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px 20px 28px;
+}
+
+/* Mapa wypełnia całą scenę — własny układ i marginesy (zadanie 021/6). */
+.stage-view:has(.map-view) {
+  padding: 0;
+}
+
+.guide-shell {
+  padding: 4px 0 24px;
+}
+
+/* --- Kontrolki wspólne --- */
 
 label {
   display: flex;
@@ -180,59 +450,6 @@ button.selected,
 .hint {
   font-size: 0.8rem;
   color: var(--muted);
-  align-self: center;
-}
-
-.summary,
-.placeholder {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  margin-bottom: 12px;
-}
-
-.summary-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.body-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  background: var(--bg);
-}
-
-.body-card.on {
-  border-color: color-mix(in srgb, var(--ok) 55%, var(--line));
-}
-
-.body-card.off {
-  border-color: color-mix(in srgb, var(--muted) 40%, var(--line));
-}
-
-.body-state {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin: 0 0 4px;
-}
-
-.body-card.on .body-state {
-  color: var(--ok);
-}
-
-.summary p,
-.placeholder p,
-.body-card p {
-  margin: 0 0 4px;
 }
 
 .muted {
@@ -242,29 +459,69 @@ button.selected,
 
 .warning {
   color: var(--warning);
-  margin-top: 8px !important;
 }
 
 .error {
   color: var(--error);
 }
 
-@media (max-width: 640px) {
+/* --- Wąski ekran: panel składa się nad scenę --- */
+
+@media (max-width: 900px) {
   .app {
-    padding: 8px 10px 24px;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
   }
 
-  .summary-grid {
-    grid-template-columns: 1fr;
+  .app-body {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .controls {
-    align-items: stretch;
+  .rail {
+    overflow: visible;
+    padding-bottom: 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
 
-  label,
-  .coords {
-    width: 100%;
+  .stage-view {
+    overflow: visible;
+  }
+
+  .app-header {
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+
+  .mode-tabs {
+    align-self: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    padding: 8px 12px;
+  }
+
+  .app-title {
+    letter-spacing: 0.1em;
+  }
+
+  .mode-tabs button {
+    flex: 1 1 auto;
+  }
+
+  .stage-tabs {
+    padding: 0 8px;
+  }
+
+  .stage-view {
+    padding: 14px 12px 24px;
+  }
+
+  .rail {
+    padding: 0 12px 16px;
   }
 
   select,
@@ -273,20 +530,11 @@ button.selected,
     width: 100%;
   }
 
-  .chips button,
-  .tabs button,
-  .scenario-actions button,
-  .mode-switch button {
+  .stage-tabs button,
+  .mode-tabs button,
+  .icon-btn,
+  .scenario-remove,
+  .scenario-row {
     width: auto;
-    flex: 1 1 auto;
   }
-}
-
-/* Przełącznik trybu Simple / Expert (020). Pigułki usunięte – układ zakładek
-   przyjdzie w zadaniu 2; do tego czasu zostaje sam układ wiersza. */
-.mode-switch {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 0 16px;
 }
