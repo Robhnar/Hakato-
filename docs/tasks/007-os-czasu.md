@@ -1,7 +1,7 @@
 # 007 – Oś czasu: okna zasilania i łączności
 
 - **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba D, po zadaniu 006)
+- **Właściciel:** – (sugerowana: osoba F, po zadaniu 009)
 - **Moduł:** frontend – widok `timeline`
 - **Gałąź:** `feat/007-os-czasu`
 - **Zależy od:** –

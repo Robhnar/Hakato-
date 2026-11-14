@@ -1,7 +1,7 @@
 # 009 – Mapa: globus Księżyca z miejscami lądowania
 
 - **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba E, po zadaniu 004)
+- **Właściciel:** – (sugerowana: osoba F, potem zadanie 007)
 - **Moduł:** frontend – widok `map`
 - **Gałąź:** `feat/009-mapa-globus`
 - **Zależy od:** –
