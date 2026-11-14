@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { latLonToVector3, type Vec3, vectorFromAzEl, vectorToLatLon } from './geo'
+import { latLonToVector3, subBodyPoint, type Vec3, vectorFromAzEl, vectorToLatLon } from './geo'
 
 function close(actual: Vec3, expected: Vec3, digits = 9) {
   expect(actual.x).toBeCloseTo(expected.x, digits)
@@ -85,4 +85,17 @@ test('the subsolar point recovered from az/el is the point the Sun stands over',
   const back = vectorToLatLon(vectorFromAzEl(0, 0, az, el))
   expect(back.lat_deg).toBeCloseTo(10, 6)
   expect(back.lon_deg).toBeCloseTo(40, 6)
+})
+
+// Wartości z /api/timeline (lat 0, lon 0) i /api/optimal-site (cursor_bodies) dla 2027-03-10T12:00:00Z.
+test('subBodyPoint finds the subsolar point from az/el seen at (0°, 0°)', () => {
+  const point = subBodyPoint(88.521, -59.622)
+  expect(point.lat_deg).toBeCloseTo(0.748, 2)
+  expect(point.lon_deg).toBeCloseTo(149.63, 1)
+})
+
+test('subBodyPoint finds the sub-Earth point the same way (within 0.05° of the API)', () => {
+  const point = subBodyPoint(225.314, 82.158)
+  expect(Math.abs(point.lat_deg - -5.481)).toBeLessThan(0.05)
+  expect(Math.abs(point.lon_deg - -5.568)).toBeLessThan(0.05)
 })
