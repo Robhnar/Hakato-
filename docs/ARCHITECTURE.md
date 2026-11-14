@@ -142,25 +142,13 @@ Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_land
 
 `matches` to podzbiór `grid` spełniający wymagania, posortowany malejąco po `score`. Pola `uncertainty` i `eclipses` są opcjonalne dla każdego okna. Do czasu zadań 012/013 endpoint może zwracać zaślepkę o tym kształcie.
 
-**`GET /api/optimal-site?start_utc&end_utc&cursor_utc&step_minutes&w_sun&w_earth&w_overlap`** – optymalny punkt lądowania i ranking polarnej siatki referencyjnej (Faza 3, zadania 017–018).
+**`GET /api/optimal-site?start_utc&end_utc&cursor_utc&step_minutes&w_sun&w_earth&w_overlap`** – ranking miejsca optymalnego dla wybranego okna (Faza 3). `cursor_utc` jest opcjonalny i domyślnie równy `start_utc`; `step_minutes` domyślnie wynosi 60, a wagi odpowiednio 0,45, 0,25 i 0,30.
 
-Parametry (domyślne): `step_minutes` (60), `cursor_utc` (`start_utc`), wagi `w_sun` (0.45), `w_earth` (0.25), `w_overlap` (0.30). Zwraca wyznaczone miejsce optymalne (`optimal`), ranking miejsc katalogowych i siatki bieguna południowego (`ranking`), podpunkty ciał (`cursor_bodies`), wagi oraz metadane.
+Odpowiedź zawiera `optimal`, `ranking`, pozycje podpunktów Słońca i Ziemi w `cursor_bodies`, użyte `weights` i `meta`. Każdy element rankingu ma współrzędne, wynik (`score` 0–100), ułamki/czasy widoczności oraz flagi widoczności w chwili kursora. Ranking obejmuje katalog miejsc i referencyjną siatkę polarną.
 
-```json
-{"optimal":{"id":"shackleton_connecting_ridge","name":"Connecting Ridge (Shackleton-de Gerlache)",
-  "lat_deg":-89.445,"lon_deg":-137.28,"elevation_m":null,"is_catalog_site":true,"score":82.5,
-  "sun_visible_fraction":0.85,"earth_visible_fraction":0.90,"overlap_fraction":0.80,
-  "sunlight_hours":602.4,"earth_hours":637.8,"overlap_hours":567.0,"max_darkness_hours":106.3,
-  "sun_visible_at_cursor":true,"earth_visible_at_cursor":true},
- "ranking":[/* lista kandydatów posortowana malejąco po score */],
- "cursor_bodies":{"cursor_utc":"2027-01-01T00:00:00Z","subsolar_lat_deg":-1.4,"subsolar_lon_deg":45.2,
-   "subearth_lat_deg":-6.2,"subearth_lon_deg":-2.1},
- "weights":{"w_sun":0.45,"w_earth":0.25,"w_overlap":0.30},
- "meta":{"ephemeris":"placeholder","horizon":"lola"}}
-```
+Do czasu zadania 018 endpoint i `contracts/fixtures/optimal_site.json` używają wyraźnie tymczasowej odpowiedzi kontraktowej: metryki są zerowe, a współrzędne podpunktów zastępcze; nie są to wyniki astronomiczne ani rekomendacja miejsca. Silnik optymalizacji zastąpi tę zaślepkę.
 
 ### Kontrakt między powłoką a widokami (frontend)
-
 
 Zdefiniowany w `web/src/app/scenario.ts`. Każdy widok to komponent w `web/src/views/<nazwa>/index.tsx`, zarejestrowany w `web/src/app/views.ts`, który dostaje `ViewProps`:
 

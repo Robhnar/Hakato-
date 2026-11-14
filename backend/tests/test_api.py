@@ -80,6 +80,30 @@ def test_windows_contract_stub():
     )
 
 
+def test_optimal_site_contract_stub():
+    r = client.get("/api/optimal-site", params=SCENARIO)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["optimal"] == body["ranking"][0]
+    assert body["weights"] == {"w_sun": 0.45, "w_earth": 0.25, "w_overlap": 0.30}
+    assert body["cursor_bodies"]["cursor_utc"] == SCENARIO["start_utc"]
+    assert any(candidate["is_catalog_site"] for candidate in body["ranking"])
+    assert any(not candidate["is_catalog_site"] for candidate in body["ranking"])
+
+    weighted = client.get(
+        "/api/optimal-site",
+        params={**SCENARIO, "w_sun": 0.7, "w_earth": 0.1, "w_overlap": 0.2},
+    )
+    assert weighted.status_code == 200
+    assert weighted.json()["weights"] == {"w_sun": 0.7, "w_earth": 0.1, "w_overlap": 0.2}
+
+    invalid_range = client.get(
+        "/api/optimal-site",
+        params={**SCENARIO, "end_utc": "2026-12-01T00:00:00Z"},
+    )
+    assert invalid_range.status_code == 422
+
+
 def test_rejects_bad_input():
     assert client.get("/api/horizon", params={"lat_deg": 91, "lon_deg": 0}).status_code == 422
     reversed_range = {**SCENARIO, "end_utc": "2026-12-01T00:00:00Z"}

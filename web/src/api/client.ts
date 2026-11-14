@@ -15,7 +15,6 @@ import type {
   WindowsResponse,
 } from './types'
 
-
 const USE_FIXTURES = import.meta.env.VITE_USE_FIXTURES === '1'
 
 type Params = Record<string, string | number | boolean | undefined>
@@ -69,4 +68,3 @@ export const api = {
       ? fixture(() => import('../../../contracts/fixtures/optimal_site.json'))
       : get('optimal-site', { ...q }),
 }
-
