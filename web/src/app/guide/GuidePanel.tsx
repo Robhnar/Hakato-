@@ -1,12 +1,16 @@
 // Tryb prowadzony „Plan a landing” (zadanie 020): trzy proste pytania → rekomendacja miejsca i terminu.
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { api } from '../../api/client'
 import type { Site, SiteCategory } from '../../api/types'
+import type { Scenario } from '../scenario'
+import type { ViewRequest, ZoomRequest } from '../../views/map/MoonGlobe'
+import '../../views/map/map.css'
 import { approximateNote } from './explain'
 import { defaultMonthRange, formatDay, formatPercent, formatUtcTime, monthRangeToSearch } from './format'
 import { MISSIONS, type MissionKind, type Priority, nextAfterSlip } from './ranking'
 import ResultCard from './ResultCard'
+import { PIN_ID, pinnedSite, siteAt } from './place'
 import { type GuideAnswers, type SearchResult, findLandings } from './search'
 import './guide.css'
 
@@ -23,6 +27,9 @@ const CATEGORY_LABEL: Record<SiteCategory, string> = {
   commercial: 'Other commercial missions',
   international: 'Other countries',
 }
+
+// Globus (three.js) ładujemy dopiero, gdy ktoś wybiera miejsce na mapie.
+const MoonGlobe = lazy(() => import('../../views/map/MoonGlobe'))
 
 const SLIP_DAYS = 7
 
@@ -46,6 +53,11 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
     ...defaultMonthRange(new Date()),
   }))
   const [status, setStatus] = useState<Status>({ kind: 'idle' })
+  // Punkt kliknięty na mapie poza katalogiem (`answers.place === PIN_ID`).
+  const [pin, setPin] = useState<{ lat_deg: number; lon_deg: number } | null>(null)
+  const [mapView, setMapView] = useState<ViewRequest>({ target: 'south', seq: 1 })
+  const [mapZoom, setMapZoom] = useState<ZoomRequest | null>(null)
+  const mapSeq = useRef(1)
   const requestId = useRef(0)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
@@ -59,7 +71,8 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
     const asked = answers
     setStatus({ kind: 'loading' })
     try {
-      const result = await findLandings(asked, sites, api.windows)
+      const searchSites = asked.place === PIN_ID && pin ? [...sites, pinnedSite(pin.lat_deg, pin.lon_deg)] : sites
+      const result = await findLandings(asked, searchSites, api.windows)
       // Starsze zapytanie nie nadpisuje nowszego.
       if (id === requestId.current) setStatus({ kind: 'done', result, answers: asked })
     } catch (error) {
@@ -71,6 +84,23 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
   useEffect(() => {
     if (status.kind === 'done') headingRef.current?.focus()
   }, [status])
+
+  const pinSite = pin ? pinnedSite(pin.lat_deg, pin.lon_deg) : null
+  const chosen = answers.place === PIN_ID ? pinSite : (sites.find((site) => site.id === answers.place) ?? null)
+  const chosenMarker: Scenario[] = chosen
+    ? [{ id: 'pick', name: chosen.name, lat_deg: chosen.lat_deg, lon_deg: chosen.lon_deg, start_utc: '', duration_hours: 0 }]
+    : []
+
+  function pickOnMap(lat_deg: number, lon_deg: number) {
+    const site = siteAt(sites, lat_deg, lon_deg)
+    if (site) {
+      setPin(null)
+      update({ place: site.id })
+    } else {
+      setPin({ lat_deg, lon_deg })
+      update({ place: PIN_ID })
+    }
+  }
 
   const groups = (Object.keys(CATEGORY_LABEL) as SiteCategory[])
     .map((category) => ({ category, sites: sites.filter((s) => s.category === category) }))
@@ -187,12 +217,16 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
               <select
                 aria-label="Landing place"
                 value={answers.place === 'auto' ? '' : answers.place}
-                onChange={(event) => update({ place: event.target.value })}
+                onChange={(event) => {
+                  if (event.target.value !== PIN_ID) setPin(null)
+                  update({ place: event.target.value })
+                }}
                 onFocus={() => {
                   if (answers.place === 'auto') update({ place: groups[0]?.sites[0]?.id ?? 'auto' })
                 }}
               >
                 {answers.place === 'auto' && <option value="">Choose a place…</option>}
+                {pinSite && <option value={PIN_ID}>{pinSite.name}</option>}
                 {groups.map((g) => (
                   <optgroup key={g.category} label={CATEGORY_LABEL[g.category]}>
                     {g.sites.map((s) => (
@@ -204,6 +238,42 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
                 ))}
               </select>
             </label>
+            {answers.place !== 'auto' && (
+              <div className="guide-map-picker">
+                <div className="guide-map-tools" role="group" aria-label="Map view">
+                  <button type="button" onClick={() => setMapView({ target: 'south', seq: ++mapSeq.current })}>
+                    South pole
+                  </button>
+                  <button type="button" onClick={() => setMapView({ target: 'near', seq: ++mapSeq.current })}>
+                    Near side
+                  </button>
+                  <button type="button" aria-label="Zoom in" onClick={() => setMapZoom({ direction: 1, seq: ++mapSeq.current })}>
+                    +
+                  </button>
+                  <button type="button" aria-label="Zoom out" onClick={() => setMapZoom({ direction: -1, seq: ++mapSeq.current })}>
+                    −
+                  </button>
+                </div>
+                <div className="guide-map">
+                  <Suspense fallback={<p role="status">Loading map…</p>}>
+                    <MoonGlobe
+                      sites={sites}
+                      scenarios={chosenMarker}
+                      activeId="pick"
+                      subsolar={null}
+                      subearth={null}
+                      onSelect={() => {}}
+                      onPick={pickOnMap}
+                      viewRequest={mapView}
+                      zoomRequest={mapZoom}
+                    />
+                  </Suspense>
+                </div>
+                <p className="guide-map-hint">
+                  Click a marker or any spot on the Moon to choose it. You can also use the list above.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
