@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.api import routes
@@ -102,6 +103,27 @@ def test_optimal_site_contract_stub():
         params={**SCENARIO, "end_utc": "2026-12-01T00:00:00Z"},
     )
     assert invalid_range.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"w_sun": "nan"},
+        {"w_sun": -1},
+        {"w_earth": "inf"},
+    ],
+    ids=["w_sun_nan", "w_sun_negative", "w_earth_inf"],
+)
+def test_optimal_site_rejects_invalid_weights(params):
+    r = client.get(
+        "/api/optimal-site",
+        params={
+            "start_utc": "2027-01-01T00:00:00Z",
+            "end_utc": "2027-01-10T00:00:00Z",
+            **params,
+        },
+    )
+    assert r.status_code == 422
 
 
 def test_rejects_bad_input():
