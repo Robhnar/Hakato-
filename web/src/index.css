@@ -1,18 +1,29 @@
 /* Style bazowe powłoki. Widoki trzymają własne style w swoich katalogach. */
 
 :root {
-  --bg: #0b0e14;
-  --panel: #151a23;
-  --border: #2a3140;
-  --text: #e6e9ef;
-  --muted: #9aa4b5;
-  --accent: #f2c14e;
-  --warning: #e8a33d;
-  --error: #ef6b6b;
-  --ok: #6bcf7f;
+  /* Paleta „konsoli misji” (zadanie 021). */
+  --bg: #0c0c0d;
+  --surface: #141415;
+  --line: #27282b;
+  --text: #e9e6df;
+  --muted: #918e86;
+  --sun: #e9b44c;
+  --earth: #5aa2e0;
+  --ok: #7dbb78;
+  --warning: #d9923b;
+  --error: #e0685f;
+
+  /* Stare nazwy zostają aliasami, żeby style widoków nie pękły w czasie migracji. */
+  --panel: var(--surface);
+  --border: var(--line);
+  --accent: var(--text);
+
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --radius: 2px;
 
   color-scheme: dark;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.5;
 }
 
@@ -20,6 +31,32 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* Wspólne klasy typografii i akcji (zadanie 021). */
+
+/* Liczby, czas, współrzędne i osie: mono z cyframi tabelarycznymi. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Etykieta sekcji: mała, wersaliki, rozstrzelona. */
+.label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Główna akcja: jasne wypełnienie, tekst w kolorze tła. */
+.btn-primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
 }
 
 .app {
@@ -61,9 +98,9 @@ h2 {
 }
 
 .controls {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   padding: 12px;
 }
 
@@ -74,8 +111,8 @@ h2 {
   align-items: end;
   margin: 0;
   padding: 8px 10px;
-  border: 1px dashed var(--border);
-  border-radius: 6px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
   min-width: min(100%, 320px);
 }
 
@@ -99,20 +136,23 @@ label {
   color: var(--muted);
 }
 
+/* Kontrolki: prostokątne, obrys 1 px, promień 2 px, wysokość 32 px.
+   Pola wyboru i suwaki zachowują natywny wygląd. */
 select,
 input,
 button {
   font: inherit;
   color: var(--text);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 10px;
 }
 
-.controls select,
-.controls input {
+select,
+button,
+input:not([type='checkbox']):not([type='radio']):not([type='range']) {
   background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  height: 32px;
+  padding: 0 10px;
 }
 
 button {
@@ -124,9 +164,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
-button.selected {
-  border-color: var(--accent);
-  color: var(--accent);
+/* Zaznaczenie: jasny tekst i kreska 2 px, bez zmiany koloru obrysu. */
+button.selected,
+[aria-pressed='true'] {
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 var(--text);
+}
+
+/* Widoczny fokus na wszystkich kontrolkach (także klawiatura). */
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 .hint {
@@ -137,9 +185,9 @@ button.selected {
 
 .summary,
 .placeholder {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   padding: 12px 16px;
   margin-bottom: 12px;
 }
@@ -148,7 +196,6 @@ button.selected {
   position: sticky;
   top: 0;
   z-index: 5;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .summary-grid {
@@ -158,18 +205,18 @@ button.selected {
 }
 
 .body-card {
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   padding: 10px 12px;
   background: var(--bg);
 }
 
 .body-card.on {
-  border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+  border-color: color-mix(in srgb, var(--ok) 55%, var(--line));
 }
 
 .body-card.off {
-  border-color: color-mix(in srgb, var(--muted) 40%, var(--border));
+  border-color: color-mix(in srgb, var(--muted) 40%, var(--line));
 }
 
 .body-state {
@@ -228,41 +275,18 @@ button.selected {
 
   .chips button,
   .tabs button,
-  .scenario-actions button {
+  .scenario-actions button,
+  .mode-switch button {
     width: auto;
     flex: 1 1 auto;
   }
 }
 
-/* Przełącznik trybu Simple / Expert (020) */
+/* Przełącznik trybu Simple / Expert (020). Pigułki usunięte – układ zakładek
+   przyjdzie w zadaniu 2; do tego czasu zostaje sam układ wiersza. */
 .mode-switch {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin: 0 0 16px;
-}
-
-.mode-switch button {
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 999px;
-}
-
-.mode-switch button[aria-pressed='true'] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #11151c;
-  font-weight: 700;
-}
-
-.mode-switch button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-@media (max-width: 640px) {
-  .mode-switch button {
-    width: auto;
-    flex: 1 1 auto;
-  }
 }
