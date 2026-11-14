@@ -52,11 +52,13 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 
 ## Czego nie sprawdzono
 
-- Czytnik ekranu (NVDA/VoiceOver) – nie testowany.
-- Zrzuty z 390 px zrobione tylko dla Mapy z nakładką; pozostałe widoki przy 390 px sprawdzone pomiarem przepełnienia, bez oglądania zrzutów.
-- Kontrast linii danych na wykresach (≥ 3:1) – nie liczony; tekst: tokeny ≥ 5.6:1, komórki mapy cieplnej ≥ 4.61:1.
+- Czytnik ekranu (NVDA/VoiceOver) – nie testowany; zamiast niego przejrzano drzewo dostępności i nazwy elementów.
+- Zrzuty zrobione przy 390 px dla trybu prowadzonego, Sky, Timeline, Compare, Windows i Mapy z nakładką; przy 1024 px dla Sky, Timeline, Compare, Windows i Mapy; przy 1440 px dla Mapy z nakładką.
+- Kontrast: tekst – tokeny ≥ 5.6:1, komórki mapy cieplnej ≥ 4.61:1; linie danych (Słońce, Ziemia, osie, kursor) 5.6–15.7:1, czyli ≥ 3:1; siatka tła (1.3:1) jest dekoracyjna.
 - Podpis zwycięzcy (rang 1) na globusie bywa chowany przez kolizję z podpisem scenariusza; nazwa i wynik są w panelu.
-- Zrzuty do opisu PR leżą lokalnie w `.playwright-mcp/` (poza repozytorium): `pr-map-overlay-1440.png`, `pr-map-390.png`, `pr-timeline-1024.png`.
+- Na telefonie wykresy Sky i Timeline mają minimalną szerokość 640 px i przewijają się poziomo w kontenerze; w Timeline przeciąganie po wykresie przesuwa kursor, więc przewija się paskiem pod wykresem.
+- Tabela Compare przy 390 px przewija się poziomo wewnątrz sceny.
+- Zrzuty do opisu PR leżą lokalnie w `.playwright-mcp/` (poza repozytorium): `pr-map-overlay-1440.png`, `pr-timeline-1024.png`, `pr-map-390.png`, `pr-sky-390.png`, `pr-timeline-390.png`, `pr-compare-390.png`, `pr-windows-390.png`, `pr-guide-390.png`.
 
 Sprawdzone ręcznie: Tab (nagłówek → panel boczny → pola, obrys 2 px na każdym elemencie), Spacja na przełączniku i presecie, strzałki na suwaku (45 → 55%), fokus zostaje na presecie po zmianie; lot `South pole`; 10 przełączeń Map ↔ Sky bez błędów WebGL; `Retry`; debounce wag; przegląd skillami `design:accessibility-review` i `design:design-critique` z poprawkami (cele dotykowe 44 px, marginesy widoków, układ Windows, rozmiar etykiet osi, numery rang, przyciski panelu na telefonie).
 

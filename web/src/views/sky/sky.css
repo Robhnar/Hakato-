@@ -268,3 +268,14 @@
     padding: 4px 6px;
   }
 }
+
+/* Telefon: wykres nie kurczy się poniżej czytelnej skali (etykiety >= ok. 10 px), panel przewija się poziomo. */
+@media (max-width: 640px) {
+  .sky-panel {
+    overflow-x: auto;
+  }
+
+  .sky-svg {
+    min-width: 640px;
+  }
+}
