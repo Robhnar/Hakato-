@@ -1,20 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../../api/client'
 import { useAsync } from '../../api/useAsync'
+import { formatHours, formatPercent, formatUtc } from '../../app/format'
 import { type ViewProps, endUtc, toIsoZ, toRangeQuery } from '../../app/scenario'
-import { advance, hoursUntilChange, overlapSegments, stepMinutesFor, visibilitySegments } from './windows'
+import {
+  advance,
+  dayTicks,
+  hoursUntilChange,
+  niceTicks,
+  overlapSegments,
+  stepMinutesFor,
+  visibilitySegments,
+} from './windows'
 import './timeline.css'
 
 // Pasy widoczności i wykres wysokości muszą się zgadzać co do piksela, więc cały
 // rysunek jest w jednym SVG o stałym viewBox (skaluje się razem z szerokością).
 const VIEW_W = 1000
 const PAD_L = 46
-const PAD_R = 14
-const BAND_H = 16
-const BAND_STEP = BAND_H + 6
-const BAND_TOP = 16
+// Prawy margines mieści procent pasa i podpisy „Sun" / „Earth" na końcu linii.
+const PAD_R = 56
+const BAND_H = 10
+const BAND_STEP = BAND_H + 8
+const BAND_TOP = 14
 const CHART_TOP = BAND_TOP + 3 * BAND_STEP + 12
-const CHART_H = 128
+const CHART_H = 140
 const AXIS_TOP = CHART_TOP + CHART_H + 22
 const VIEW_H = AXIS_TOP + 14
 const PLOT_W = VIEW_W - PAD_L - PAD_R
@@ -38,20 +48,26 @@ function clampTime(ms: number, startMs: number, endMs: number): number {
   return Math.min(endMs, Math.max(startMs, ms))
 }
 
-function formatTick(iso: string): string {
-  const date = new Date(iso)
+/** Podziałka krótkiego okna: dzień i godzina, np. `19 May 19:00`. */
+function formatHourTick(ms: number): string {
+  const date = new Date(ms)
   const day = date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'UTC' })
   return `${day} ${String(date.getUTCHours()).padStart(2, '0')}:00`
 }
 
-function formatCursor(iso: string): string {
-  return `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`
+/** Podziałka wielodniowego okna: sama data, np. `20 May`. */
+function formatDayTick(ms: number): string {
+  return new Date(ms).toLocaleDateString('en-GB', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
 }
 
-/** Odmiana liczby godzin: „sets in 20.0 h", „no change in this window". */
+/** Opis najbliższej zmiany: „Sun sets in 12.0 h", „Earth no change". */
 function describeChange(label: string, visible: boolean, hours: number | null): string {
-  if (hours === null) return `${label}: no change in this window`
-  return `${label} ${visible ? 'sets' : 'rises'} in ${hours.toFixed(1)} h`
+  if (hours === null) return `${label} no change`
+  return `${label} ${visible ? 'sets' : 'rises'} in ${formatHours(hours)}`
 }
 
 function lastVisibleAt(times: string[], visible: boolean[], ms: number): boolean {
@@ -63,10 +79,19 @@ function lastVisibleAt(times: string[], visible: boolean[], ms: number): boolean
   return value
 }
 
+/** Udział próbek, w których wszystkie podane serie są widoczne (procent 0…100). */
 function share(times: string[], ...series: boolean[][]): number {
   if (times.length === 0) return 0
   const visible = times.filter((_, index) => series.every((flags) => flags[index])).length
   return (visible / times.length) * 100
+}
+
+/** Ostatnia poprawna wartość serii przeliczona na y wykresu. */
+function lastY(series: number[], scale: { min: number; max: number }): number {
+  for (let index = series.length - 1; index >= 0; index -= 1) {
+    if (Number.isFinite(series[index])) return yForElevation(series[index], scale)
+  }
+  return CHART_TOP + CHART_H / 2
 }
 
 export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewProps) {
@@ -115,6 +140,8 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
       scale,
       sunPath: path(data.sun.el_deg),
       earthPath: path(data.earth.el_deg),
+      sunEndY: lastY(data.sun.el_deg, scale),
+      earthEndY: lastY(data.earth.el_deg, scale),
       shares: {
         sun: share(times, data.sun.visible),
         earth: share(times, data.earth.visible),
@@ -170,8 +197,25 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
   const sunChange = hoursUntilChange(times, data!.sun.visible, cursorIso)
   const earthChange = hoursUntilChange(times, data!.earth.visible, cursorIso)
   const cursorX = xFor(cursorMs, startMs, endMs)
-  const cursorPercent = (cursorX / VIEW_W) * 100
-  const badgeOnLeft = cursorPercent > 62
+
+  const yZero = yForElevation(0, scale)
+  const belowHeight = Math.max(0, CHART_TOP + CHART_H - yZero)
+  const elevationTicks = niceTicks(scale.min, scale.max)
+
+  // Podpisy linii na prawym końcu; przy zbliżonych wysokościach rozsuwamy je o 12 px.
+  const sunLabelY = Math.min(CHART_TOP + CHART_H, Math.max(CHART_TOP + 10, geometry.sunEndY))
+  const earthLabelRaw = Math.abs(geometry.earthEndY - geometry.sunEndY) < 12
+    ? geometry.earthEndY + 12
+    : geometry.earthEndY
+  const earthLabelY = Math.min(CHART_TOP + CHART_H, Math.max(CHART_TOP + 10, earthLabelRaw))
+
+  // Okno do 48 h: dotychczasowe 6 równych podziałek z godziną. Dłuższe: północe UTC.
+  const spanHours = (endMs - startMs) / 3_600_000
+  const midnightTicks = dayTicks(startMs, endMs)
+  const timeTicks: { ms: number; label: string }[] =
+    spanHours > 48 && midnightTicks.length > 0
+      ? midnightTicks.map((ms) => ({ ms, label: formatDayTick(ms) }))
+      : tickTimes(startMs, endMs).map((ms) => ({ ms, label: formatHourTick(ms) }))
 
   function timeAtClientX(clientX: number): number {
     const rect = plotRef.current?.getBoundingClientRect()
@@ -223,7 +267,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     else moveCursor(cursorMs + (jumps[event.key] ?? 0))
   }
 
-  const summary = `${formatCursor(cursorIso)}. ${describeChange('Sun', sunNow, sunChange)}. ${describeChange(
+  const summary = `${formatUtc(cursorIso)}. ${describeChange('Sun', sunNow, sunChange)}. ${describeChange(
     'Earth',
     earthNow,
     earthChange,
@@ -234,7 +278,8 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
       <div className="timeline-head">
         <h2>Timeline</h2>
         <span className="timeline-meta">
-          {active.name} · {active.duration_hours.toFixed(0)} h · every {step} min (UTC)
+          {active.name} · <span className="num">{formatHours(active.duration_hours, 0)}</span> · every{' '}
+          <span className="num">{step}</span> min (UTC)
         </span>
         <span className="timeline-legend">
           <span className="timeline-chip timeline-chip-sun" /> Sun
@@ -268,7 +313,19 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
             ))}
           </select>
         </label>
-        <span className="timeline-cursor-label">{formatCursor(cursorIso)}</span>
+        {/* Stały odczyt zamiast dymka nachodzącego na pasy. */}
+        <div className="timeline-readout">
+          <span className="num timeline-readout-time">{formatUtc(cursorIso)}</span>
+          <span className="timeline-readout-change">
+            <span className="timeline-chip timeline-chip-sun" aria-hidden="true" />
+            {describeChange('Sun', sunNow, sunChange)}
+            <span className="timeline-sep" aria-hidden="true">
+              ·
+            </span>
+            <span className="timeline-chip timeline-chip-earth" aria-hidden="true" />
+            {describeChange('Earth', earthNow, earthChange)}
+          </span>
+        </div>
       </div>
 
       <div className="timeline-canvas">
@@ -289,90 +346,111 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
           onPointerCancel={onPointerUp}
           onKeyDown={onKeyDown}
         >
-          <defs>
-            <linearGradient id="timeline-both-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="50%" className="timeline-both-stop-sun" />
-              <stop offset="50%" className="timeline-both-stop-earth" />
-            </linearGradient>
-          </defs>
-
-          <rect
-            className="timeline-track"
-            x={PAD_L}
+          <BandRow
+            windows={sunWindows}
             y={BAND_TOP}
-            width={PLOT_W}
-            height={3 * BAND_STEP - 6}
-            rx={4}
-            aria-hidden="true"
+            tone="sun"
+            startMs={startMs}
+            endMs={endMs}
           />
-
-          <Band windows={sunWindows} y={BAND_TOP} startMs={startMs} endMs={endMs} tone="sun" />
-          <Band
+          <BandRow
             windows={earthWindows}
             y={BAND_TOP + BAND_STEP}
+            tone="earth"
             startMs={startMs}
             endMs={endMs}
-            tone="earth"
           />
-          <Band
+          <BandRow
             windows={bothWindows}
             y={BAND_TOP + 2 * BAND_STEP}
+            tone="both"
             startMs={startMs}
             endMs={endMs}
-            tone="both"
           />
 
-          <text className="timeline-row-label" x={PAD_L - 8} y={BAND_TOP + 12} textAnchor="end">
-            Sun
-          </text>
-          <text
-            className="timeline-row-label"
-            x={PAD_L - 8}
-            y={BAND_TOP + BAND_STEP + 12}
-            textAnchor="end"
-          >
-            Earth
-          </text>
-          <text
-            className="timeline-row-label"
-            x={PAD_L - 8}
-            y={BAND_TOP + 2 * BAND_STEP + 12}
-            textAnchor="end"
-          >
-            Both
-          </text>
+          {[
+            { label: 'Sun', y: BAND_TOP, percent: shares.sun },
+            { label: 'Earth', y: BAND_TOP + BAND_STEP, percent: shares.earth },
+            { label: 'Both', y: BAND_TOP + 2 * BAND_STEP, percent: shares.both },
+          ].map((row) => (
+            <g key={row.label} aria-hidden="true">
+              <text
+                className="timeline-row-label"
+                x={PAD_L - 8}
+                y={row.y + BAND_H - 1}
+                textAnchor="end"
+              >
+                {row.label}
+              </text>
+              <text
+                className="timeline-row-percent num"
+                x={PAD_L + PLOT_W + 8}
+                y={row.y + BAND_H - 1}
+              >
+                {formatPercent(row.percent / 100)}
+              </text>
+            </g>
+          ))}
 
-          <rect className="timeline-chart-bg" x={PAD_L} y={CHART_TOP} width={PLOT_W} height={CHART_H} rx={4} />
-          <line
-            className="timeline-zero"
-            x1={PAD_L}
-            y1={yForElevation(0, scale)}
-            x2={PAD_L + PLOT_W}
-            y2={yForElevation(0, scale)}
-          />
-          <text className="timeline-axis-label" x={PAD_L - 8} y={yForElevation(0, scale) + 4} textAnchor="end">
-            0°
-          </text>
-          <text className="timeline-axis-label" x={PAD_L - 8} y={CHART_TOP + 9} textAnchor="end">
-            {scale.max.toFixed(0)}°
-          </text>
-          <text className="timeline-axis-label" x={PAD_L - 8} y={CHART_TOP + CHART_H} textAnchor="end">
-            {scale.min.toFixed(0)}°
-          </text>
+          {/* Wykres wysokości */}
+          <rect className="timeline-chart-bg" x={PAD_L} y={CHART_TOP} width={PLOT_W} height={CHART_H} />
+          {belowHeight > 0 && (
+            <>
+              <rect
+                className="timeline-below"
+                x={PAD_L}
+                y={yZero}
+                width={PLOT_W}
+                height={belowHeight}
+              />
+              <text
+                className="timeline-below-label"
+                x={PAD_L + 8}
+                y={CHART_TOP + CHART_H - 6}
+              >
+                below horizon
+              </text>
+            </>
+          )}
+
+          {elevationTicks.map((value) => {
+            const y = yForElevation(value, scale)
+            const isZero = Math.abs(value) < 1e-9
+            return (
+              <g key={value} aria-hidden="true">
+                <line
+                  className={isZero ? 'timeline-zero' : 'timeline-grid'}
+                  x1={PAD_L}
+                  y1={y}
+                  x2={PAD_L + PLOT_W}
+                  y2={y}
+                />
+                <text className="timeline-axis-label" x={PAD_L - 8} y={y + 4} textAnchor="end">
+                  {Number.isInteger(value) ? `${value}°` : `${value.toFixed(1)}°`}
+                </text>
+              </g>
+            )
+          })}
 
           <path className="timeline-line timeline-line-sun" d={sunPath} />
           <path className="timeline-line timeline-line-earth" d={earthPath} />
+          <text className="timeline-line-label timeline-line-label-sun" x={PAD_L + PLOT_W + 8} y={sunLabelY + 4}>
+            Sun
+          </text>
+          <text className="timeline-line-label timeline-line-label-earth" x={PAD_L + PLOT_W + 8} y={earthLabelY + 4}>
+            Earth
+          </text>
 
           <g className="timeline-ticks">
-            {tickTimes(startMs, endMs).map((tickMs, index, all) => {
-              const x = xFor(tickMs, startMs, endMs)
-              const anchor = index === 0 ? 'start' : index === all.length - 1 ? 'end' : 'middle'
+            {timeTicks.map((tick, index) => {
+              const x = xFor(tick.ms, startMs, endMs)
+              const anchor = index === 0 ? 'start' : index === timeTicks.length - 1 ? 'end' : 'middle'
               return (
                 // Okno o zerowej długości daje identyczne znaczniki czasu — indeks pilnuje unikalności.
-                <g key={`${tickMs}-${index}`} aria-hidden="true">
+                <g key={`${tick.ms}-${index}`} aria-hidden="true">
                   <line className="timeline-tick" x1={x} y1={CHART_TOP} x2={x} y2={CHART_TOP + CHART_H} />
                   <text className="timeline-axis-label" x={x} y={AXIS_TOP} textAnchor={anchor}>
-                    {formatTick(toIsoZ(new Date(tickMs)))}
+                    {tick.label}
                   </text>
                 </g>
               )
@@ -388,62 +466,63 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
           />
           <circle className="timeline-cursor-handle" cx={cursorX} cy={BAND_TOP - 8} r={4} />
         </svg>
-
-        <div
-          className={`timeline-badge${badgeOnLeft ? ' timeline-badge-left' : ''}`}
-          style={{ left: `${cursorPercent}%` }}
-        >
-          <p>
-            <span className="timeline-chip timeline-chip-sun" />
-            {describeChange('Sun', sunNow, sunChange)}
-          </p>
-          <p>
-            <span className="timeline-chip timeline-chip-earth" />
-            {describeChange('Earth', earthNow, earthChange)}
-          </p>
-        </div>
       </div>
 
       <p className="timeline-share">
-        Sun visible {shares.sun.toFixed(0)}% · Earth visible {shares.earth.toFixed(0)}% · both{' '}
-        {shares.both.toFixed(0)}% of the window ({sunWindows.length} sun and {earthWindows.length} earth
-        windows)
+        Sun visible {formatPercent(shares.sun / 100)} of the window · Earth visible{' '}
+        {formatPercent(shares.earth / 100)} · both {formatPercent(shares.both / 100)}.
       </p>
     </div>
   )
 }
 
-function Band({
+/** Jeden wiersz pasów widoczności: tor w kolorze linii + wypełnione okna. */
+function BandRow({
   windows,
   y,
+  tone,
   startMs,
   endMs,
-  tone,
 }: {
   windows: { start_utc: string; end_utc: string }[]
   y: number
+  tone: 'sun' | 'earth' | 'both'
   startMs: number
   endMs: number
-  tone: 'sun' | 'earth' | 'both'
 }) {
   return (
-    <g aria-hidden="true">
+    <g>
+      {/* Tor pasa: pełna szerokość okna w kolorze linii — pusty pas nadal widać. */}
+      <rect className="timeline-track" x={PAD_L} y={y} width={PLOT_W} height={BAND_H} />
       {windows.map((window) => {
         const x1 = xFor(Date.parse(window.start_utc), startMs, endMs)
         const x2 = Math.max(x1 + 1, xFor(Date.parse(window.end_utc), startMs, endMs))
-        return (
+        const width = x2 - x1
+        const title = `${formatUtc(window.start_utc)} → ${formatUtc(window.end_utc)}`
+        // „Both" to podział pasa w poprzek (góra Słońce, dół Ziemia) — bez gradientu.
+        return tone === 'both' ? (
+          <g key={window.start_utc}>
+            <rect className="timeline-band timeline-band-sun" x={x1} y={y} width={width} height={BAND_H / 2}>
+              <title>{title}</title>
+            </rect>
+            <rect
+              className="timeline-band timeline-band-earth"
+              x={x1}
+              y={y + BAND_H / 2}
+              width={width}
+              height={BAND_H / 2}
+            />
+          </g>
+        ) : (
           <rect
             key={window.start_utc}
             className={`timeline-band timeline-band-${tone}`}
             x={x1}
             y={y}
-            width={x2 - x1}
+            width={width}
             height={BAND_H}
-            rx={3}
           >
-            <title>
-              {window.start_utc} → {window.end_utc}
-            </title>
+            <title>{title}</title>
           </rect>
         )
       })}
@@ -451,6 +530,7 @@ function Band({
   )
 }
 
+/** Równe podziałki krótkiego okna (godziny) — sześć, jak dotąd. */
 function tickTimes(startMs: number, endMs: number): number[] {
   const span = endMs - startMs
   return Array.from({ length: TICKS }, (_, index) => startMs + (span * index) / (TICKS - 1))
