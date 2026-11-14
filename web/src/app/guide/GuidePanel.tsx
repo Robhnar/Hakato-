@@ -93,10 +93,11 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
           void search()
         }}
       >
-        <fieldset className="guide-step">
-          <legend>
-            <span className="guide-step-no">1</span> How long will the mission stay on the Moon?
-          </legend>
+        <div className="guide-step" role="group" aria-labelledby="guide-step-mission">
+          <h3 className="guide-step-title">
+            <span className="guide-step-no num">01</span>
+            <span id="guide-step-mission">How long will the mission stay on the Moon?</span>
+          </h3>
           <div className="guide-choices">
             {(Object.keys(MISSIONS) as MissionKind[]).map((kind) => (
               <label key={kind} className="guide-choice">
@@ -112,12 +113,13 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
               </label>
             ))}
           </div>
-        </fieldset>
+        </div>
 
-        <fieldset className="guide-step">
-          <legend>
-            <span className="guide-step-no">2</span> What matters most?
-          </legend>
+        <div className="guide-step" role="group" aria-labelledby="guide-step-priority">
+          <h3 className="guide-step-title">
+            <span className="guide-step-no num">02</span>
+            <span id="guide-step-priority">What matters most?</span>
+          </h3>
           <div className="guide-choices">
             {PRIORITIES.map((p) => (
               <label key={p.id} className="guide-choice">
@@ -141,12 +143,13 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
             />
             Earth must be in the sky at the moment of landing (live video home)
           </label>
-        </fieldset>
+        </div>
 
-        <fieldset className="guide-step">
-          <legend>
-            <span className="guide-step-no">3</span> When and where?
-          </legend>
+        <div className="guide-step" role="group" aria-labelledby="guide-step-when">
+          <h3 className="guide-step-title">
+            <span className="guide-step-no num">03</span>
+            <span id="guide-step-when">When and where?</span>
+          </h3>
           <div className="guide-row">
             <label>
               Earliest landing month
@@ -162,7 +165,7 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
               {rangeError}
             </p>
           )}
-          <div className="guide-choices guide-choices-place">
+          <div className="guide-choices">
             <label className="guide-choice">
               <input
                 type="radio"
@@ -202,11 +205,11 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
               </select>
             </label>
           </div>
-        </fieldset>
+        </div>
 
         <button
           type="submit"
-          className="guide-primary guide-submit"
+          className="btn-primary guide-submit"
           disabled={rangeError !== null || status.kind === 'loading'}
           aria-describedby={rangeError ? 'guide-range-error' : undefined}
         >
@@ -280,11 +283,11 @@ function Results({
       />
 
       <section className="guide-slip">
-        <h3>If your launch slips by a week</h3>
+        <h3 className="label">If your launch slips by a week</h3>
         {slipped ? (
           <p>
-            Next good chance at {best.site.name}: <strong>{formatDay(slipped.slot.start_utc)}</strong> at{' '}
-            {formatUtcTime(slipped.slot.start_utc)}
+            Next good chance at {best.site.name}: <strong className="num">{formatDay(slipped.slot.start_utc)}</strong> at{' '}
+            <span className="num">{formatUtcTime(slipped.slot.start_utc)}</span>
             {slipped.points < best.points - 10 ? ' — not quite as good, but workable.' : ' — about as good.'}
           </p>
         ) : (
@@ -294,12 +297,12 @@ function Results({
 
       {alternatives.length > 0 && (
         <section className="guide-others">
-          <h3>Other good options</h3>
+          <h3 className="label">Other good options</h3>
           <ul>
             {alternatives.map((c) => (
               <li key={`${c.site.id}-${c.slot.start_utc}`}>
                 <span className="guide-other-name">{c.site.name}</span>
-                <span className="guide-other-when">
+                <span className="guide-other-when num">
                   {formatDay(c.slot.start_utc)}, {formatUtcTime(c.slot.start_utc)}
                 </span>
                 <span className="guide-other-why">
