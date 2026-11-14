@@ -34,25 +34,25 @@ Deterministyczne przeszukiwanie wieloletnie tym samym silnikiem (`SPICE` + horyz
 - `de440s.bsp`: `1849-12-25` → `2150-01-21`
 - `moon_pa_de440_200625.bpc`: `1549-12-30` → `2650-01-24`
 
-| Nr | Zadanie | Moduł | Sugerowana osoba | Zależy od | Status |
+| Nr | Zadanie | Moduł | Przydzielona osoba | Zależy od | Status |
 | --- | --- | --- | --- | --- | --- |
-| [011](011-kontrakt-wyszukiwarki-okien.md) | Kontrakt `/api/windows`, fixture i zakładka `Windows` | `api`, `contracts`, powłoka | C + integrator | – | wolne |
-| [012](012-kalendarz-wieloletni-dane.md) | Kalendarz miejsca na lata 2027–2035 (`data/calendars/`) | `data`, `metrics` | B | 011 | wolne |
-| [013](013-silnik-wyszukiwania-i-opoznien.md) | Silnik wyszukiwania po wymaganiach, cykli i opóźnienia startu | `metrics`, `api` | A | 011 (012) | wolne |
-| [014](014-widok-mapy-cieplnej-okien.md) | Widok `windows`: mapa cieplna „data startu × parametr" i cykle | widok `windows` | D | 011 | wolne |
-| [015](015-panel-wymagan-i-opoznienia-startu.md) | Widok `windows`: wymagania misji i „Start opóźnił się o N dni" | widok `windows` | F | 011 | wolne |
-| [016](016-margines-niepewnosci-i-rozszerzenia.md) | Margines niepewności (tarcza Słońca, elipsa) i zaćmienia (rozszerzenie) | `metrics`, `terrain` | E | 011, 013 | wolne |
+| [011](011-kontrakt-wyszukiwarki-okien.md) | Kontrakt `/api/windows`, fixture i zakładka `Windows` | `api`, `contracts`, powłoka | osoba C | – | wolne |
+| [012](012-kalendarz-wieloletni-dane.md) | Kalendarz miejsca na lata 2027–2035 (`data/calendars/`) | `data`, `metrics` | osoba B | 011 | wolne |
+| [013](013-silnik-wyszukiwania-i-opoznien.md) | Silnik wyszukiwania po wymaganiach, cykli i opóźnienia startu | `metrics`, `api` | osoba A | 011 (012) | wolne |
+| [014](014-widok-mapy-cieplnej-okien.md) | Widok `windows`: mapa cieplna „data startu × parametr" i cykle | widok `windows` | osoba D | 011 | wolne |
+| [015](015-panel-wymagan-i-opoznienia-startu.md) | Widok `windows`: wymagania misji i „Start opóźnił się o N dni" | widok `windows` | osoba F | 011 | wolne |
+| [016](016-margines-niepewnosci-i-rozszerzenia.md) | Margines niepewności (tarcza Słońca, elipsa) i zaćmienia | `metrics`, `terrain` | osoba E | 011, 013 | wolne |
 
 ## Kolejność prac w Fazie 2
 
-1. **Krok 1 (blokujący kontrakt):** Zadanie **011** (osoba C / integrator) — dodaje schemat `/api/windows`, `contracts/fixtures/windows.json`, metodę `api.windows()` oraz zakładkę `Windows` z akcją `applyWindow`.
+1. **Krok 1 (blokujący kontrakt):** Zadanie **011** (**osoba C**) — dodaje schemat `/api/windows`, `contracts/fixtures/windows.json`, metodę `api.windows()` oraz zakładkę `Windows` z akcją `applyWindow`.
 2. **Krok 2 (równolegle po 011):**
-   - **Osoba B (012):** skrypt `data/scripts/build_calendars.py` i wygenerowanie wieloletnich kalendarzy 2027–2035 do `data/calendars/<id>.json`.
-   - **Osoba A (013):** logika filtrowania po wymaganiach misji, symulacji „Start się opóźnił o N dni" (`slip_days` + najbliższe okno równoważne) i wyznaczania faz cykli w `GET /api/windows`.
-   - **Osoba D (014):** komponent `CalendarHeatmap.tsx` („data startu × parametr") i legenda cykli `CyclesLegend.tsx` (praca na `npm run dev:fixtures`).
-   - **Osoba F (015):** komponenty `RequirementsPanel.tsx`, `MatchesList.tsx` oraz `SlipAnalyzer.tsx` („Launch delayed by +N days").
-3. **Krok 3 (rozszerzenie, jeśli zostanie czas):**
-   - **Osoba E (016):** tarcza słoneczna `0,53°`, margines błędu horyzontu `±0,2°`, rozrzut w elipsie lądowania oraz zaćmienia Słońca przez Ziemię.
+   - **osoba B (012):** skrypt `data/scripts/build_calendars.py` i wygenerowanie wieloletnich kalendarzy 2027–2035 do `data/calendars/<id>.json`.
+   - **osoba A (013):** logika filtrowania po wymaganiach misji, symulacji „Start się opóźnił o N dni" (`slip_days` + najbliższe okno równoważne) i wyznaczania faz cykli w `GET /api/windows`.
+   - **osoba D (014):** komponent `CalendarHeatmap.tsx` („data startu × parametr") i legenda cykli `CyclesLegend.tsx` (praca na `npm run dev:fixtures`).
+   - **osoba F (015):** komponenty `RequirementsPanel.tsx`, `MatchesList.tsx` oraz `SlipAnalyzer.tsx` („Launch delayed by +N days").
+3. **Krok 3 (równolegle / rozszerzenie):**
+   - **osoba E (016):** tarcza słoneczna `0,53°`, margines błędu horyzontu `±0,2°`, rozrzut w elipsie lądowania oraz zaćmienia Słońca przez Ziemię.
 
 ## Pliki, w których łatwo o konflikt
 
