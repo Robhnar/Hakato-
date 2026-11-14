@@ -391,7 +391,7 @@ export default function MoonGlobe({
         if (row.candidate.id === selectedCandidateId) {
           addLabel(`cand:${row.candidate.id}`, row.label, row.candidate.lat_deg, row.candidate.lon_deg, 115, true, 'map-label map-label-scenario is-active')
         } else if (row.rank <= CANDIDATE_TOP_RANKS) {
-          addLabel(`cand:${row.candidate.id}`, String(row.rank), row.candidate.lat_deg, row.candidate.lon_deg, 80, true, 'map-rank num')
+          addLabel(`cand:${row.candidate.id}`, String(row.rank), row.candidate.lat_deg, row.candidate.lon_deg, 130, true, 'map-label map-label-pole map-rank num')
         }
       }
       addLabel('pole-s', 'S', -90, 0, 90, true, 'map-label map-label-pole')

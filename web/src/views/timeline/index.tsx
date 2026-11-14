@@ -17,7 +17,7 @@ import './timeline.css'
 // Pasy widoczności i wykres wysokości muszą się zgadzać co do piksela, więc cały
 // rysunek jest w jednym SVG o stałym viewBox (skaluje się razem z szerokością).
 const VIEW_W = 1000
-const PAD_L = 46
+const PAD_L = 62
 // Prawy margines mieści procent pasa i podpisy „Sun" / „Earth" na końcu linii.
 const PAD_R = 56
 const BAND_H = 10

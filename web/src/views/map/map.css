@@ -451,3 +451,22 @@
     border-top: 1px solid var(--line);
   }
 }
+
+/* Telefon: globalne `button { width: 100% }` z index.css rozciągało przyciski panelu i paska narzędzi. */
+@media (max-width: 640px) {
+  .optimal-panel-head button {
+    flex: none;
+    width: 44px;
+    height: 44px;
+  }
+
+  .optimal-presets button,
+  .map-toolbar button {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .optimal-presets button {
+    min-height: 44px;
+  }
+}
