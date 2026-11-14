@@ -1,7 +1,7 @@
 # 006 – Widok nieba: panorama horyzontu
 
 - **Status:** w recenzji
-- **Właściciel:** osoba E
+- **Właściciel:** osoba D
 - **Moduł:** frontend – widok `sky`
 - **Gałąź:** `feat/006-widok-nieba`
 - **Zależy od:** –
@@ -41,11 +41,9 @@ Dostaje `ViewProps` (`web/src/app/scenario.ts`). Korzysta z `api.timeline()` i `
 ## Kryteria ukończenia
 
 - [x] Na fixtures (`npm run dev:fixtures`) widać nierówny horyzont i Słońce chowające się za nim przy zmianie kursora.
-- [x] Na danych z backendu dla Apollo 11 Ziemia stoi wysoko i prawie nieruchomo, a Słońce przechodzi przez całe niebo.
+- [ ] Na danych z backendu dla Apollo 11 Ziemia stoi wysoko i prawie nieruchomo, a Słońce przechodzi przez całe niebo.
 - [x] Funkcje przeliczające dane na współrzędne ekranu mają testy.
 - [x] `npm run lint`, `npm run build`, `npm test` zielone.
-
-Walidację backendu wykonano na modelu `placeholder` dostępnym na `main`; efemerydy SPICE są osobnym zadaniem.
 
 ## Notatki
 

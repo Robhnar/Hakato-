@@ -1,38 +1,93 @@
 import { api } from '../../api/client'
+import type { BodySeries, Horizon, Timeline } from '../../api/types'
 import { useAsync } from '../../api/useAsync'
 import { type ViewProps, toRangeQuery } from '../../app/scenario'
+import { horizonSilhouettePath, trailPaths } from './paths'
 import {
-  getElevationRange,
+  azToX,
+  elToY,
+  elevationRange,
   horizonElevationAt,
-  nearestSampleIndex,
-  projectPoint,
-  splitTrack,
-  type PlotBounds,
-} from './geometry'
+  nearestTimeIndex,
+  plotInner,
+  type PlotLayout,
+  toSvgPoint,
+} from './project'
 import './sky.css'
 
-const CHART_WIDTH = 800
-const CHART_HEIGHT = 380
-const PLOT: PlotBounds = { left: 58, top: 22, width: 710, height: 292 }
-const Y_TICK_COUNT = 5
+const WIDTH = 900
+const HEIGHT = 380
+const PADDING = { top: 18, right: 16, bottom: 36, left: 48 }
 
-type BodyName = 'sun' | 'earth'
+const CARDINAL: { az: number; label: string }[] = [
+  { az: 0, label: 'N' },
+  { az: 90, label: 'E' },
+  { az: 180, label: 'S' },
+  { az: 270, label: 'W' },
+]
 
-function formatDegrees(value: number): string {
-  return `${value.toFixed(1)}°`
+function buildLayout(horizon: Horizon, timeline: Timeline): PlotLayout {
+  const values = [
+    ...horizon.elevation_deg,
+    ...timeline.sun.el_deg,
+    ...timeline.earth.el_deg,
+  ]
+  const { elMin, elMax } = elevationRange(values)
+  return { width: WIDTH, height: HEIGHT, padding: PADDING, elMin, elMax }
 }
 
-function trackPath(azimuths: number[], elevations: number[], min: number, max: number): string {
-  return splitTrack(azimuths, elevations)
-    .map((segment) =>
-      segment.azimuths
-        .map((azimuth, index) => {
-          const point = projectPoint(azimuth, segment.elevations[index], { min, max }, PLOT)
-          return `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
-        })
-        .join(' '),
-    )
+function formatDeg(value: number, digits = 2): string {
+  return `${value.toFixed(digits)}°`
+}
+
+function BodyMarker({
+  az,
+  el,
+  visible,
+  kind,
+  layout,
+}: {
+  az: number
+  el: number
+  visible: boolean
+  kind: 'sun' | 'earth'
+  layout: PlotLayout
+}) {
+  const { x, y } = toSvgPoint(az, el, layout)
+  const r = kind === 'sun' ? 7 : 8
+  const className = [
+    kind === 'sun' ? 'sky-body-sun' : 'sky-body-earth',
+    visible ? '' : 'sky-body-occulted',
+  ]
+    .filter(Boolean)
     .join(' ')
+
+  return (
+    <g>
+      <circle className={className} cx={x} cy={y} r={r} />
+      {!visible && (
+        <title>{kind === 'sun' ? 'Sun' : 'Earth'} occulted by terrain</title>
+      )}
+    </g>
+  )
+}
+
+function Trail({
+  series,
+  className,
+  layout,
+}: {
+  series: BodySeries
+  className: string
+  layout: PlotLayout
+}) {
+  return (
+    <>
+      {trailPaths({ az_deg: series.az_deg, el_deg: series.el_deg }, layout).map((d, i) => (
+        <path key={i} className={className} d={d} />
+      ))}
+    </>
+  )
 }
 
 export default function SkyView({ active, cursor_utc }: ViewProps) {
@@ -48,204 +103,190 @@ export default function SkyView({ active, cursor_utc }: ViewProps) {
   }
   if (!timeline.data || !horizon.data) return <p>Loading…</p>
 
-  const { times_utc, sun, earth } = timeline.data
-  const horizonData = horizon.data
-  const sampleIndex = nearestSampleIndex(times_utc, cursor_utc)
-  if (sampleIndex < 0) return <p className="error">No sky samples are available for this scenario.</p>
-
-  const range = getElevationRange(
-    [0],
-    horizonData.elevation_deg,
-    sun.el_deg,
-    earth.el_deg,
+  const layout = buildLayout(horizon.data, timeline.data)
+  const idx = nearestTimeIndex(timeline.data.times_utc, cursor_utc)
+  const sunAz = timeline.data.sun.az_deg[idx]
+  const sunEl = timeline.data.sun.el_deg[idx]
+  const earthAz = timeline.data.earth.az_deg[idx]
+  const earthEl = timeline.data.earth.el_deg[idx]
+  const sunVisible = timeline.data.sun.visible[idx]
+  const earthVisible = timeline.data.earth.visible[idx]
+  const sunHorizonEl = horizonElevationAt(
+    sunAz,
+    horizon.data.elevation_deg,
+    horizon.data.azimuth_step_deg,
   )
-  const y = (elevation: number) => projectPoint(0, elevation, range, PLOT).y
-  const bottom = PLOT.top + PLOT.height
-  const horizonPoints = horizonData.elevation_deg.map((elevation, index) =>
-    projectPoint(index * horizonData.azimuth_step_deg, elevation, range, PLOT),
-  )
-  const horizonLinePath = horizonPoints
-    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
-    .join(' ')
-  const horizonFillPath = [
-    `M ${PLOT.left} ${bottom}`,
-    horizonPoints.map((point) => `L ${point.x} ${point.y}`).join(' '),
-    `L ${PLOT.left + PLOT.width} ${bottom} Z`,
-  ].join(' ')
-  const tickValues = Array.from(
-    { length: Y_TICK_COUNT },
-    (_, index) => range.max - ((range.max - range.min) * index) / (Y_TICK_COUNT - 1),
+  const earthHorizonEl = horizonElevationAt(
+    earthAz,
+    horizon.data.elevation_deg,
+    horizon.data.azimuth_step_deg,
   )
 
-  const bodies: Record<BodyName, { az: number; el: number }> = {
-    sun: { az: sun.az_deg[sampleIndex], el: sun.el_deg[sampleIndex] },
-    earth: { az: earth.az_deg[sampleIndex], el: earth.el_deg[sampleIndex] },
-  }
-  const horizonAtBody: Record<BodyName, number> = {
-    sun: horizonElevationAt(bodies.sun.az, horizonData.elevation_deg, horizonData.azimuth_step_deg),
-    earth: horizonElevationAt(
-      bodies.earth.az,
-      horizonData.elevation_deg,
-      horizonData.azimuth_step_deg,
-    ),
-  }
-  const visible: Record<BodyName, boolean> = {
-    sun: bodies.sun.el > horizonAtBody.sun,
-    earth: bodies.earth.el > horizonAtBody.earth,
-  }
-  const selectedTime = times_utc[sampleIndex]
+  const horizonPath = horizonSilhouettePath(
+    horizon.data.elevation_deg,
+    horizon.data.azimuth_step_deg,
+    layout,
+  )
+
+  const inner = plotInner(layout)
+  const yZero = elToY(0, layout)
+  const tickEls = niceElevationTicks(layout.elMin, layout.elMax)
+  const cardinalMarks = [
+    ...CARDINAL.map(({ az, label }) => ({
+      x: azToX(az, layout),
+      label,
+      key: `${label}-${az}`,
+    })),
+    { x: inner.x + inner.w, label: 'N', key: 'N-360' },
+  ]
 
   return (
-    <section className="sky-view" aria-labelledby="sky-view-title">
-      <header className="sky-view__header">
-        <div>
-          <h2 id="sky-view-title">Sky panorama · {active.name}</h2>
-          <p>
-            {times_utc[0]} — {times_utc[times_utc.length - 1]} · cursor sample {selectedTime}
-          </p>
-        </div>
-        <div className="sky-view__legend" aria-label="Chart legend">
-          <span className="sky-view__legend-item">
-            <span className="sky-view__swatch sky-view__swatch--sun" aria-hidden="true" />
-            Sun trail
-          </span>
-          <span className="sky-view__legend-item">
-            <span className="sky-view__swatch sky-view__swatch--earth" aria-hidden="true" />
-            Earth trail
-          </span>
-          <span className="sky-view__legend-item">Dashed marker: below terrain horizon</span>
-        </div>
-      </header>
+    <div className="sky">
+      <h2>Sky panorama</h2>
+      <p className="sky-hint">
+        Azimuth across, elevation up. Terrain silhouette from the local horizon; body positions at
+        the shared time cursor.
+      </p>
 
-      <figure className="sky-view__chart">
+      <div className="sky-panel">
         <svg
-          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+          className="sky-svg"
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           role="img"
-          aria-labelledby="sky-chart-title sky-chart-description"
+          aria-label="Sky panorama with horizon, Sun and Earth"
         >
-          <title id="sky-chart-title">Sun and Earth above the lunar horizon</title>
-          <desc id="sky-chart-description">
-            Azimuth runs from north through east, south and west back to north. The shaded area is
-            terrain below the local horizon. Trails cover the scenario window; markers show the
-            sample nearest the shared time cursor.
-          </desc>
+          {/* Vertical grid / cardinals (N also at right edge = 360°) */}
+          {cardinalMarks.map(({ x, label, key }) => (
+            <g key={key}>
+              <line
+                className="sky-grid"
+                x1={x}
+                y1={PADDING.top}
+                x2={x}
+                y2={HEIGHT - PADDING.bottom}
+              />
+              <text className="sky-axis-label" x={x} y={HEIGHT - 12} textAnchor="middle">
+                {label}
+              </text>
+            </g>
+          ))}
 
-          {tickValues.map((value) => {
-            const tickY = y(value)
+          {/* Elevation ticks */}
+          {tickEls.map((el) => {
+            const y = elToY(el, layout)
             return (
-              <g key={value}>
+              <g key={el}>
                 <line
-                  className="sky-view__grid"
-                  x1={PLOT.left}
-                  x2={PLOT.left + PLOT.width}
-                  y1={tickY}
-                  y2={tickY}
-                />
-                <text className="sky-view__tick" x={PLOT.left - 10} y={tickY + 4} textAnchor="end">
-                  {value.toFixed(1)}°
-                </text>
-              </g>
-            )
-          })}
-
-          {[0, 90, 180, 270, 360].map((azimuth) => {
-            const point = projectPoint(azimuth, 0, range, PLOT)
-            const direction = ['N', 'E', 'S', 'W', 'N'][azimuth / 90]
-            return (
-              <g key={azimuth}>
-                <line
-                  className="sky-view__grid"
-                  x1={point.x}
-                  x2={point.x}
-                  y1={PLOT.top}
-                  y2={bottom}
+                  className="sky-grid"
+                  x1={PADDING.left}
+                  y1={y}
+                  x2={WIDTH - PADDING.right}
+                  y2={y}
                 />
                 <text
-                  className="sky-view__tick"
-                  x={point.x}
-                  y={bottom + 20}
-                  textAnchor={azimuth === 0 ? 'start' : azimuth === 360 ? 'end' : 'middle'}
+                  className="sky-axis-label"
+                  x={PADDING.left - 8}
+                  y={y + 3}
+                  textAnchor="end"
                 >
-                  {direction} · {azimuth}°
+                  {el.toFixed(el % 1 === 0 ? 0 : 1)}°
                 </text>
               </g>
             )
           })}
 
-          <path className="sky-view__horizon-fill" d={horizonFillPath} />
-          <path className="sky-view__horizon-line" d={horizonLinePath} />
+          {/* Geometric horizon (0°) */}
+          {layout.elMin < 0 && layout.elMax > 0 && (
+            <line
+              className="sky-zero"
+              x1={PADDING.left}
+              y1={yZero}
+              x2={WIDTH - PADDING.right}
+              y2={yZero}
+            />
+          )}
 
-          <path className="sky-view__trail sky-view__trail--sun" d={trackPath(sun.az_deg, sun.el_deg, range.min, range.max)} />
-          <path
-            className="sky-view__trail sky-view__trail--earth"
-            d={trackPath(earth.az_deg, earth.el_deg, range.min, range.max)}
+          <path className="sky-horizon" d={horizonPath} />
+
+          <Trail series={timeline.data.sun} className="sky-trail-sun" layout={layout} />
+          <Trail series={timeline.data.earth} className="sky-trail-earth" layout={layout} />
+
+          <BodyMarker
+            kind="sun"
+            az={sunAz}
+            el={sunEl}
+            visible={sunVisible}
+            layout={layout}
           />
-
-          <line
-            className="sky-view__cursor"
-            x1={projectPoint(bodies.sun.az, 0, range, PLOT).x}
-            x2={projectPoint(bodies.sun.az, 0, range, PLOT).x}
-            y1={PLOT.top}
-            y2={bottom}
+          <BodyMarker
+            kind="earth"
+            az={earthAz}
+            el={earthEl}
+            visible={earthVisible}
+            layout={layout}
           />
-
-          {(['sun', 'earth'] as const).map((body) => {
-            const point = projectPoint(bodies[body].az, bodies[body].el, range, PLOT)
-            return (
-              <circle
-                key={body}
-                className={`sky-view__marker sky-view__marker--${body}${visible[body] ? '' : ' sky-view__marker--hidden'}`}
-                cx={point.x}
-                cy={point.y}
-                r={body === 'sun' ? 8 : 7}
-              >
-                <title>
-                  {body === 'sun' ? 'Sun' : 'Earth'}: {formatDegrees(bodies[body].az)} azimuth,{' '}
-                  {formatDegrees(bodies[body].el)} elevation; horizon{' '}
-                  {formatDegrees(horizonAtBody[body])}
-                </title>
-              </circle>
-            )
-          })}
-
-          <text
-            className="sky-view__axis-label"
-            x={PLOT.left + PLOT.width / 2}
-            y={CHART_HEIGHT - 7}
-            textAnchor="middle"
-          >
-            Azimuth
-          </text>
-          <text
-            className="sky-view__axis-label"
-            transform={`translate(16 ${PLOT.top + PLOT.height / 2}) rotate(-90)`}
-            textAnchor="middle"
-          >
-            Elevation
-          </text>
         </svg>
-      </figure>
-
-      <div className="sky-view__readouts" aria-label="Positions at the selected time">
-        {(['sun', 'earth'] as const).map((body) => (
-          <section className="sky-view__readout" key={body} aria-label={body === 'sun' ? 'Sun' : 'Earth'}>
-            <h3>{body === 'sun' ? 'Sun' : 'Earth'}</h3>
-            <dl>
-              <dt>Azimuth</dt>
-              <dd>{formatDegrees(bodies[body].az)}</dd>
-              <dt>Elevation</dt>
-              <dd>{formatDegrees(bodies[body].el)}</dd>
-              <dt>Terrain horizon</dt>
-              <dd>{formatDegrees(horizonAtBody[body])}</dd>
-            </dl>
-            <p
-              className={`sky-view__visibility sky-view__visibility--${visible[body] ? 'visible' : 'hidden'}`}
-            >
-              {visible[body] ? 'Above terrain horizon' : 'Below terrain horizon'}
-            </p>
-          </section>
-        ))}
       </div>
-    </section>
+
+      <ul className="sky-legend">
+        <li>
+          <span className="sky-legend-swatch sky-legend-swatch-horizon" />
+          Terrain horizon ({horizon.data.source})
+        </li>
+        <li>
+          <span className="sky-legend-swatch sky-legend-swatch-sun" />
+          Sun trail / position
+        </li>
+        <li>
+          <span className="sky-legend-swatch sky-legend-swatch-earth" />
+          Earth trail / position
+        </li>
+        <li>Hollow marker = occulted by terrain</li>
+      </ul>
+
+      <dl className="sky-readout">
+        <div>
+          <dt className="sky-sun-label">Sun at cursor</dt>
+          <dd>
+            az {formatDeg(sunAz, 1)}, el {formatDeg(sunEl)} · horizon under body{' '}
+            {formatDeg(sunHorizonEl)} · {sunVisible ? 'visible' : 'occulted'}
+          </dd>
+        </div>
+        <div>
+          <dt className="sky-earth-label">Earth at cursor</dt>
+          <dd>
+            az {formatDeg(earthAz, 1)}, el {formatDeg(earthEl)} · horizon under body{' '}
+            {formatDeg(earthHorizonEl)} · {earthVisible ? 'visible' : 'occulted'}
+          </dd>
+        </div>
+        <div>
+          <dt>Sample time</dt>
+          <dd>{timeline.data.times_utc[idx]}</dd>
+        </div>
+      </dl>
+    </div>
   )
+}
+
+/** Kilka czytelnych znaczników wysokości w zakresie [elMin, elMax]. */
+function niceElevationTicks(elMin: number, elMax: number): number[] {
+  const span = elMax - elMin
+  if (!(span > 0)) return [0]
+
+  const rough = span / 4
+  const magnitude = 10 ** Math.floor(Math.log10(rough))
+  const residual = rough / magnitude
+  let step = magnitude
+  if (residual >= 5) step = 5 * magnitude
+  else if (residual >= 2) step = 2 * magnitude
+  else step = magnitude
+
+  const ticks: number[] = []
+  const start = Math.ceil(elMin / step) * step
+  for (let v = start; v <= elMax + step * 1e-9; v += step) {
+    const rounded = Math.abs(v) < step * 1e-9 ? 0 : Number(v.toFixed(6))
+    ticks.push(rounded)
+  }
+  if (!ticks.includes(0) && elMin < 0 && elMax > 0) ticks.push(0)
+  return ticks.sort((a, b) => a - b)
 }
