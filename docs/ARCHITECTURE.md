@@ -142,6 +142,12 @@ Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_land
 
 `matches` to podzbiór `grid` spełniający wymagania, posortowany malejąco po `score`. Pola `uncertainty` i `eclipses` są opcjonalne dla każdego okna. Do czasu zadań 012/013 endpoint może zwracać zaślepkę o tym kształcie.
 
+**`GET /api/optimal-site?start_utc&end_utc&cursor_utc&step_minutes&w_sun&w_earth&w_overlap`** – ranking miejsca optymalnego dla wybranego okna (Faza 3). `cursor_utc` jest opcjonalny i domyślnie równy `start_utc`; `step_minutes` domyślnie wynosi 60, a wagi odpowiednio 0,45, 0,25 i 0,30.
+
+Odpowiedź zawiera `optimal`, `ranking`, pozycje podpunktów Słońca i Ziemi w `cursor_bodies`, użyte `weights` i `meta`. Każdy element rankingu ma współrzędne, wynik (`score` 0–100), ułamki/czasy widoczności oraz flagi widoczności w chwili kursora. Ranking obejmuje katalog miejsc i referencyjną siatkę polarną.
+
+Do czasu zadania 018 endpoint i `contracts/fixtures/optimal_site.json` używają wyraźnie tymczasowej odpowiedzi kontraktowej: metryki są zerowe, a współrzędne podpunktów zastępcze; nie są to wyniki astronomiczne ani rekomendacja miejsca. Silnik optymalizacji zastąpi tę zaślepkę.
+
 ### Kontrakt między powłoką a widokami (frontend)
 
 Zdefiniowany w `web/src/app/scenario.ts`. Każdy widok to komponent w `web/src/views/<nazwa>/index.tsx`, zarejestrowany w `web/src/app/views.ts`, który dostaje `ViewProps`:
