@@ -12,6 +12,7 @@ from .. import metrics, terrain
 from ..config import DATA_DIR
 from ..timeutil import to_utc
 from . import schemas
+from .optimal_site_stub import optimal_site_stub
 
 router = APIRouter(prefix="/api")
 
@@ -159,3 +160,34 @@ def windows(
         )
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+@lru_cache(maxsize=32)
+def _cached_optimal_site(
+    start_utc: datetime,
+    end_utc: datetime,
+    cursor_utc: datetime,
+    step_minutes: float,
+    w_sun: float,
+    w_earth: float,
+    w_overlap: float,
+) -> dict:
+    del step_minutes
+    return optimal_site_stub(start_utc, end_utc, cursor_utc, w_sun, w_earth, w_overlap)
+
+
+@router.get("/optimal-site", response_model=schemas.OptimalSiteResponse)
+def optimal_site(
+    start_utc: datetime,
+    end_utc: datetime,
+    cursor_utc: datetime | None = None,
+    step_minutes: Step = 60,
+    w_sun: float = 0.45,
+    w_earth: float = 0.25,
+    w_overlap: float = 0.30,
+) -> dict:
+    _check_range(start_utc, end_utc, step_minutes)
+    cursor = cursor_utc if cursor_utc is not None else start_utc
+    return deepcopy(
+        _cached_optimal_site(start_utc, end_utc, cursor, step_minutes, w_sun, w_earth, w_overlap)
+    )
