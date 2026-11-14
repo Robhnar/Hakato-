@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-14-tryb-prowadzony-design.md`
 
-**Wykonanie:** natywnie w tej sesji; zadania oznaczone **[DeepSeek]** zleca się `opencode run -m opencode-go/deepseek-v4-pro` z briefem zawierającym blok Interfaces i testy zadania, a wynik przegląda Claude.
+**Wykonanie:** natywnie w tej sesji; każdy wynik przegląda Claude.
 
 ## Global Constraints
 
@@ -58,7 +58,7 @@ Wagi (sun / earth / darkness): power 0.6/0.15/0.25, earth 0.2/0.6/0.2, both 0.4/
 - [ ] **Step 4:** Ten sam test → PASS.
 - [ ] **Step 5:** Commit `[020] Ranking i oceny trybu prowadzonego`.
 
-### Task 2: Formatowanie i zakres dat (`format.ts`) **[DeepSeek]**
+### Task 2: Formatowanie i zakres dat (`format.ts`)
 
 **Files:**
 - Create: `web/src/app/guide/format.ts`, Test: `web/src/app/guide/format.test.ts`
@@ -72,7 +72,7 @@ Wagi (sun / earth / darkness): power 0.6/0.15/0.25, earth 0.2/0.6/0.2, both 0.4/
   - `formatPercent(f: number): string` → `0.512`→`'51%'`.
   - `defaultMonthRange(now: Date): { from: string; to: string }` → od następnego miesiąca (`'YYYY-MM'`), `to` = `from` + 11 mies.
   - `monthRangeToSearch(from: string, to: string): { search_start_utc: string; search_end_utc: string } | { error: string }` → `('2028-03','2028-12')` → `2028-03-01T00:00:00Z`…`2029-01-01T00:00:00Z`; `to < from` → `{error: 'The end month must be after the start month.'}`; > 24 mies. → `{error: 'Please choose at most 2 years.'}`; pusty → `{error: 'Choose both months.'}`.
-- [ ] **Step 1:** Testy z wartościami powyżej. **Step 2:** FAIL. **Step 3:** Implementacja (DeepSeek). **Step 4:** PASS + przegląd Claude. **Step 5:** Commit `[020] Formatowanie dat i zakresu wyszukiwania`.
+- [ ] **Step 1:** Testy z wartościami powyżej. **Step 2:** FAIL. **Step 3:** Implementacja. **Step 4:** PASS + przegląd Claude. **Step 5:** Commit `[020] Formatowanie dat i zakresu wyszukiwania`.
 
 ### Task 3: Wyszukiwanie miejsc i terminów (`search.ts` + `useLandingSearch`)
 
@@ -92,7 +92,7 @@ Wagi (sun / earth / darkness): power 0.6/0.15/0.25, earth 0.2/0.6/0.2, both 0.4/
 
 (Odporność na wyścig z Review Focus 4 jest w Task 5: licznik żądań w komponencie, wynik przyjmowany tylko dla ostatniego.)
 
-### Task 4: Rozkład dzień po dniu (`daily.ts` + `DayStrip.tsx`) **[DeepSeek dla komponentu]**
+### Task 4: Rozkład dzień po dniu (`daily.ts` + `DayStrip.tsx`)
 
 **Files:**
 - Create: `web/src/app/guide/daily.ts`, `web/src/app/guide/daily.test.ts`, `web/src/app/guide/DayStrip.tsx`
@@ -102,7 +102,7 @@ Wagi (sun / earth / darkness): power 0.6/0.15/0.25, earth 0.2/0.6/0.2, both 0.4/
   - `interface DayShare { day: string /* YYYY-MM-DD */; sun: number; earth: number }` (ułamki 0–1)
   - `dailyShares(t: Timeline): DayShare[]` — grupowanie próbek po dniu UTC.
   - `DayStrip({ lat_deg, lon_deg, start_utc, hours }: {...})` — `api.timeline` z `step_minutes` = 60 (dla > 400 h: 180), rysuje po jednej kolumnie na dzień: górna połowa Słońce (żółta, wysokość = ułamek), dolna Ziemia (niebieska); `role="img"` + `aria-label` z podsumowaniem („Sun up on 14 of 14 days, Earth visible on 9 of 14 days”); dla > 31 dni grupuje po 3 dni.
-- [ ] **Step 1:** Testy `dailyShares`: 48 próbek co godzinę, pierwsze 24 sun=true → `[{sun:1},{sun:0}]`; dzień częściowy liczy tylko swoje próbki. **Step 2:** FAIL. **Step 3:** Implementacja `daily.ts` (Claude), `DayStrip.tsx` (DeepSeek). **Step 4:** PASS + build. **Step 5:** Commit.
+- [ ] **Step 1:** Testy `dailyShares`: 48 próbek co godzinę, pierwsze 24 sun=true → `[{sun:1},{sun:0}]`; dzień częściowy liczy tylko swoje próbki. **Step 2:** FAIL. **Step 3:** Implementacja `daily.ts` i `DayStrip.tsx`. **Step 4:** PASS + build. **Step 5:** Commit.
 
 ### Task 5: Ekran „Plan a landing” (`GuidePanel.tsx`, `ResultCard.tsx`, `explain.ts`)
 
@@ -119,13 +119,13 @@ Wagi (sun / earth / darkness): power 0.6/0.15/0.25, earth 0.2/0.6/0.2, both 0.4/
 - [ ] **Step 1:** Testy `whyText` (power + pełne słońce → zawiera „whole mission”; earth + earth_fraction 0.95 → zawiera „Earth”) i `approximateNote`. **Step 2:** FAIL. **Step 3:** Implementacja. **Step 4:** PASS + `npm run build`.
 - [ ] **Step 5:** Commit `[020] Ekran Plan a landing`.
 
-### Task 6: Integracja z powłoką + style **[DeepSeek dla CSS]**
+### Task 6: Integracja z powłoką + style
 
 **Files:**
 - Modify: `web/src/App.tsx` (stan `mode: 'simple' | 'expert'`, domyślnie `'simple'`; przełącznik w nagłówku; `openExpert(site, start, hours)` = `applySite` + `applyWindow(start, hours)` + `setViewId('sky')` + `setMode('expert')`)
 - Create: `web/src/app/guide/guide.css` (importowany w `GuidePanel.tsx`; tylko zmienne z `index.css`)
 - Modify: `web/src/index.css` — tylko styl przełącznika trybu (`.mode-switch`).
-- [ ] **Step 1:** Implementacja przełącznika i `openExpert`. **Step 2:** CSS (DeepSeek): karty radio, karta wyniku, ratingi, pasek dni, układ jednokolumnowy < 640 px, focus-visible. **Step 3:** `npm run lint && npm run build && npm test` → PASS.
+- [ ] **Step 1:** Implementacja przełącznika i `openExpert`. **Step 2:** CSS: karty radio, karta wyniku, ratingi, pasek dni, układ jednokolumnowy < 640 px, focus-visible. **Step 3:** `npm run lint && npm run build && npm test` → PASS.
 - [ ] **Step 4:** Commit `[020] Przełącznik Simple/Expert i style trybu prowadzonego`.
 
 ### Task 7: Weryfikacja, mikrocopy, dostępność, oddanie

@@ -1,6 +1,6 @@
 # 021 – Odświeżenie UI: „konsola misji", wykresy, mapa i Optimization Overlay
 
-- **Status:** w recenzji (wszystkie kryteria odhaczone; czytnika ekranu nie testowano – patrz „Czego nie sprawdzono")
+- **Status:** scalone
 - **Właściciel:** Claude Code
 - **Moduł:** frontend – powłoka i wszystkie widoki (`web/src/`)
 - **Gałąź:** `feat/021-odswiezenie-ui`

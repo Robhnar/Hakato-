@@ -1,6 +1,6 @@
 # 023 – Poprawki z audytu backendu: kalendarz, zakres SPICE, wagi
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** Claude Code
 - **Moduł:** `metrics`, `ephemeris`, `api`
 - **Gałąź:** `feat/023-poprawki-z-audytu`
