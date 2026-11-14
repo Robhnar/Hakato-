@@ -1,7 +1,7 @@
 # 005 – Powłoka aplikacji: miejsce, data, scenariusze
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba C, potem zadanie 008)
+- **Status:** w recenzji
+- **Właściciel:** Michał Majkut (Micello421)
 - **Moduł:** frontend – powłoka
 - **Gałąź:** `feat/005-powloka-aplikacji`
 - **Zależy od:** –
@@ -41,7 +41,7 @@ Udostępnia widokom `ViewProps` z `web/src/app/scenario.ts`. Cztery osoby piszą
 
 ## Kryteria ukończenia
 
-- [ ] Da się zbudować dwa scenariusze (inne miejsce albo inna data) i przełączać się między nimi; wszystkie cztery zakładki nadal działają.
-- [ ] Własne współrzędne spoza zakresu są odrzucane z komunikatem.
-- [ ] Działa z backendem (`npm run dev`) i bez niego (`npm run dev:fixtures`).
-- [ ] `npm run lint`, `npm run build`, `npm test` zielone.
+- [x] Da się zbudować dwa scenariusze (inne miejsce albo inna data) i przełączać się między nimi; wszystkie cztery zakładki nadal działają.
+- [x] Własne współrzędne spoza zakresu są odrzucane z komunikatem.
+- [x] Działa z backendem (`npm run dev`) i bez niego (`npm run dev:fixtures`).
+- [x] `npm run lint`, `npm run build`, `npm test` zielone.
