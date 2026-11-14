@@ -3,7 +3,7 @@
 **Goal:** one continuous story ≤ 30 seconds of screen time (or the narrative behind ≤ 7 slides).  
 **Build:** `git checkout main && git pull`, then backend + `npm run dev` (prefer live backend with SPICE kernels if available; otherwise note Approximate / flat-horizon banners).
 
-Do **not** demo unmerged feature branches. On current `main` the Timeline tab is still a stub — skip it or show it for one second as “coming next”, then move on.
+Do **not** demo unmerged feature branches. All four views (**Sky**, **Timeline**, **Compare**, **Map**) are integrated on `main`.
 
 ## Story
 

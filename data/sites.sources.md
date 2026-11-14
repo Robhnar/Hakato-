@@ -21,6 +21,9 @@ lądowania. Katalog nie sugeruje większej dokładności niż źródło.
 
 - NASA wymienia „Peak Near Shackleton” / Connecting Ridge wśród regionów Artemis III:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
+- Boazman et al. (2022) identyfikują site 001 na Connecting Ridge przy
+  `89,45°S, 137,31°W` (`222,69°E`):
+  https://doi.org/10.3847/PSJ/aca590
 - Punkt na oświetlonym grzbiecie przy Shackletonie: `-89.45°, -137.3°` (ME, długość ujemna = zachód),
   dobrany jako kontrast do `south-pole-reference` w zagłębieniu; nie jest oficjalnym miejscem lądowania.
 - Mapa: https://quickmap.lroc.asu.edu/

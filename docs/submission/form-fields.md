@@ -24,7 +24,7 @@ Local run: see repository `README.md` (`uvicorn` backend + `npm run dev`, or `np
 
 See [project-description.md](project-description.md) for the full text. Short version:
 
-Hakato is a FastAPI + React application for the Lunar Landing Site Navigator challenge. The backend computes Sun and Earth azimuth/elevation (SPICE when kernels are present), builds local horizons (LOLA profiles for selected polar sites, otherwise flat), and returns timeline/summary metrics with provenance in `meta`. The frontend shell manages scenarios; Sky, Compare, and Map views visualize results. The Timeline tab on `main` is still a placeholder pending merge of task 007. We designed for rapid what-if comparison when a landing date or site must change.
+Hakato is a FastAPI + React application for the Lunar Landing Site Navigator challenge. The backend computes Sun and Earth azimuth/elevation (SPICE when kernels are present), builds local horizons (LOLA profiles for selected polar sites, otherwise flat), and returns timeline/summary metrics with provenance in `meta`. The frontend shell manages scenarios; Sky, Timeline, Compare, and Map views visualize results. We designed for rapid what-if comparison when a landing date or site must change.
 
 ## Use of Artificial Intelligence
 

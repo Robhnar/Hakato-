@@ -36,13 +36,12 @@ Horizons System is used for **offline verification** of SPICE results, not as a 
 - Sun/Earth azimuth and elevation from SPICE kernels (NAIF).
 - Local horizon elevation vs azimuth from LOLA-based profiles for several south-polar catalogue sites (see `data/horizons/`).
 - Visibility windows, visible fractions, hours until rise/set, sticky summary strip.
-- Sky panorama (horizon silhouette + body tracks), interactive Moon globe with catalogue pins, multi-scenario compare lanes.
+- Sky panorama (horizon silhouette + body tracks), interactive Timeline with power/comms window bands and playback cursor, interactive Moon globe with catalogue pins, multi-scenario compare lanes.
 
 **Simplified or incomplete on current `main`:**
 
 - Sites far from the polar DEM / without a stored profile use a **flat** horizon — the UI states this explicitly.
 - Without SPICE kernels the backend falls back to the **placeholder** ephemeris and warns in the UI.
-- The **Timeline** tab on `main` is still a stub (full timeline work lives on branch `feat/007-os-czasu` and is not claimed as shipped until merged).
 - Catalogue Artemis “rim” points are regional landmarks, not approved landing pads; sources are listed in `data/sites.sources.md`.
 - Visibility uses body centre vs horizon (no finite disc / atmosphere; Moon has none).
 
