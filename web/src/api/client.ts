@@ -3,7 +3,18 @@
 // VITE_USE_FIXTURES=1 (npm run dev:fixtures): zamiast backendu zwraca pliki
 // z contracts/fixtures/ - zawsze ten sam scenariusz, niezależnie od parametrów.
 
-import type { Horizon, RangeQuery, Site, Summary, Timeline, WindowsQuery, WindowsResponse } from './types'
+import type {
+  Horizon,
+  OptimalSiteQuery,
+  OptimalSiteResponse,
+  RangeQuery,
+  Site,
+  Summary,
+  Timeline,
+  WindowsQuery,
+  WindowsResponse,
+} from './types'
+
 
 const USE_FIXTURES = import.meta.env.VITE_USE_FIXTURES === '1'
 
@@ -52,4 +63,10 @@ export const api = {
     USE_FIXTURES
       ? fixture(() => import('../../../contracts/fixtures/windows.json'))
       : get('windows', { ...q }),
+
+  optimalSite: (q: OptimalSiteQuery): Promise<OptimalSiteResponse> =>
+    USE_FIXTURES
+      ? fixture(() => import('../../../contracts/fixtures/optimal_site.json'))
+      : get('optimal-site', { ...q }),
 }
+

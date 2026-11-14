@@ -133,3 +133,47 @@ class WindowsResponse(BaseModel):
     slip_analysis: SlipAnalysis | None = None
     cycles_summary: CyclesSummary
     meta: Meta
+
+
+# --- Predykcja optymalnego punktu lądowania (zadanie 017 / 018) ---
+
+
+class OptimalWeights(BaseModel):
+    w_sun: float
+    w_earth: float
+    w_overlap: float
+
+
+class CursorBodies(BaseModel):
+    cursor_utc: str
+    subsolar_lat_deg: float
+    subsolar_lon_deg: float
+    subearth_lat_deg: float
+    subearth_lon_deg: float
+
+
+class OptimalCandidate(BaseModel):
+    id: str
+    name: str
+    lat_deg: float
+    lon_deg: float
+    elevation_m: float | None = None
+    is_catalog_site: bool
+    score: float
+    sun_visible_fraction: float
+    earth_visible_fraction: float
+    overlap_fraction: float
+    sunlight_hours: float
+    earth_hours: float
+    overlap_hours: float
+    max_darkness_hours: float
+    sun_visible_at_cursor: bool
+    earth_visible_at_cursor: bool
+
+
+class OptimalSiteResponse(BaseModel):
+    optimal: OptimalCandidate
+    ranking: list[OptimalCandidate]
+    cursor_bodies: CursorBodies
+    weights: OptimalWeights
+    meta: Meta

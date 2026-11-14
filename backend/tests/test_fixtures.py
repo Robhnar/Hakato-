@@ -15,6 +15,7 @@ MODELS = {
     "timeline.json": schemas.Timeline,
     "summary.json": schemas.Summary,
     "windows.json": schemas.WindowsResponse,
+    "optimal_site.json": schemas.OptimalSiteResponse,
 }
 
 
