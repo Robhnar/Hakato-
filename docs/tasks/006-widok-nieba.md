@@ -1,7 +1,7 @@
 # 006 – Widok nieba: panorama horyzontu
 
 - **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba D, potem zadanie 007)
+- **Właściciel:** – (sugerowana: osoba D)
 - **Moduł:** frontend – widok `sky`
 - **Gałąź:** `feat/006-widok-nieba`
 - **Zależy od:** –
