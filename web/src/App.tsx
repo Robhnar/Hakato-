@@ -2,6 +2,7 @@ import { Suspense, useMemo, useState } from 'react'
 import { api } from './api/client'
 import type { Site, SiteCategory } from './api/types'
 import { useAsync } from './api/useAsync'
+import { formatCoords, formatDuration, formatUtcDate } from './app/format'
 import {
   DURATION_PRESETS,
   LUNAR_DAY_HOURS,
@@ -15,11 +16,12 @@ import {
   validateCoords,
 } from './app/scenario'
 import GuidePanel from './app/guide/GuidePanel'
-import SummaryStrip from './app/SummaryStrip'
+import SummaryStrip, { DataBadge } from './app/SummaryStrip'
 import { VIEWS } from './app/views'
 
 // Powłoka (zadanie 005): miejsce, czas, scenariusze.
 // Widoki w src/views/ dostają dane przez ViewProps i nie zależą od tego pliku.
+// Układ „konsoli misji” (zadanie 021): nagłówek, panel boczny 300 px, scena.
 
 const CATEGORY_ORDER: SiteCategory[] = [
   'apollo',
@@ -199,12 +201,14 @@ function Shell({ sites }: { sites: Site[] }) {
     syncCoordDrafts(copy)
   }
 
-  function removeActive() {
+  /** Usuwa wskazany wiersz; przy usunięciu aktywnego wybiera sąsiada z listy. */
+  function removeScenario(id: string) {
     if (scenarios.length <= 1) return
-    const remaining = scenarios.filter((scenario) => scenario.id !== active.id)
+    const index = scenarios.findIndex((scenario) => scenario.id === id)
+    if (index === -1) return
+    const remaining = scenarios.filter((scenario) => scenario.id !== id)
     setScenarios(remaining)
-    setActiveId(remaining[0].id)
-    syncCoordDrafts(remaining[0])
+    if (id === active.id) activateScenario(remaining[Math.min(index, remaining.length - 1)].id)
   }
 
   function pickLocation(lat_deg: number, lon_deg: number) {
@@ -249,10 +253,16 @@ function Shell({ sites }: { sites: Site[] }) {
 
   return (
     <div className="app">
-      <header>
-        <h1>Lunar Landing Site Navigator</h1>
-        <p className="tagline">Find when and where to land on the Moon, with sunlight for power and Earth in view.</p>
-        <nav className="mode-switch" aria-label="Mode">
+      <header className="app-header">
+        <div className="app-brand">
+          <h1 className="label app-title">LUNAR LANDING SITE NAVIGATOR</h1>
+          {mode === 'simple' && (
+            <p className="tagline">
+              Find when and where to land on the Moon, with sunlight for power and Earth in view.
+            </p>
+          )}
+        </div>
+        <nav className="mode-tabs" aria-label="Mode">
           <button type="button" aria-pressed={mode === 'simple'} onClick={() => setMode('simple')}>
             Plan a landing
           </button>
@@ -260,191 +270,224 @@ function Shell({ sites }: { sites: Site[] }) {
             Expert tools
           </button>
         </nav>
+        <div className="app-badges">
+          <DataBadge scenario={active} />
+        </div>
       </header>
 
-      {/* Zawsze zamontowany: odpowiedzi i wynik przetrwają wycieczkę do Expert. */}
-      <div hidden={mode !== 'simple'}>
-        <GuidePanel sites={sites} onOpenExpert={openExpert} />
-      </div>
+      <div className={mode === 'expert' ? 'app-body' : 'app-body app-body--single'}>
+        {mode === 'expert' && (
+          <aside className="rail" aria-label="Scenario setup">
+            <section className="rail-section">
+              <div className="rail-head">
+                <h2 className="label rail-title">Scenarios</h2>
+                <div className="rail-actions">
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    aria-label="Add scenario"
+                    title="Add another catalogue site with the current UTC hour as start"
+                    onClick={addScenario}
+                    disabled={atLimit}
+                  >
+                    +
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    aria-label="Duplicate scenario"
+                    title="Copy the active scenario exactly"
+                    onClick={duplicateActive}
+                    disabled={atLimit}
+                  >
+                    ⧉
+                  </button>
+                </div>
+              </div>
+              <ul className="scenario-list">
+                {scenarios.map((scenario) => (
+                  <li key={scenario.id} className="scenario-item">
+                    <button
+                      type="button"
+                      className="scenario-row"
+                      aria-pressed={scenario.id === active.id}
+                      onClick={() => activateScenario(scenario.id)}
+                    >
+                      <span className="scenario-name">{scenario.name}</span>
+                      <span className="num scenario-date">{formatUtcDate(scenario.start_utc)}</span>
+                    </button>
+                    {scenarios.length > 1 && (
+                      <button
+                        type="button"
+                        className="scenario-remove"
+                        aria-label="Remove scenario"
+                        title={`Remove ${scenario.name}`}
+                        onClick={() => removeScenario(scenario.id)}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p className="hint">Limit {MAX_SCENARIOS} scenarios</p>
+            </section>
 
-      {mode === 'expert' && (
-      <>
+            <section className="rail-section">
+              <h2 className="label rail-title">Site</h2>
+              <select
+                aria-label="Landing site"
+                value={selectedSiteId}
+                onChange={(event) => {
+                  const site = sites.find((candidate) => candidate.id === event.target.value)
+                  if (site) applySite(site)
+                }}
+              >
+                {!selectedSiteId && (
+                  <option value="" disabled>
+                    Custom coordinates
+                  </option>
+                )}
+                {groups.map(({ category, sites: groupSites }) => (
+                  <optgroup key={category} label={CATEGORY_LABEL[category]}>
+                    {groupSites.map((site) => (
+                      <option key={site.id} value={site.id}>
+                        {site.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </section>
 
-      <section className="controls" aria-label="Scenario setup">
-        <label>
-          Landing site
-          <select
-            value={selectedSiteId}
-            onChange={(event) => {
-              const site = sites.find((candidate) => candidate.id === event.target.value)
-              if (site) applySite(site)
-            }}
-          >
-            {!selectedSiteId && (
-              <option value="" disabled>
-                Custom coordinates
-              </option>
-            )}
-            {groups.map(({ category, sites: groupSites }) => (
-              <optgroup key={category} label={CATEGORY_LABEL[category]}>
-                {groupSites.map((site) => (
-                  <option key={site.id} value={site.id}>
-                    {site.name}
+            <section className="rail-section">
+              <h2 className="label rail-title">Coordinates</h2>
+              <div className="coord-grid">
+                <label>
+                  Latitude
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    min={-90}
+                    max={90}
+                    placeholder="-89.5"
+                    value={latDraft}
+                    onChange={(event) => {
+                      setLatDraft(event.target.value)
+                      setCoordError(null)
+                    }}
+                  />
+                </label>
+                <label>
+                  Longitude
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    min={-180}
+                    max={180}
+                    placeholder="0"
+                    value={lonDraft}
+                    onChange={(event) => {
+                      setLonDraft(event.target.value)
+                      setCoordError(null)
+                    }}
+                  />
+                </label>
+                <button type="button" className="apply" onClick={applyCustomCoords}>
+                  Apply
+                </button>
+              </div>
+              <p className="num coord-readout">{formatCoords(active.lat_deg, active.lon_deg)}</p>
+              {coordError && (
+                <p className="error rail-error" role="alert">
+                  {coordError}
+                </p>
+              )}
+            </section>
+
+            <section className="rail-section">
+              <h2 className="label rail-title">Start (UTC)</h2>
+              <input
+                type="datetime-local"
+                aria-label="Start (UTC)"
+                value={active.start_utc.slice(0, 16)}
+                onChange={(event) => {
+                  if (event.target.value) updateActive({ start_utc: `${event.target.value}:00Z` })
+                }}
+              />
+            </section>
+
+            <section className="rail-section">
+              <h2 className="label rail-title">Window</h2>
+              <select
+                aria-label="Window length"
+                value={durationKey(active.duration_hours)}
+                onChange={(event) => updateActive({ duration_hours: Number(event.target.value) })}
+              >
+                {DURATION_PRESETS.map((preset) => (
+                  <option key={preset.label} value={durationKey(preset.hours)}>
+                    {preset.label}
+                    {preset.hours === LUNAR_DAY_HOURS ? ` (${LUNAR_DAY_HOURS} h)` : ''}
+                    {preset.hours === LUNAR_DAY_HOURS * 3
+                      ? ` (${(LUNAR_DAY_HOURS * 3).toFixed(1)} h)`
+                      : ''}
                   </option>
                 ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+                {!DURATION_PRESETS.some(
+                  (preset) => durationKey(preset.hours) === durationKey(active.duration_hours),
+                ) && (
+                  <option value={durationKey(active.duration_hours)}>
+                    {formatDuration(active.duration_hours)}
+                  </option>
+                )}
+              </select>
+            </section>
 
-        <fieldset className="coords">
-          <legend>Custom coordinates (ME, degrees)</legend>
-          <label>
-            Latitude
-            <input
-              type="number"
-              inputMode="decimal"
-              step="any"
-              min={-90}
-              max={90}
-              placeholder="-89.5"
-              value={latDraft}
-              onChange={(event) => {
-                setLatDraft(event.target.value)
-                setCoordError(null)
-              }}
-            />
-          </label>
-          <label>
-            Longitude
-            <input
-              type="number"
-              inputMode="decimal"
-              step="any"
-              min={-180}
-              max={180}
-              placeholder="0"
-              value={lonDraft}
-              onChange={(event) => {
-                setLonDraft(event.target.value)
-                setCoordError(null)
-              }}
-            />
-          </label>
-          <button type="button" onClick={applyCustomCoords}>
-            Apply coordinates
-          </button>
-          {coordError && (
-            <p className="error" role="alert">
-              {coordError}
-            </p>
+            <SummaryStrip scenario={active} />
+          </aside>
+        )}
+
+        <div className="stage">
+          {mode === 'expert' && (
+            <nav className="stage-tabs" aria-label="Views">
+              {VIEWS.map((view) => (
+                <button
+                  key={view.id}
+                  type="button"
+                  className={view.id === viewId ? 'selected' : ''}
+                  aria-pressed={view.id === viewId}
+                  onClick={() => setViewId(view.id)}
+                >
+                  {view.label}
+                </button>
+              ))}
+            </nav>
           )}
-        </fieldset>
 
-        <label>
-          Start (UTC)
-          <input
-            type="datetime-local"
-            value={active.start_utc.slice(0, 16)}
-            onChange={(event) => {
-              if (event.target.value) updateActive({ start_utc: `${event.target.value}:00Z` })
-            }}
-          />
-        </label>
+          <main className="stage-view">
+            {/* Zawsze zamontowany: odpowiedzi i wynik przetrwają wycieczkę do Expert. */}
+            <div className="guide-shell" hidden={mode !== 'simple'}>
+              <GuidePanel sites={sites} onOpenExpert={openExpert} />
+            </div>
 
-        <label>
-          Window length
-          <select
-            value={durationKey(active.duration_hours)}
-            onChange={(event) => updateActive({ duration_hours: Number(event.target.value) })}
-          >
-            {DURATION_PRESETS.map((preset) => (
-              <option key={preset.label} value={durationKey(preset.hours)}>
-                {preset.label}
-                {preset.hours === LUNAR_DAY_HOURS ? ` (${LUNAR_DAY_HOURS} h)` : ''}
-                {preset.hours === LUNAR_DAY_HOURS * 3
-                  ? ` (${(LUNAR_DAY_HOURS * 3).toFixed(1)} h)`
-                  : ''}
-              </option>
-            ))}
-            {!DURATION_PRESETS.some((preset) => durationKey(preset.hours) === durationKey(active.duration_hours)) && (
-              <option value={durationKey(active.duration_hours)}>
-                {active.duration_hours} h (custom)
-              </option>
+            {mode === 'expert' && (
+              <Suspense fallback={<p role="status">Loading view…</p>}>
+                <View
+                  scenarios={scenarios}
+                  active={active}
+                  cursor_utc={cursor ?? active.start_utc}
+                  setCursorUtc={setCursor}
+                  selectScenario={activateScenario}
+                  pickLocation={pickLocation}
+                  applyWindow={applyWindow}
+                />
+              </Suspense>
             )}
-          </select>
-        </label>
-      </section>
-
-      <section className="scenario-bar" aria-label="Scenarios">
-        <nav className="chips" aria-label="Scenario list">
-          {scenarios.map((scenario) => (
-            <button
-              key={scenario.id}
-              type="button"
-              className={scenario.id === active.id ? 'selected' : ''}
-              aria-pressed={scenario.id === active.id}
-              onClick={() => activateScenario(scenario.id)}
-            >
-              {scenario.name} · {scenario.start_utc.slice(0, 10)}
-            </button>
-          ))}
-        </nav>
-        <div className="scenario-actions">
-          <button
-            type="button"
-            onClick={addScenario}
-            disabled={atLimit}
-            title="Add another catalogue site with the current UTC hour as start"
-          >
-            Add scenario
-          </button>
-          <button
-            type="button"
-            onClick={duplicateActive}
-            disabled={atLimit}
-            title="Copy the active scenario exactly"
-          >
-            Duplicate
-          </button>
-          <button type="button" onClick={removeActive} disabled={scenarios.length <= 1}>
-            Remove
-          </button>
-          {atLimit && <span className="hint">Limit {MAX_SCENARIOS} scenarios</span>}
+          </main>
         </div>
-      </section>
-
-      <SummaryStrip scenario={active} />
-
-      <nav className="tabs" aria-label="Views">
-        {VIEWS.map((view) => (
-          <button
-            key={view.id}
-            type="button"
-            className={view.id === viewId ? 'selected' : ''}
-            aria-pressed={view.id === viewId}
-            onClick={() => setViewId(view.id)}
-          >
-            {view.label}
-          </button>
-        ))}
-      </nav>
-
-      <main>
-        <Suspense fallback={<p role="status">Loading view…</p>}>
-          <View
-            scenarios={scenarios}
-            active={active}
-            cursor_utc={cursor ?? active.start_utc}
-            setCursorUtc={setCursor}
-            selectScenario={activateScenario}
-            pickLocation={pickLocation}
-            applyWindow={applyWindow}
-          />
-        </Suspense>
-      </main>
-      </>
-      )}
+      </div>
     </div>
   )
 }
