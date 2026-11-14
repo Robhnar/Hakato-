@@ -1,7 +1,7 @@
 # 002 – Teren: profil horyzontu z danych LOLA
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba B; to najdłuższe zadanie, bez drugiego w parze)
+- **Status:** w recenzji
+- **Właściciel:** osoba B
 - **Moduł:** `terrain`
 - **Gałąź:** `feat/002-horyzont-lola`
 - **Zależy od:** –
@@ -40,9 +40,9 @@ Udostępnia `terrain.horizon_profile()` – kształt wyniku bez zmian (`docs/ARC
 
 ## Kryteria ukończenia
 
-- [ ] Test na sztucznym modelu wysokości: pojedyncze wzgórze o znanej wysokości i odległości daje oczekiwany kąt na właściwym azymucie; płaska kula daje wartości bliskie 0.
-- [ ] Dla punktu przy biegunie `/api/horizon` zwraca `source = "lola"` i profil o zmienności rzędu stopni.
-- [ ] Bez pobranych danych wszystkie testy przechodzą (CI danych nie pobiera).
+- [x] Test na sztucznym modelu wysokości: pojedyncze wzgórze o znanej wysokości i odległości daje oczekiwany kąt na właściwym azymucie; płaska kula daje wartości bliskie 0.
+- [x] Dla punktu przy biegunie `/api/horizon` zwraca `source = "lola"` i profil o zmienności rzędu stopni.
+- [x] Bez pobranych danych wszystkie testy przechodzą (CI danych nie pobiera).
 - [ ] W PR: wykres albo zrzut jednego profilu i krótkie porównanie z tym, co pokazuje Quickmap lub Moon Trek w tym miejscu.
 
 ## Notatki
