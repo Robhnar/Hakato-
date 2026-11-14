@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { api } from './api/client'
 import type { Site, SiteCategory } from './api/types'
 import { useAsync } from './api/useAsync'
@@ -58,6 +58,11 @@ function matchingSiteId(sites: Site[], scenario: Scenario): string {
   return match?.id ?? ''
 }
 
+/** Stabilny klucz selecta — unika niespójności float (np. 708.7 * 3). */
+function durationKey(hours: number): string {
+  return hours.toFixed(4)
+}
+
 export default function App() {
   const sites = useAsync(() => api.sites(), 'sites')
 
@@ -82,6 +87,18 @@ function Shell({ sites }: { sites: Site[] }) {
   const groups = useMemo(() => sitesByCategory(sites), [sites])
   const selectedSiteId = matchingSiteId(sites, active)
   const atLimit = scenarios.length >= MAX_SCENARIOS
+
+  // Przy przełączaniu scenariusza pokaż jego współrzędne w polach custom (katalog = puste).
+  useEffect(() => {
+    setCoordError(null)
+    if (matchingSiteId(sites, active)) {
+      setLatDraft('')
+      setLonDraft('')
+      return
+    }
+    setLatDraft(String(active.lat_deg))
+    setLonDraft(String(active.lon_deg))
+  }, [active.id, active.lat_deg, active.lon_deg, sites])
 
   function updateActive(change: Partial<Scenario>) {
     setScenarios((list) =>
@@ -243,18 +260,22 @@ function Shell({ sites }: { sites: Site[] }) {
         <label>
           Window length
           <select
-            value={String(active.duration_hours)}
+            value={durationKey(active.duration_hours)}
             onChange={(event) => updateActive({ duration_hours: Number(event.target.value) })}
           >
             {DURATION_PRESETS.map((preset) => (
-              <option key={preset.label} value={preset.hours}>
+              <option key={preset.label} value={durationKey(preset.hours)}>
                 {preset.label}
                 {preset.hours === LUNAR_DAY_HOURS ? ` (${LUNAR_DAY_HOURS} h)` : ''}
-                {preset.hours === LUNAR_DAY_HOURS * 3 ? ` (${(LUNAR_DAY_HOURS * 3).toFixed(1)} h)` : ''}
+                {preset.hours === LUNAR_DAY_HOURS * 3
+                  ? ` (${(LUNAR_DAY_HOURS * 3).toFixed(1)} h)`
+                  : ''}
               </option>
             ))}
-            {!DURATION_PRESETS.some((preset) => preset.hours === active.duration_hours) && (
-              <option value={active.duration_hours}>{active.duration_hours} h (custom)</option>
+            {!DURATION_PRESETS.some((preset) => durationKey(preset.hours) === durationKey(active.duration_hours)) && (
+              <option value={durationKey(active.duration_hours)}>
+                {active.duration_hours} h (custom)
+              </option>
             )}
           </select>
         </label>
