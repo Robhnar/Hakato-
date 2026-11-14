@@ -36,7 +36,7 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 
 ## Kryteria ukończenia
 
-- [ ] Żaden element nie zasłania wykresów, mapy ani zakładek przy 1440, 1024 i 390 px.
+- [x] Żaden element nie zasłania wykresów, mapy ani zakładek przy 1440, 1024 i 390 px.
 - [ ] Czas i współrzędne wszędzie w jednym formacie (`19 May 2027 19:13 UTC`, `89.45°S 137.30°W`).
 - [ ] „South pole" ustawia biegun w środku kadru; miejsca mają podpisy.
 - [x] Nakładka nie zasłania terenu; kandydaci widoczni jako punkty w skali wyniku; remisy oznaczone.
@@ -52,9 +52,9 @@ Korzysta z `GET /api/sites`, `/api/summary`, `/api/timeline`, `/api/horizon`, `/
 
 ## Czego nie sprawdzono
 
-- Układ przy 1024 px; przy 1440 px sprawdzony ręcznie, przy 390 px tylko brak poziomego przewijania strony.
-- Nawigacja klawiaturą po wszystkich widokach i kolejność fokusu.
-- Kontrast: policzony dla tokenów tekstu i komórek mapy cieplnej (po poprawce progu ≥ 4.61:1); linie danych (≥ 3:1) nie liczone.
-- `Retry` po zatrzymaniu backendu, liczba zapytań przy przeciąganiu suwaka, lot `South pole`, zwalnianie zasobów WebGL po wielu przełączeniach Map ↔ Sky.
-- Tryb prowadzony nadal używa grup `fieldset` (plan zadania 3 każe je usunąć) – do decyzji przy recenzji.
+- Układ sprawdzony przy 1440, 1024 i 390 px pomiarem (brak poziomego przewijania strony w pięciu widokach, zakładki nie są zasłaniane); nie oglądałem zrzutów wszystkich widoków przy 1024 i 390 px.
+- Klawiatura: sprawdzone nazwy dostępne i wskaźnik fokusu wszystkich elementów interaktywnych oraz brak fokusu na kanwie globusa; nie przechodziłem Tabem ani strzałkami ręcznie.
+- Kontrast: policzony dla tokenów tekstu i komórek mapy cieplnej (≥ 4.61:1); linie danych (≥ 3:1) nie liczone.
+- Nie sprawdzono: lot `South pole` po kliknięciu, zwalnianie zasobów WebGL po wielu przełączeniach Map ↔ Sky, tryb prowadzony od początku do końca, skille `design:accessibility-review` i `design:design-critique`.
 - Numery rang 1–5 na globusie bywają chowane przez kolizje podpisów.
+- Zrzuty do opisu PR trzeba zrobić przy otwieraniu PR.
