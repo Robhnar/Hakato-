@@ -192,6 +192,14 @@ function Shell({ sites }: { sites: Site[] }) {
     updateActive({ name, lat_deg, lon_deg })
   }
 
+  function applyWindow(start_utc: string, duration_hours?: number) {
+    updateActive({
+      start_utc,
+      ...(duration_hours !== undefined ? { duration_hours } : {}),
+    })
+    setCursor(start_utc)
+  }
+
   const View = VIEWS.find((view) => view.id === viewId)?.component ?? VIEWS[0].component
 
   return (
@@ -367,6 +375,7 @@ function Shell({ sites }: { sites: Site[] }) {
           setCursorUtc={setCursor}
           selectScenario={activateScenario}
           pickLocation={pickLocation}
+          applyWindow={applyWindow}
         />
       </main>
     </div>

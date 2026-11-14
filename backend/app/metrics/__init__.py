@@ -184,3 +184,6 @@ def summary(
 
     out["meta"] = tl["meta"]
     return out
+
+
+from .windows_search import search_windows as search_windows

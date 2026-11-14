@@ -49,6 +49,37 @@ def test_summary_shape():
     assert set(body["meta"]) == {"ephemeris", "horizon"}
 
 
+def test_windows_contract_stub():
+    r = client.get(
+        "/api/windows",
+        params={
+            "lat_deg": -89.5,
+            "lon_deg": 0,
+            "search_start_utc": "2027-01-01T00:00:00Z",
+            "search_end_utc": "2028-01-01T00:00:00Z",
+            "duration_hours": 708.7,
+        },
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["matches"]
+    assert body["matches"] == sorted(body["matches"], key=lambda s: s["score"], reverse=True)
+    assert set(body["meta"]) == {"ephemeris", "horizon"}
+    assert body["cycles_summary"]["synodic_month_days"] == 29.53
+    assert (
+        client.get(
+            "/api/windows",
+            params={
+                "lat_deg": -89.5,
+                "lon_deg": 0,
+                "search_start_utc": "2028-01-01T00:00:00Z",
+                "search_end_utc": "2027-01-01T00:00:00Z",
+            },
+        ).status_code
+        == 422
+    )
+
+
 def test_rejects_bad_input():
     assert client.get("/api/horizon", params={"lat_deg": 91, "lon_deg": 0}).status_code == 422
     reversed_range = {**SCENARIO, "end_utc": "2026-12-01T00:00:00Z"}

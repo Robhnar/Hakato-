@@ -14,6 +14,7 @@ MODELS = {
     "horizon.json": schemas.Horizon,
     "timeline.json": schemas.Timeline,
     "summary.json": schemas.Summary,
+    "windows.json": schemas.WindowsResponse,
 }
 
 
