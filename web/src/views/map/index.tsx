@@ -4,7 +4,7 @@ import type { OptimalSiteResponse, OptimalWeights } from '../../api/types'
 import { useAsync } from '../../api/useAsync'
 import { formatCoords } from '../../app/format'
 import { toIsoZ, type ViewProps } from '../../app/scenario'
-import { vectorFromAzEl, vectorToLatLon } from './geo'
+import { subBodyPoint } from './geo'
 import { rankCandidates } from './candidates'
 import { overlayQuery, WEIGHT_PRESETS } from './heatmap'
 import MoonGlobe, {
@@ -65,21 +65,21 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
   const selectedId =
     ranked.find((row) => row.candidate.id === pickedId)?.candidate.id ?? ranked[0]?.candidate.id ?? null
 
-  // Punkt podsłoneczny z istniejącego zapytania o widoczność Słońca.
+  // Punkty podsłoneczny i podziemski z istniejącego zapytania o widoczność (bez dodatkowych zapytań).
   const subsolar = useMemo(() => {
     if (!sun.data || sun.data.times_utc.length === 0) return null
-    return vectorToLatLon(vectorFromAzEl(0, 0, sun.data.sun.az_deg[0], sun.data.sun.el_deg[0]))
+    return subBodyPoint(sun.data.sun.az_deg[0], sun.data.sun.el_deg[0])
   }, [sun.data])
 
-  // Punkt podziemski tylko z danych nakładki - bez dodatkowego zapytania.
+  // Z włączoną nakładką bierzemy dokładny punkt z jej danych (te same co strefy), inaczej z zapytania o widoczność.
   const cursorBodies = optimal.data?.cursor_bodies ?? null
-  const subearth = useMemo(
-    () =>
-      overlayEnabled && cursorBodies
-        ? { lat_deg: cursorBodies.subearth_lat_deg, lon_deg: cursorBodies.subearth_lon_deg }
-        : null,
-    [overlayEnabled, cursorBodies],
-  )
+  const subearth = useMemo(() => {
+    if (overlayEnabled && cursorBodies) {
+      return { lat_deg: cursorBodies.subearth_lat_deg, lon_deg: cursorBodies.subearth_lon_deg }
+    }
+    if (!sun.data || sun.data.times_utc.length === 0) return null
+    return subBodyPoint(sun.data.earth.az_deg[0], sun.data.earth.el_deg[0])
+  }, [overlayEnabled, cursorBodies, sun.data])
 
   function requestView(target: ViewTarget) {
     requestSeq.current += 1
