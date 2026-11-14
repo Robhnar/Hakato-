@@ -17,6 +17,8 @@ const ANSWERS: GuideAnswers = {
   place: 'auto',
 }
 
+const QUICK: GuideAnswers = { ...ANSWERS, mission: 'quick' }
+
 function slot(change: Partial<CalendarSlot> = {}): CalendarSlot {
   return {
     start_utc: '2028-05-01T00:00:00Z',
@@ -60,7 +62,7 @@ test('findLandings asks each candidate site with the mission length and month ra
     queries.push(q)
     return response([slot()])
   })
-  expect(queries.map((q) => q.lat_deg)).toEqual([-89.5, -89.4])
+  expect([...new Set(queries.map((q) => q.lat_deg))]).toEqual([-89.5, -89.4])
   expect(queries[0]).toMatchObject({
     duration_hours: 336,
     search_start_utc: '2028-03-01T00:00:00Z',
@@ -69,7 +71,7 @@ test('findLandings asks each candidate site with the mission length and month ra
 })
 
 test('findLandings ranks slots from every site together', async () => {
-  const result = await findLandings(ANSWERS, SITES, async (q) =>
+  const result = await findLandings(QUICK, SITES, async (q) =>
     response([slot({ sun_visible_fraction: q.lat_deg === -89.4 ? 1 : 0.3 })]),
   )
   expect(result.ranked.map((c) => c.site.id)).toEqual(['ridge', 'pole'])
@@ -77,7 +79,7 @@ test('findLandings ranks slots from every site together', async () => {
 })
 
 test('findLandings keeps results when one site fails', async () => {
-  const result = await findLandings(ANSWERS, SITES, async (q) => {
+  const result = await findLandings(QUICK, SITES, async (q) => {
     if (q.lat_deg === -89.5) throw new Error('boom')
     return response([slot()])
   })
@@ -118,6 +120,39 @@ test('findLandings rejects an invalid month range before calling the API', async
       called = true
       return response([])
     }),
-  ).rejects.toThrow('The end month must be after the start month.')
+  ).rejects.toThrow('The latest month can’t be before the earliest month.')
   expect(called).toBe(false)
+})
+
+test('findLandings samples 8 lunar phases for missions of 300 h or more', async () => {
+  // Backend przesuwa długie okna co miesiąc synodyczny, więc jeden start = jedna faza Księżyca.
+  const queries: WindowsQuery[] = []
+  await findLandings(ANSWERS, SITES, async (q) => {
+    queries.push(q)
+    return response([slot()])
+  })
+  expect(queries).toHaveLength(16)
+  const poleStarts = queries.filter((q) => q.lat_deg === -89.5).map((q) => q.search_start_utc)
+  expect(new Set(poleStarts).size).toBe(8)
+  expect(poleStarts[0]).toBe('2028-03-01T00:00:00Z')
+  expect(poleStarts[1]).toBe('2028-03-04T16:35:30Z')
+})
+
+test('findLandings asks once per site for short missions', async () => {
+  const queries: WindowsQuery[] = []
+  await findLandings({ ...ANSWERS, mission: 'quick' }, SITES, async (q) => {
+    queries.push(q)
+    return response([slot()])
+  })
+  expect(queries).toHaveLength(2)
+})
+
+test('findLandings treats a site as failed only when all its phases fail', async () => {
+  let n = 0
+  const result = await findLandings(ANSWERS, SITES, async () => {
+    n += 1
+    if (n % 2 === 0) throw new Error('flaky')
+    return response([slot()])
+  })
+  expect(result.failedSites).toEqual([])
 })

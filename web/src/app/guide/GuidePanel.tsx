@@ -1,0 +1,325 @@
+// Tryb prowadzony „Plan a landing” (zadanie 020): trzy proste pytania → rekomendacja miejsca i terminu.
+
+import { useEffect, useRef, useState } from 'react'
+import { api } from '../../api/client'
+import type { Site, SiteCategory } from '../../api/types'
+import { approximateNote } from './explain'
+import { defaultMonthRange, formatDay, formatPercent, formatUtcTime, monthRangeToSearch } from './format'
+import { MISSIONS, type MissionKind, type Priority, nextAfterSlip } from './ranking'
+import ResultCard from './ResultCard'
+import { type GuideAnswers, type SearchResult, findLandings } from './search'
+import './guide.css'
+
+const PRIORITIES: { id: Priority; label: string; blurb: string }[] = [
+  { id: 'power', label: 'Solar power', blurb: 'Most sunlight, shortest nights' },
+  { id: 'earth', label: 'Talking to Earth', blurb: 'Earth in the sky as often as possible' },
+  { id: 'both', label: 'Both equally', blurb: 'A balance of sunlight and contact' },
+]
+
+const CATEGORY_LABEL: Record<SiteCategory, string> = {
+  candidate: 'South pole candidates',
+  apollo: 'Apollo landing sites',
+  clps: 'NASA commercial landers (CLPS)',
+  commercial: 'Other commercial missions',
+  international: 'Other countries',
+}
+
+const SLIP_DAYS = 7
+
+type Status =
+  | { kind: 'idle' }
+  | { kind: 'loading' }
+  | { kind: 'error'; message: string }
+  | { kind: 'done'; result: SearchResult; answers: GuideAnswers }
+
+export interface GuidePanelProps {
+  sites: Site[]
+  onOpenExpert: (site: Site, start_utc: string, duration_hours: number, viewId: 'sky' | 'timeline') => void
+}
+
+export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
+  const [answers, setAnswers] = useState<GuideAnswers>(() => ({
+    mission: 'twoWeeks',
+    priority: 'power',
+    earthAtLanding: false,
+    place: 'auto',
+    ...defaultMonthRange(new Date()),
+  }))
+  const [status, setStatus] = useState<Status>({ kind: 'idle' })
+  const requestId = useRef(0)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  const range = monthRangeToSearch(answers.from, answers.to)
+  const rangeError = 'error' in range ? range.error : null
+  const update = (change: Partial<GuideAnswers>) => setAnswers((prev) => ({ ...prev, ...change }))
+
+  async function search() {
+    if (rangeError) return
+    const id = ++requestId.current
+    const asked = answers
+    setStatus({ kind: 'loading' })
+    try {
+      const result = await findLandings(asked, sites, api.windows)
+      // Starsze zapytanie nie nadpisuje nowszego.
+      if (id === requestId.current) setStatus({ kind: 'done', result, answers: asked })
+    } catch (error) {
+      if (id === requestId.current) setStatus({ kind: 'error', message: error instanceof Error ? error.message : String(error) })
+    }
+  }
+
+  // Po nowym wyniku fokus na nagłówku rekomendacji (czytniki ekranu i klawiatura).
+  useEffect(() => {
+    if (status.kind === 'done') headingRef.current?.focus()
+  }, [status])
+
+  const groups = (Object.keys(CATEGORY_LABEL) as SiteCategory[])
+    .map((category) => ({ category, sites: sites.filter((s) => s.category === category) }))
+    .filter((g) => g.sites.length > 0)
+
+  return (
+    <div className="guide">
+      <header className="guide-intro">
+        <h2>Plan a Moon landing</h2>
+        <p>
+          Answer three questions. We check where the Sun and Earth will be above the lunar hills and suggest the best
+          place and day to land.
+        </p>
+      </header>
+
+      <form
+        className="guide-form"
+        onSubmit={(event) => {
+          event.preventDefault()
+          void search()
+        }}
+      >
+        <fieldset className="guide-step">
+          <legend>
+            <span className="guide-step-no">1</span> How long will the mission stay on the Moon?
+          </legend>
+          <div className="guide-choices">
+            {(Object.keys(MISSIONS) as MissionKind[]).map((kind) => (
+              <label key={kind} className="guide-choice">
+                <input
+                  type="radio"
+                  name="mission"
+                  aria-label={`${MISSIONS[kind].label}: ${MISSIONS[kind].blurb}`}
+                  checked={answers.mission === kind}
+                  onChange={() => update({ mission: kind })}
+                />
+                <span className="guide-choice-title">{MISSIONS[kind].label}</span>
+                <span className="guide-choice-blurb">{MISSIONS[kind].blurb}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="guide-step">
+          <legend>
+            <span className="guide-step-no">2</span> What matters most?
+          </legend>
+          <div className="guide-choices">
+            {PRIORITIES.map((p) => (
+              <label key={p.id} className="guide-choice">
+                <input
+                  type="radio"
+                  name="priority"
+                  aria-label={`${p.label}: ${p.blurb}`}
+                  checked={answers.priority === p.id}
+                  onChange={() => update({ priority: p.id })}
+                />
+                <span className="guide-choice-title">{p.label}</span>
+                <span className="guide-choice-blurb">{p.blurb}</span>
+              </label>
+            ))}
+          </div>
+          <label className="guide-check">
+            <input
+              type="checkbox"
+              checked={answers.earthAtLanding}
+              onChange={(event) => update({ earthAtLanding: event.target.checked })}
+            />
+            Earth must be in the sky at the moment of landing (live video home)
+          </label>
+        </fieldset>
+
+        <fieldset className="guide-step">
+          <legend>
+            <span className="guide-step-no">3</span> When and where?
+          </legend>
+          <div className="guide-row">
+            <label>
+              Earliest landing month
+              <input type="month" value={answers.from} onChange={(event) => update({ from: event.target.value })} />
+            </label>
+            <label>
+              Latest landing month
+              <input type="month" value={answers.to} onChange={(event) => update({ to: event.target.value })} />
+            </label>
+          </div>
+          {rangeError && (
+            <p className="guide-error" id="guide-range-error" role="alert">
+              {rangeError}
+            </p>
+          )}
+          <div className="guide-choices guide-choices-place">
+            <label className="guide-choice">
+              <input
+                type="radio"
+                name="place"
+                aria-label="Find the best place for me"
+                checked={answers.place === 'auto'} onChange={() => update({ place: 'auto' })} />
+              <span className="guide-choice-title">Find the best place for me</span>
+              <span className="guide-choice-blurb">Compares the south pole sites NASA is studying for Artemis</span>
+            </label>
+            <label className="guide-choice">
+              <input
+                type="radio"
+                name="place"
+                aria-label="A place I choose"
+                checked={answers.place !== 'auto'}
+                onChange={() => update({ place: groups[0]?.sites[0]?.id ?? 'auto' })}
+              />
+              <span className="guide-choice-title">A place I choose</span>
+              <select
+                aria-label="Landing place"
+                value={answers.place === 'auto' ? '' : answers.place}
+                onChange={(event) => update({ place: event.target.value })}
+                onFocus={() => {
+                  if (answers.place === 'auto') update({ place: groups[0]?.sites[0]?.id ?? 'auto' })
+                }}
+              >
+                {answers.place === 'auto' && <option value="">Choose a place…</option>}
+                {groups.map((g) => (
+                  <optgroup key={g.category} label={CATEGORY_LABEL[g.category]}>
+                    {g.sites.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <button
+          type="submit"
+          className="guide-primary guide-submit"
+          disabled={rangeError !== null || status.kind === 'loading'}
+          aria-describedby={rangeError ? 'guide-range-error' : undefined}
+        >
+          {status.kind === 'loading' ? 'Searching…' : 'Find my landing'}
+        </button>
+      </form>
+
+      <section className="guide-results" aria-live="polite" aria-busy={status.kind === 'loading'}>
+        {status.kind === 'loading' && <p role="status">Checking sunlight and Earth contact for every day…</p>}
+        {status.kind === 'error' && (
+          <div className="guide-error" role="alert">
+            <p>{status.message}</p>
+            <button type="button" onClick={() => void search()}>
+              Try again
+            </button>
+          </div>
+        )}
+        {status.kind === 'done' && (
+          <Results result={status.result} answers={status.answers} headingRef={headingRef} onOpenExpert={onOpenExpert} />
+        )}
+      </section>
+    </div>
+  )
+}
+
+function Results({
+  result,
+  answers,
+  headingRef,
+  onOpenExpert,
+}: {
+  result: SearchResult
+  answers: GuideAnswers
+  headingRef: React.RefObject<HTMLHeadingElement | null>
+  onOpenExpert: GuidePanelProps['onOpenExpert']
+}) {
+  const hours = MISSIONS[answers.mission].hours
+  const note = approximateNote(result.meta)
+  const failed =
+    result.failedSites.length > 0 ? `We could not check: ${result.failedSites.map((s) => s.name).join(', ')}.` : null
+
+  if (result.ranked.length === 0) {
+    return (
+      <div className="guide-empty">
+        <h2 ref={headingRef} tabIndex={-1}>
+          No good landing found
+        </h2>
+        <p>
+          {result.emptyReason === 'earth-at-landing'
+            ? 'In these months Earth is never in the sky at touchdown. Untick “Earth must be in the sky at the moment of landing” or choose more months.'
+            : 'There are no landing opportunities in these months. Try a longer period.'}
+        </p>
+        {failed && <p className="guide-note">{failed}</p>}
+      </div>
+    )
+  }
+
+  const best = result.ranked[0]
+  const others = result.ranked.filter((c) => c !== best && c.site.id !== best.site.id).slice(0, 3)
+  const alternatives = others.length > 0 ? others : result.ranked.slice(1, 4)
+  const slipped = nextAfterSlip(result.ranked, best, SLIP_DAYS)
+
+  return (
+    <>
+      <ResultCard
+        candidate={best}
+        priority={answers.priority}
+        durationHours={hours}
+        headingRef={headingRef}
+        onOpenExpert={onOpenExpert}
+      />
+
+      <section className="guide-slip">
+        <h3>If your launch slips by a week</h3>
+        {slipped ? (
+          <p>
+            Next good chance at {best.site.name}: <strong>{formatDay(slipped.slot.start_utc)}</strong> at{' '}
+            {formatUtcTime(slipped.slot.start_utc)}
+            {slipped.points < best.points - 10 ? ' — not quite as good, but workable.' : ' — about as good.'}
+          </p>
+        ) : (
+          <p>No later chance at this place in the months you chose. Add more months to see one.</p>
+        )}
+      </section>
+
+      {alternatives.length > 0 && (
+        <section className="guide-others">
+          <h3>Other good options</h3>
+          <ul>
+            {alternatives.map((c) => (
+              <li key={`${c.site.id}-${c.slot.start_utc}`}>
+                <span className="guide-other-name">{c.site.name}</span>
+                <span className="guide-other-when">
+                  {formatDay(c.slot.start_utc)}, {formatUtcTime(c.slot.start_utc)}
+                </span>
+                <span className="guide-other-why">
+                  Sun up {formatPercent(c.slot.sun_visible_fraction)} · Earth in view{' '}
+                  {formatPercent(c.slot.earth_visible_fraction)}
+                </span>
+                <button type="button" onClick={() => onOpenExpert(c.site, c.slot.start_utc, hours, 'sky')}>
+                  See it
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {(note || failed) && (
+        <p className="guide-note" role="note">
+          {note} {failed}
+        </p>
+      )}
+    </>
+  )
+}
