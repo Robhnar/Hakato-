@@ -368,7 +368,8 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
               const x = xFor(tickMs, startMs, endMs)
               const anchor = index === 0 ? 'start' : index === all.length - 1 ? 'end' : 'middle'
               return (
-                <g key={tickMs} aria-hidden="true">
+                // Okno o zerowej długości daje identyczne znaczniki czasu — indeks pilnuje unikalności.
+                <g key={`${tickMs}-${index}`} aria-hidden="true">
                   <line className="timeline-tick" x1={x} y1={CHART_TOP} x2={x} y2={CHART_TOP + CHART_H} />
                   <text className="timeline-axis-label" x={x} y={AXIS_TOP} textAnchor={anchor}>
                     {formatTick(toIsoZ(new Date(tickMs)))}
