@@ -88,6 +88,16 @@ def test_summary_and_window_results_expose_optional_metrics():
     CalendarSlot.model_validate(slot)
 
 
+def test_summary_uncertainty_uses_sun_horizon_not_earth_horizon():
+    start = datetime(2027, 1, 1, tzinfo=UTC)
+    end = datetime(2027, 1, 30, tzinfo=UTC)
+    scenario = summary(-89.5, 0.0, start, end, step_minutes=60.0)
+    expected_hours = scenario["sun"]["visible_fraction"] * ((end - start).total_seconds() / 3600.0)
+    if expected_hours > 10.0:
+        assert scenario["uncertainty"]["typical_sunlight_hours"] > 0.0
+        assert abs(scenario["uncertainty"]["typical_sunlight_hours"] - expected_hours) < 25.0
+
+
 def test_uncertainty_rejects_mismatched_samples_and_invalid_time_order():
     times = ["2027-01-01T00:00:00Z", "2027-01-01T01:00:00Z"]
 

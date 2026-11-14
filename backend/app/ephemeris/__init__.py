@@ -1,6 +1,7 @@
 """Moduł efemeryd: gdzie na niebie są Słońce i Ziemia. Kontrakt w docs/ARCHITECTURE.md."""
 
 import os
+import threading
 from datetime import datetime
 
 from ..config import DATA_DIR
@@ -26,6 +27,7 @@ _REQUIRED_KERNELS = [
 ]
 
 _KERNELS_LOADED = False
+_KERNEL_LOCK = threading.Lock()
 
 
 def _try_load_kernels() -> bool:
@@ -37,20 +39,23 @@ def _try_load_kernels() -> bool:
     if not _SPICE_AVAILABLE:
         return False
 
-    for k in _REQUIRED_KERNELS:
-        kernel_path = _KERNELS_DIR / k
-        if not (kernel_path.exists() and kernel_path.stat().st_size > 0):
-            return False
+    with _KERNEL_LOCK:
+        if _KERNELS_LOADED:
+            return True
 
-    try:
         for k in _REQUIRED_KERNELS:
-            spice.furnsh(str(_KERNELS_DIR / k))
-        _KERNELS_LOADED = True
-        return True
-    except Exception:  # noqa: BLE001
-        _KERNELS_LOADED = False
-        spice.kclear()
-        return False
+            kernel_path = _KERNELS_DIR / k
+            if not (kernel_path.exists() and kernel_path.stat().st_size > 0):
+                return False
+
+        try:
+            for k in _REQUIRED_KERNELS:
+                spice.furnsh(str(_KERNELS_DIR / k))
+            _KERNELS_LOADED = True
+            return True
+        except Exception:  # noqa: BLE001
+            _KERNELS_LOADED = False
+            return False
 
 
 def are_kernels_loaded() -> bool:

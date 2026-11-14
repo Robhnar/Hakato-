@@ -26,7 +26,9 @@ async function get<T>(path: string, params: Params = {}): Promise<T> {
     query.set(key, String(value))
   }
   const suffix = query.size > 0 ? `?${query}` : ''
-  const response = await fetch(`/api/${path}${suffix}`)
+  const response = await fetch(`/api/${path}${suffix}`, {
+    signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(15_000) : undefined,
+  })
   if (!response.ok) {
     throw new Error(`API ${path}: ${response.status} ${await response.text()}`)
   }

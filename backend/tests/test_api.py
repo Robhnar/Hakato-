@@ -110,6 +110,52 @@ def test_rejects_bad_input():
     assert client.get("/api/timeline", params=reversed_range).status_code == 422
     too_dense = {**SCENARIO, "end_utc": "2028-01-01T00:00:00Z", "step_minutes": 1}
     assert client.get("/api/timeline", params=too_dense).status_code == 422
+    assert client.get("/api/optimal-site", params=too_dense).status_code == 422
+    out_of_spice_years = {
+        **SCENARIO,
+        "start_utc": "3000-01-01T00:00:00Z",
+        "end_utc": "3000-01-02T00:00:00Z",
+    }
+    assert client.get("/api/timeline", params=out_of_spice_years).status_code == 422
+    too_many_windows = {
+        "lat_deg": -89.5,
+        "lon_deg": 0,
+        "search_start_utc": "2020-01-01T00:00:00Z",
+        "search_end_utc": "2030-01-01T00:00:00Z",
+        "duration_hours": 0.5,
+    }
+    assert client.get("/api/windows", params=too_many_windows).status_code == 422
+
+
+def test_single_sample_summary_and_outside_calendar_windows():
+    single = client.get(
+        "/api/summary",
+        params={
+            "lat_deg": 0.0,
+            "lon_deg": 0.0,
+            "start_utc": "2027-01-01T00:00:00Z",
+            "end_utc": "2027-01-01T00:30:00Z",
+            "step_minutes": 60,
+        },
+    )
+    assert single.status_code == 200
+    body = single.json()
+    assert body["earth"]["visible_at_start"] is True
+    assert body["earth"]["visible_fraction"] == 1.0
+
+    # Zakres w roku 2026 (poza prekomputowanym kalendarzem 2027-2035) liczy się na żądanie
+    win_2026 = client.get(
+        "/api/windows",
+        params={
+            "lat_deg": -89.5,
+            "lon_deg": 0.0,
+            "search_start_utc": "2026-01-01T00:00:00Z",
+            "search_end_utc": "2026-03-01T00:00:00Z",
+            "duration_hours": 708.7,
+        },
+    )
+    assert win_2026.status_code == 200
+    assert len(win_2026.json()["grid"]) >= 1
 
 
 def test_horizon_response_is_cached_without_sharing_mutable_data(monkeypatch):

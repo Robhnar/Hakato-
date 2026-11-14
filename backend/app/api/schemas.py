@@ -22,7 +22,7 @@ class Horizon(BaseModel):
 
 class Meta(BaseModel):
     ephemeris: Literal["placeholder", "spice"]
-    horizon: Literal["flat", "lola", "synthetic"]
+    horizon: Literal["flat", "lola", "synthetic", "mixed"]
 
 
 class BodySeries(BaseModel):
@@ -169,6 +169,7 @@ class OptimalCandidate(BaseModel):
     max_darkness_hours: float = Field(ge=0)
     sun_visible_at_cursor: bool
     earth_visible_at_cursor: bool
+    horizon: Literal["flat", "lola", "synthetic"] = "flat"
 
 
 class OptimalSiteResponse(BaseModel):

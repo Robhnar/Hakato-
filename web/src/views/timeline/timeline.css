@@ -224,6 +224,14 @@
     white-space: normal;
   }
 
+  .timeline-canvas {
+    overflow-x: auto;
+  }
+
+  .timeline-svg {
+    min-width: 720px;
+  }
+
   /* Tekst w SVG skaluje się razem z wykresem — na wąskim ekranie podbijamy go
      i pokazujemy co drugi tick, żeby etykiety nie nachodziły na siebie. */
   .timeline-axis-label {

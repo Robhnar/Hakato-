@@ -99,9 +99,12 @@ export default function SkyView({ active, cursor_utc }: ViewProps) {
   )
 
   if (timeline.error || horizon.error) {
-    return <p className="error">{timeline.error ?? horizon.error}</p>
+    return <p className="error" role="alert">{timeline.error ?? horizon.error}</p>
   }
-  if (!timeline.data || !horizon.data) return <p>Loading…</p>
+  if (!timeline.data || !horizon.data) return <p role="status">Loading…</p>
+  if (timeline.data.times_utc.length === 0) {
+    return <p role="status">No visibility samples in this window.</p>
+  }
 
   const layout = buildLayout(horizon.data, timeline.data)
   const idx = nearestTimeIndex(timeline.data.times_utc, cursor_utc)

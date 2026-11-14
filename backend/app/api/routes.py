@@ -22,8 +22,18 @@ Lon = Annotated[float, Query(ge=-180, le=180)]
 Step = Annotated[float, Query(ge=1, le=1440)]
 
 
+MIN_YEAR = 1850
+MAX_YEAR = 2150
+
+
 def _check_range(start_utc: datetime, end_utc: datetime, step_minutes: float) -> None:
-    span_minutes = (to_utc(end_utc) - to_utc(start_utc)).total_seconds() / 60.0
+    s_utc = to_utc(start_utc)
+    e_utc = to_utc(end_utc)
+    if not (MIN_YEAR <= s_utc.year <= MAX_YEAR and MIN_YEAR <= e_utc.year <= MAX_YEAR):
+        raise HTTPException(
+            422, f"Daty muszą mieścić się w zakresie lat {MIN_YEAR}–{MAX_YEAR} (pokrycie SPICE)"
+        )
+    span_minutes = (e_utc - s_utc).total_seconds() / 60.0
     if span_minutes <= 0:
         raise HTTPException(422, "end_utc musi być późniejszy niż start_utc")
     if span_minutes / step_minutes > MAX_SAMPLES:
@@ -136,7 +146,7 @@ def windows(
     require_earth_at_landing: bool = False,
     min_earth_fraction: Annotated[float, Query(ge=0, le=1)] = 0.0,
     reference_start_utc: datetime | None = None,
-    slip_days: float = 0.0,
+    slip_days: Annotated[float, Query(ge=-3650, le=3650)] = 0.0,
 ) -> dict:
     if to_utc(search_end_utc) <= to_utc(search_start_utc):
         raise HTTPException(422, "search_end_utc musi być późniejszy niż search_start_utc")
@@ -157,7 +167,7 @@ def windows(
                 slip_days,
             )
         )
-    except ValueError as exc:
+    except (ValueError, OverflowError) as exc:
         raise HTTPException(422, str(exc)) from exc
 
 
@@ -192,8 +202,7 @@ def optimal_site(
     w_earth: float = 0.25,
     w_overlap: float = 0.30,
 ) -> dict:
-    if to_utc(end_utc) <= to_utc(start_utc):
-        raise HTTPException(422, "end_utc musi być późniejszy niż start_utc")
+    _check_range(start_utc, end_utc, step_minutes)
     try:
         return deepcopy(
             _cached_optimal_site(

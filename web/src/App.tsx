@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { api } from './api/client'
 import type { Site, SiteCategory } from './api/types'
 import { useAsync } from './api/useAsync'
@@ -65,11 +65,27 @@ function durationKey(hours: number): string {
 }
 
 export default function App() {
-  const sites = useAsync(() => api.sites(), 'sites')
+  const [retryCount, setRetryCount] = useState(0)
+  const sites = useAsync(() => api.sites(), `sites-${retryCount}`)
 
-  if (sites.error) return <p className="error">Cannot load landing sites: {sites.error}</p>
-  if (!sites.data) return <p>Loading…</p>
-  if (sites.data.length === 0) return <p className="error">The landing site catalogue is empty.</p>
+  if (sites.error) {
+    return (
+      <div role="alert" className="error">
+        <p>Cannot load landing sites: {sites.error}</p>
+        <button type="button" onClick={() => setRetryCount((n) => n + 1)}>
+          Retry
+        </button>
+      </div>
+    )
+  }
+  if (!sites.data) return <p role="status">Loading…</p>
+  if (sites.data.length === 0) {
+    return (
+      <p className="error" role="alert">
+        The landing site catalogue is empty.
+      </p>
+    )
+  }
   return <Shell sites={sites.data} />
 }
 
@@ -116,9 +132,18 @@ function Shell({ sites }: { sites: Site[] }) {
   }
 
   function updateActive(change: Partial<Scenario>) {
+    const nextScenario = { ...active, ...change }
     setScenarios((list) =>
-      list.map((scenario) => (scenario.id === active.id ? { ...scenario, ...change } : scenario)),
+      list.map((scenario) => (scenario.id === active.id ? nextScenario : scenario)),
     )
+    setCursor((current) => {
+      if (!current) return current
+      const start = new Date(nextScenario.start_utc).getTime()
+      const end = new Date(endUtc(nextScenario)).getTime()
+      const value = new Date(current).getTime()
+      if (Number.isNaN(value) || value < start || value > end) return nextScenario.start_utc
+      return current
+    })
   }
 
   function applySite(site: Site) {
@@ -322,6 +347,7 @@ function Shell({ sites }: { sites: Site[] }) {
               key={scenario.id}
               type="button"
               className={scenario.id === active.id ? 'selected' : ''}
+              aria-pressed={scenario.id === active.id}
               onClick={() => activateScenario(scenario.id)}
             >
               {scenario.name} · {scenario.start_utc.slice(0, 10)}
@@ -360,6 +386,7 @@ function Shell({ sites }: { sites: Site[] }) {
             key={view.id}
             type="button"
             className={view.id === viewId ? 'selected' : ''}
+            aria-pressed={view.id === viewId}
             onClick={() => setViewId(view.id)}
           >
             {view.label}
@@ -368,15 +395,17 @@ function Shell({ sites }: { sites: Site[] }) {
       </nav>
 
       <main>
-        <View
-          scenarios={scenarios}
-          active={active}
-          cursor_utc={cursor ?? active.start_utc}
-          setCursorUtc={setCursor}
-          selectScenario={activateScenario}
-          pickLocation={pickLocation}
-          applyWindow={applyWindow}
-        />
+        <Suspense fallback={<p role="status">Loading view…</p>}>
+          <View
+            scenarios={scenarios}
+            active={active}
+            cursor_utc={cursor ?? active.start_utc}
+            setCursorUtc={setCursor}
+            selectScenario={activateScenario}
+            pickLocation={pickLocation}
+            applyWindow={applyWindow}
+          />
+        </Suspense>
       </main>
     </div>
   )

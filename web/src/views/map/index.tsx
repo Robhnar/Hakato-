@@ -48,8 +48,9 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
     overlayEnabled ? JSON.stringify(optimalQuery) : 'overlay-off',
   )
 
-  if (sites.error || sun.error) return <p className="error">{sites.error ?? sun.error}</p>
-  if (!sites.data || !sun.data) return <p>Loading…</p>
+  if (sites.error || sun.error) return <p className="error" role="alert">{sites.error ?? sun.error}</p>
+  if (!sites.data || !sun.data) return <p role="status">Loading…</p>
+  if (sun.data.times_utc.length === 0) return <p role="status">No visibility samples in this window.</p>
 
   const sunDir = vectorFromAzEl(0, 0, sun.data.sun.az_deg[0], sun.data.sun.el_deg[0])
   const subsolar = vectorToLatLon(sunDir)
