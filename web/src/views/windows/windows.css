@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 16px 20px 24px;
+  padding: 0;
   min-width: 0;
 }
 
@@ -301,6 +301,7 @@
 }
 
 .windows-field input {
+  box-sizing: border-box;
   width: 100%;
   background: var(--bg);
 }
@@ -701,7 +702,7 @@
 
 @media (max-width: 900px) {
   .windows {
-    padding: 12px 12px 20px;
+    padding: 0;
   }
 
   .windows-layout {
@@ -751,4 +752,15 @@
   .windows-nearest button {
     margin-left: 0;
   }
+}
+
+/* Scena jest węższa od okna o panel boczny (300 px) - dwie kolumny mieszczą się dopiero od ok. 1200 px. */
+@media (max-width: 1200px) {
+  .windows-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.windows-matches-table td {
+  white-space: nowrap;
 }
