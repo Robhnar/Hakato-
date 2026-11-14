@@ -1,7 +1,7 @@
 # 008 – Porównanie scenariuszy obok siebie
 
 - **Status:** w recenzji
-- **Właściciel:** Michał Majkut (Micello421)
+- **Właściciel:** osoba C
 - **Moduł:** frontend – widok `compare`
 - **Gałąź:** `feat/008-porownanie`
 - **Zależy od:** 005 (wygodne dodawanie scenariuszy); zacząć można wcześniej
