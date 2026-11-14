@@ -339,6 +339,7 @@
 }
 
 .windows-table-wrap {
+  position: relative; /* kotwica dla .windows-visually-hidden, inaczej ucieka poza przewijanie */
   overflow-x: auto;
   border-top: 1px solid var(--line);
 }
