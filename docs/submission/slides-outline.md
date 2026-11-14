@@ -19,7 +19,7 @@ Export to PDF/Google Slides and put the link in **Project Demo**. Screenshots mu
 
 - Web app: catalogue + custom ME coords, UTC windows, up to 4 scenarios
 - Sticky summary of Sun/Earth visibility
-- Views: Sky · Compare · Map (Timeline stub noted honestly if shown)
+- Views: Sky · Timeline · Compare · Map
 
 ## 4. NASA data
 
