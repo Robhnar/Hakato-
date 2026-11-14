@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from datetime import datetime
 from functools import lru_cache
 
@@ -39,8 +40,9 @@ POLAR_GRID_SPECS: list[tuple[float, int]] = [
 ]
 
 
-@lru_cache(maxsize=128)
-def _candidate_horizon(lat_deg: float, lon_deg: float) -> dict:
+@lru_cache(maxsize=256)
+def _candidate_horizon(lat_deg: float, lon_deg: float, placeholder_flag: str = "") -> dict:
+    del placeholder_flag
     return terrain.horizon_profile(lat_deg, lon_deg)
 
 
@@ -71,8 +73,10 @@ def _generate_candidates() -> list[dict]:
     """Wygeneruj pełny zbiór kandydatów: miejsca katalogowe + polarna siatka referencyjna."""
     candidates = []
 
-    # 1. Miejsca katalogowe
+    # 1. Miejsca katalogowe w regionie bieguna południowego (<= -75°S)
     for site in _load_catalog_sites():
+        if float(site["lat_deg"]) > -75.0:
+            continue
         candidates.append(
             {
                 "id": site.get("id", f"site_{site['lat_deg']}_{site['lon_deg']}"),
@@ -189,10 +193,11 @@ def find_optimal_site(
     evaluated_candidates = []
     candidates = _generate_candidates()
 
+    placeholder_flag = os.environ.get("HAKATO_FORCE_PLACEHOLDER", "")
     for cand in candidates:
         lat = cand["lat_deg"]
         lon = cand["lon_deg"]
-        profile = _candidate_horizon(lat, lon)
+        profile = _candidate_horizon(lat, lon, placeholder_flag)
 
         sun_visible_flags: list[bool] = []
         earth_visible_flags: list[bool] = []
@@ -270,6 +275,7 @@ def find_optimal_site(
                 "max_darkness_hours": max_darkness_hours,
                 "sun_visible_at_cursor": bool(sun_vis_cursor),
                 "earth_visible_at_cursor": bool(earth_vis_cursor),
+                "horizon": profile.get("source", "flat"),
             }
         )
 
@@ -280,6 +286,8 @@ def find_optimal_site(
     )
 
     optimal = evaluated_candidates[0] if evaluated_candidates else None
+    horizon_sources = {c["horizon"] for c in evaluated_candidates}
+    meta_horizon = next(iter(horizon_sources)) if len(horizon_sources) == 1 else "mixed"
 
     return {
         "optimal": optimal,
@@ -292,6 +300,6 @@ def find_optimal_site(
         },
         "meta": {
             "ephemeris": ephemeris.SOURCE,
-            "horizon": "lola",
+            "horizon": meta_horizon,
         },
     }

@@ -32,7 +32,7 @@ Każdy moduł ma własny katalog. Poza swoim katalogiem nie zmieniasz plików be
 | API | `backend/app/api/` | endpointy HTTP, katalog miejsc, cache |
 | Dane | `data/` | katalog miejsc (`sites.json`), gotowe profile horyzontu, skrypty pobierania jąder i modeli wysokości |
 | Frontend – powłoka | `web/src/App.tsx`, `web/src/app/`, `web/src/api/` | układ aplikacji, wybór miejsca i daty, klient API, stan scenariuszy |
-| Frontend – widoki | `web/src/views/<widok>/` | każdy widok w osobnym katalogu: niebo, oś czasu, porównanie, mapa |
+| Frontend – widoki | `web/src/views/<widok>/` | każdy widok w osobnym katalogu: niebo (`sky`), oś czasu (`timeline`), porównanie (`compare`), wyszukiwarka okien (`windows`), mapa 3D (`map`) |
 | Kontrakty | `contracts/` | przykładowe odpowiedzi API (fixtures) – wspólne dla backendu i frontendu |
 
 Przepływ danych: `ephemeris` + `terrain` → `metrics` → `api` → `web`.
@@ -73,9 +73,11 @@ Przeliczenie wektora w układzie ME na azymut i wysokość jest w `backend/app/e
 
 Źródłem prawdy o kształcie odpowiedzi są `backend/app/api/schemas.py` i jego odbicie `web/src/api/types.ts` – oba pliki zmienia się razem. Pełne przykładowe odpowiedzi leżą w `contracts/fixtures/` (generuje je `python -m scripts.export_fixtures`, test pilnuje ich aktualności). Frontend może pracować na nich bez backendu: `npm run dev:fixtures`.
 
-Każda odpowiedź z obliczeniami niesie pole `meta` mówiące, z czego ją policzono: `ephemeris` = `placeholder` | `spice`, `horizon` = `flat` | `lola` | `synthetic` (to ostatnie tylko w fixtures). Aplikacja pokazuje ostrzeżenie, dopóki nie jest to `spice` + `lola`.
+Każda odpowiedź z obliczeniami niesie pole `meta` mówiące, z czego ją policzono: `ephemeris` = `placeholder` | `spice`, `horizon` = `flat` | `lola` | `synthetic` | `mixed`. Aplikacja pokazuje ostrzeżenie, dopóki nie jest to `spice` + `lola`.
 
-Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 10 minut to ok. 12 800), `step_minutes` od 1 do 1440; przekroczenie daje błąd 422.
+Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 10 minut to ok. 12 800), `step_minutes` od 1 do 1440, zakres lat 1850–2150; przekroczenie daje błąd 422.
+
+**`GET /api/health`** – kontrola stanu serwera (`{"status": "ok"}`).
 
 **`GET /api/sites`** – katalog miejsc.
 
@@ -122,7 +124,7 @@ Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 
 
 **`GET /api/windows?lat_deg&lon_deg&search_start_utc&search_end_utc&…`** – wyszukiwarka okien lądowania (Faza 2).
 
-Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_landing_deg` (0), `min_sunlight_hours` (0), `max_darkness_hours` (708.7), `require_earth_at_landing` (false), `min_earth_fraction` (0), opcjonalnie `reference_start_utc` i `slip_days` (0) dla trybu „start się opóźnił".
+Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_landing_deg` (-90.0), `min_sunlight_hours` (0), `max_darkness_hours` (708.7), `require_earth_at_landing` (false), `min_earth_fraction` (0), opcjonalnie `reference_start_utc` i `slip_days` (0, w zakresie ±3650) dla trybu „start się opóźnił". Maksymalny przedział wyszukiwania to 10 lat i 500 okien.
 
 ```json
 {"grid":[{"start_utc":"2027-01-01T00:00:00Z","end_utc":"2027-01-30T12:42:00Z",

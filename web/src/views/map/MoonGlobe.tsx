@@ -371,6 +371,7 @@ export default function MoonGlobe({
       optimalRingGeometry.dispose()
       optimalRingMaterial.dispose()
       sunLight.dispose()
+      renderer.forceContextLoss()
       renderer.dispose()
       host.removeChild(canvas)
       globeRef.current = null

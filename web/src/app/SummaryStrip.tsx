@@ -29,7 +29,7 @@ function DataNotes({ meta }: { meta: Meta }) {
           Approximate data: ephemeris is a placeholder model, not SPICE.
         </p>
       )}
-      {meta.horizon === 'flat' && (
+      {(meta.horizon === 'flat' || meta.horizon === 'mixed') && (
         <p className="hint" role="status">
           Terrain not modelled at this site – flat horizon assumed.
         </p>

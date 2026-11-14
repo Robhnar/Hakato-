@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -95,7 +96,7 @@ def horizon_profile(lat_deg: float, lon_deg: float) -> dict:
     if precomputed is not None:
         return precomputed
 
-    if lat_deg <= -80.0:
+    if lat_deg <= -80.0 and os.environ.get("HAKATO_FORCE_PLACEHOLDER") != "1":
         computed = _compute_cached(str(data_dir), round(lat_deg, 5), round(lon_deg, 5))
         if computed is not None:
             return computed

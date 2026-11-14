@@ -106,20 +106,26 @@ export default function SlipAnalyzer({
   // po stronie klienta - te same progi co panel wymagań.
   const original = slipAnalysis ? slipAnalysis.original_slot : slotAt(grid, referenceStartUtc)
   const delayed = slipAnalysis ? slipAnalysis.delayed_slot : slotAt(grid, delayedStart)
-  // Lokalne porównanie liczymy zawsze, gdy znamy oba okna: służy jako fallback
-  // dla backendu i jako kontrola jego progów względem aktualnych wymagań.
+  // Lokalne porównanie i najbliższe okno liczymy względem bieżących (żywych)
+  // wymagań z formularza, żeby "Jump to nearest window" oraz delty nie używały
+  // nieaktualnej odpowiedzi z poprzedniego zapytania.
   const localComparison =
     original && delayed ? slipComparison(original, delayed, requirements) : null
-  const deltas: Deltas | null = slipAnalysis
-    ? {
-        delta_sunlight_hours: slipAnalysis.delta_sunlight_hours,
-        delta_max_darkness_hours: slipAnalysis.delta_max_darkness_hours,
-        delta_earth_fraction: slipAnalysis.delta_earth_fraction,
-      }
-    : localComparison
-  const nearest = slipAnalysis
-    ? slipAnalysis.nearest_equivalent_slot
-    : nearestEquivalent(grid, delayedStart, requirements)
+  const deltas: Deltas | null = localComparison ?? (
+    slipAnalysis
+      ? {
+          delta_sunlight_hours: slipAnalysis.delta_sunlight_hours,
+          delta_max_darkness_hours: slipAnalysis.delta_max_darkness_hours,
+          delta_earth_fraction: slipAnalysis.delta_earth_fraction,
+        }
+      : null
+  )
+  const nearest =
+    nearestEquivalent(grid, delayedStart, requirements) ??
+    (slipAnalysis?.nearest_equivalent_slot &&
+    violations(slipAnalysis.nearest_equivalent_slot, requirements).length === 0
+      ? slipAnalysis.nearest_equivalent_slot
+      : null)
 
   const delayedViolations =
     localComparison?.delayed_violations ?? (delayed ? violations(delayed, requirements) : [])
@@ -155,6 +161,7 @@ export default function SlipAnalyzer({
           step={1}
           value={days}
           aria-label="Launch delay slider in days"
+          aria-valuetext={`+${days} days`}
           onChange={(event) => onSlipDaysChange(Number(event.target.value))}
         />
         <input

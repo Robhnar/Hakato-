@@ -67,14 +67,15 @@ export default function CalendarHeatmap({
                 const value = metricValue(slot, metric)
                 const background = colorForValue(value, min, max, meta.invert)
                 const selected = slot.start_utc === selectedStartUtc
+                const labelText = `${slot.start_utc.slice(0, 10)} · ${meta.format(value)}${slot.passes_requirements ? ' · meets requirements' : ''}`
                 return (
                   <button
                     key={slot.start_utc}
                     type="button"
-                    role="listitem"
                     className={`windows-heat-cell${slot.passes_requirements ? ' pass' : ''}${selected ? ' selected' : ''}`}
                     style={{ background }}
-                    title={`${slot.start_utc.slice(0, 10)} · ${meta.format(value)}${slot.passes_requirements ? ' · meets requirements' : ''}`}
+                    title={labelText}
+                    aria-label={`Lunar day ${slot.cycles.lunar_day_index}: ${labelText}`}
                     aria-pressed={selected}
                     onMouseEnter={() => setHover(slot)}
                     onMouseLeave={() => setHover(null)}

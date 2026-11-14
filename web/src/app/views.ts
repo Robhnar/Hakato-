@@ -1,12 +1,13 @@
 // Rejestr widoków. Nowy widok: katalog w src/views/ + jeden wpis tutaj.
 
-import type { ComponentType } from 'react'
+import { lazy, type ComponentType } from 'react'
 import CompareView from '../views/compare'
-import MapView from '../views/map'
 import SkyView from '../views/sky'
 import TimelineView from '../views/timeline'
 import WindowsView from '../views/windows'
 import type { ViewProps } from './scenario'
+
+const MapView = lazy(() => import('../views/map'))
 
 export interface ViewEntry {
   id: string

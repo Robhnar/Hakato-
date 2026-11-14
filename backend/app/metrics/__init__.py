@@ -132,7 +132,7 @@ def summarize_body(
         else:
             windows.append(w)
 
-    visible_at_start = bool(windows and windows[0]["start_utc"] == iso_z(t_start))
+    visible_at_start = bool(visible[0])
 
     if total_duration_s > 0:
         total_visible_s = sum(
@@ -147,7 +147,7 @@ def summarize_body(
         visible_fraction = 1.0 if visible_at_start else 0.0
 
     hours_until_change = None
-    if visible_at_start:
+    if visible_at_start and windows:
         first_end = to_utc(datetime.fromisoformat(windows[0]["end_utc"]))
         if first_end < t_end:
             hours_until_change = round((first_end - t_start).total_seconds() / 3600.0, 3)
@@ -177,8 +177,10 @@ def summary(
     tl = timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes, profile)
 
     out = {}
+    h_by_body: dict[str, list[float]] = {}
     for body in BODIES:
         h_elevations = [horizon_elevation_at(profile, a) for a in tl[body]["az_deg"]]
+        h_by_body[body] = h_elevations
         out[body] = summarize_body(
             tl["times_utc"], tl[body]["el_deg"], tl[body]["visible"], h_elevations
         )
@@ -186,7 +188,7 @@ def summary(
     out["meta"] = tl["meta"]
     sun_az_el = list(zip(tl["sun"]["az_deg"], tl["sun"]["el_deg"]))
     earth_az_el = list(zip(tl["earth"]["az_deg"], tl["earth"]["el_deg"]))
-    out["uncertainty"] = solar_visibility_uncertainty(tl["times_utc"], sun_az_el, h_elevations)
+    out["uncertainty"] = solar_visibility_uncertainty(tl["times_utc"], sun_az_el, h_by_body["sun"])
     out["eclipses"] = detect_eclipses(tl["times_utc"], sun_az_el, earth_az_el)
     return out
 

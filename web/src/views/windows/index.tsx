@@ -48,6 +48,14 @@ export default function WindowsView({ active, applyWindow }: ViewProps) {
   }))
   const [slipDays, setSlipDays] = useState(7)
 
+  useEffect(() => {
+    setRequirements((prev) =>
+      prev.duration_hours === active.duration_hours
+        ? prev
+        : { ...prev, duration_hours: active.duration_hours },
+    )
+  }, [active.duration_hours])
+
   const debouncedRequirements = useDebounced(requirements, DEBOUNCE_MS)
   const debouncedSlipDays = useDebounced(slipDays, DEBOUNCE_MS)
 

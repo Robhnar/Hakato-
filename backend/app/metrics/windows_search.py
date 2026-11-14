@@ -5,11 +5,10 @@ Kontrakt i założenia w docs/tasks/011-kontrakt-wyszukiwarki-okien.md i 013-sil
 
 from __future__ import annotations
 
-import json
+import math
 from datetime import UTC, datetime, timedelta
 
 from .. import ephemeris, terrain
-from ..config import DATA_DIR
 from ..timeutil import iso_z, time_range, to_utc
 from . import summarize_body
 from .uncertainty import detect_eclipses, solar_visibility_uncertainty
@@ -181,28 +180,11 @@ def _horizon_at(profile: dict, az_deg: float) -> float:
     return values[i % n] * (1.0 - frac) + values[(i + 1) % n] * frac
 
 
-def load_precomputed_calendar(lat_deg: float, lon_deg: float) -> list[dict] | None:
-    """Ładuje gotowy kalendarz z data/calendars/<id>.json, jeśli istnieje."""
-    calendars_dir = DATA_DIR / "calendars"
-    sites_file = DATA_DIR / "sites.json"
-    if not (calendars_dir.is_dir() and sites_file.is_file()):
-        return None
+from .calendar_store import load_precomputed_calendar
 
-    try:
-        sites = json.loads(sites_file.read_text(encoding="utf-8"))
-        for site in sites:
-            if (
-                abs(float(site.get("lat_deg", 999)) - lat_deg) < 1e-4
-                and abs(float(site.get("lon_deg", 999)) - lon_deg) < 1e-4
-            ):
-                cal_path = calendars_dir / f"{site['id']}.json"
-                if cal_path.is_file():
-                    data = json.loads(cal_path.read_text(encoding="utf-8"))
-                    if isinstance(data, list) and data:
-                        return data
-    except (OSError, json.JSONDecodeError, KeyError, ValueError):
-        return None
-    return None
+MAX_SEARCH_YEARS = 10
+MAX_WINDOWS_SLOTS = 500
+MAX_SLIP_DAYS = 3650.0
 
 
 def search_windows(
@@ -238,35 +220,49 @@ def search_windows(
     if end_utc <= start_utc:
         raise ValueError("search_end_utc must be after search_start_utc")
 
+    span_days = (end_utc - start_utc).total_seconds() / 86400.0
+    if span_days > MAX_SEARCH_YEARS * 366:
+        raise ValueError(f"search range cannot exceed {MAX_SEARCH_YEARS} years")
+
+    if not math.isfinite(slip_days) or abs(slip_days) > MAX_SLIP_DAYS:
+        raise ValueError(f"slip_days must be within ±{int(MAX_SLIP_DAYS)} days")
+
     profile = horizon if horizon is not None else terrain.horizon_profile(lat_deg, lon_deg)
 
-    # 1. Sprawdź, czy mamy gotowy kalendarz z zadania 012
+    # 1. Sprawdź, czy mamy gotowy kalendarz z zadania 012 pokrywający badany przedział
     cached_slots = None
     if abs(duration_hours - 708.7) < 2.0:
         cached_slots = load_precomputed_calendar(lat_deg, lon_deg)
 
+    matching_cached = [
+        slot
+        for slot in (cached_slots or [])
+        if start_utc <= to_utc(datetime.fromisoformat(slot["start_utc"])) <= end_utc
+    ]
+
     grid: list[dict] = []
 
-    if cached_slots:
+    if matching_cached:
         # Filtruj prekomputowane sloty z kalendarza
-        for slot in cached_slots:
-            slot_start = to_utc(datetime.fromisoformat(slot["start_utc"]))
-            if start_utc <= slot_start <= end_utc:
-                # Zaaplikuj kryteria i scoring
-                s = dict(slot)
-                passes = (
-                    s["sun_el_at_start_deg"] >= min_sun_el_at_landing_deg
-                    and s["sunlight_hours"] >= min_sunlight_hours
-                    and s["max_darkness_hours"] <= max_darkness_hours
-                    and (not require_earth_at_landing or s["earth_visible_at_start"])
-                    and s["earth_visible_fraction"] >= min_earth_fraction
-                )
-                s["passes_requirements"] = passes
-                grid.append(s)
+        for slot in matching_cached:
+            s = dict(slot)
+            passes = (
+                s["sun_el_at_start_deg"] >= min_sun_el_at_landing_deg
+                and s["sunlight_hours"] >= min_sunlight_hours
+                and s["max_darkness_hours"] <= max_darkness_hours
+                and (not require_earth_at_landing or s["earth_visible_at_start"])
+                and s["earth_visible_fraction"] >= min_earth_fraction
+            )
+            s["passes_requirements"] = passes
+            grid.append(s)
     else:
         # Licz siatkę na żądanie
         step_days = SYNODIC_MONTH_DAYS if duration_hours >= 300.0 else (duration_hours / 24.0)
         step_days = max(1.0, step_days)
+        if span_days / step_days > MAX_WINDOWS_SLOTS:
+            raise ValueError(
+                f"Za dużo okien w siatce (limit {MAX_WINDOWS_SLOTS}); zwiększ duration_hours lub skróć zakres dat"
+            )
 
         current = start_utc
         while current + timedelta(hours=duration_hours) <= end_utc + timedelta(days=1):

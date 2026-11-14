@@ -2,7 +2,7 @@
 // to jest kontrakt, zmiana wymaga osobnego PR (patrz AGENTS.md).
 
 export type SiteCategory = 'apollo' | 'clps' | 'commercial' | 'international' | 'candidate'
-export type HorizonSource = 'flat' | 'lola' | 'synthetic'
+export type HorizonSource = 'flat' | 'lola' | 'synthetic' | 'mixed'
 export type EphemerisSource = 'placeholder' | 'spice'
 
 export interface Site {
@@ -100,6 +100,7 @@ export interface OptimalCandidate {
   max_darkness_hours: number
   sun_visible_at_cursor: boolean
   earth_visible_at_cursor: boolean
+  horizon?: 'flat' | 'lola' | 'synthetic'
 }
 
 export interface OptimalSiteResponse {

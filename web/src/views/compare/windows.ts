@@ -1,4 +1,5 @@
 import type { VisibilityWindow } from '../../api/types'
+import { visibilitySegments } from '../timeline/windows'
 
 export interface HourBand {
   startHours: number
@@ -25,24 +26,10 @@ export function bandsFromWindows(
   return bands
 }
 
-/** Buduje okna z serii `visible` na wspólnej siatce czasu. */
+/** Buduje okna z serii `visible` na wspólnej siatce czasu (wspólna implementacja z Timeline). */
 export function windowsFromVisibility(
   timesUtc: string[],
   visible: boolean[],
 ): VisibilityWindow[] {
-  const windows: VisibilityWindow[] = []
-  let open: string | null = null
-
-  for (let i = 0; i < timesUtc.length; i += 1) {
-    const on = Boolean(visible[i])
-    if (on && open === null) open = timesUtc[i]
-    if (!on && open !== null) {
-      windows.push({ start_utc: open, end_utc: timesUtc[i] })
-      open = null
-    }
-  }
-  if (open !== null && timesUtc.length > 0) {
-    windows.push({ start_utc: open, end_utc: timesUtc[timesUtc.length - 1] })
-  }
-  return windows
+  return visibilitySegments(timesUtc, visible)
 }

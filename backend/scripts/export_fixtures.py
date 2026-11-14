@@ -14,13 +14,12 @@ import os
 from datetime import UTC, datetime
 
 from app import metrics
-from app.api.optimal_site_stub import optimal_site_stub
-from app.api.windows_stub import windows_fixture
 from app.config import DATA_DIR, FIXTURES_DIR
 
 LAT_DEG, LON_DEG = -89.5, 0.0
 START = datetime(2027, 1, 1, tzinfo=UTC)
 END = datetime(2027, 1, 31, tzinfo=UTC)
+WINDOWS_END = datetime(2027, 4, 1, tzinfo=UTC)
 STEP_MINUTES = 60
 
 
@@ -55,9 +54,17 @@ def _build() -> dict[str, object]:
         "horizon.json": horizon,
         "timeline.json": metrics.timeline(LAT_DEG, LON_DEG, START, END, STEP_MINUTES, horizon),
         "summary.json": metrics.summary(LAT_DEG, LON_DEG, START, END, horizon=horizon),
-        "windows.json": windows_fixture(),
-        "optimal_site.json": optimal_site_stub(
-            START, END, START, w_sun=0.45, w_earth=0.25, w_overlap=0.30
+        "windows.json": metrics.search_windows(
+            LAT_DEG,
+            LON_DEG,
+            START,
+            WINDOWS_END,
+            reference_start_utc=START,
+            slip_days=7.0,
+            horizon=horizon,
+        ),
+        "optimal_site.json": metrics.find_optimal_site(
+            START, END, cursor_utc=START, step_minutes=STEP_MINUTES
         ),
     }
 
