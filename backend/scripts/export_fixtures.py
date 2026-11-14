@@ -3,12 +3,14 @@
 Uruchom z katalogu backend/ po każdej zmianie kontraktu:  python -m scripts.export_fixtures
 
 Scenariusz: punkt odniesienia przy biegunie południowym, 30 dni od 2027-01-01, krok 1 h.
+Położenia zawsze z modelu przybliżonego (także gdy jądra SPICE są pobrane).
 Horyzont jest SZTUCZNY (source = "synthetic"), żeby widoki miały na czym pracować,
 zanim powstanie prawdziwy profil z danych LOLA.
 """
 
 import json
 import math
+import os
 from datetime import UTC, datetime
 
 from app import metrics
@@ -32,6 +34,19 @@ def synthetic_horizon() -> dict:
 
 
 def build() -> dict[str, object]:
+    """Fixtures zawsze z modelu przybliżonego - wynik nie może zależeć od pobranych jąder SPICE."""
+    previous = os.environ.get("HAKATO_FORCE_PLACEHOLDER")
+    os.environ["HAKATO_FORCE_PLACEHOLDER"] = "1"
+    try:
+        return _build()
+    finally:
+        if previous is None:
+            del os.environ["HAKATO_FORCE_PLACEHOLDER"]
+        else:
+            os.environ["HAKATO_FORCE_PLACEHOLDER"] = previous
+
+
+def _build() -> dict[str, object]:
     horizon = synthetic_horizon()
     return {
         "sites.json": json.loads((DATA_DIR / "sites.json").read_text(encoding="utf-8")),

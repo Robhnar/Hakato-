@@ -75,7 +75,7 @@ Przeliczenie wektora w układzie ME na azymut i wysokość jest w `backend/app/e
 
 Każda odpowiedź z obliczeniami niesie pole `meta` mówiące, z czego ją policzono: `ephemeris` = `placeholder` | `spice`, `horizon` = `flat` | `lola` | `synthetic` (to ostatnie tylko w fixtures). Aplikacja pokazuje ostrzeżenie, dopóki nie jest to `spice` + `lola`.
 
-Limity: najwyżej 10 000 próbek na zapytanie, `step_minutes` od 1 do 1440; przekroczenie daje błąd 422.
+Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 10 minut to ok. 12 800), `step_minutes` od 1 do 1440; przekroczenie daje błąd 422.
 
 **`GET /api/sites`** – katalog miejsc.
 
