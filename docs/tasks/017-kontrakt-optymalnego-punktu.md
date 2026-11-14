@@ -1,6 +1,6 @@
 # 017 – Kontrakt wyszukiwania optymalnego punktu lądowania (`/api/optimal-site`) i fixture
 
-- **Status:** wolne
+- **Status:** w recenzji
 - **Właściciel:** osoba C
 - **Moduł:** `api`, `contracts`, `web/src/api`
 - **Gałąź:** `feat/017-kontrakt-optimal-site`
@@ -59,6 +59,6 @@ Nowy endpoint `GET /api/optimal-site` — zmiany w `schemas.py` i `types.ts` wyk
 
 ## Kryteria ukończenia
 
-- [ ] `GET /api/optimal-site` przechodzi walidację `OptimalSiteResponse` w `pytest` (`backend/tests/test_api_smoke.py`).
-- [ ] Plik `contracts/fixtures/optimal_site.json` istnieje i działa z `api.optimalSite()` przy `VITE_USE_FIXTURES=true`.
-- [ ] `ruff`, `pytest`, `npm run lint`, `npm run build` i `npm test` przechodzą.
+- [x] `GET /api/optimal-site` przechodzi walidację `OptimalSiteResponse` w `pytest` (`backend/tests/test_api.py`).
+- [x] Plik `contracts/fixtures/optimal_site.json` istnieje i działa z `api.optimalSite()` przy `VITE_USE_FIXTURES=true`.
+- [x] `ruff`, `pytest`, `npm run lint`, `npm run build` i `npm test` przechodzą.
