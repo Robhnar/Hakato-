@@ -3,7 +3,7 @@
 // używają tych samych progów, więc lista pasujących okien zmienia się natychmiast.
 
 import { LUNAR_DAY_HOURS, toIsoZ } from '../../app/scenario'
-import type { CalendarSlot, WindowsQuery } from './contract'
+import type { CalendarSlot, WindowsQuery } from '../../api/types'
 
 /** Presety czasu trwania są wspólne z powłoką (zadanie 005). */
 export { DURATION_PRESETS } from '../../app/scenario'
@@ -244,8 +244,9 @@ export function toQuery(
     max_darkness_hours: requirements.max_darkness_hours,
     require_earth_at_landing: requirements.require_earth_at_landing,
     min_earth_fraction: requirements.min_earth_fraction,
-    reference_start_utc: slip?.reference_start_utc ?? null,
-    slip_days: slip?.slip_days ?? 0,
+    ...(slip
+      ? { reference_start_utc: slip.reference_start_utc, slip_days: slip.slip_days }
+      : {}),
   }
 }
 

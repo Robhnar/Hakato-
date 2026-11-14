@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { LUNAR_DAY_HOURS } from '../../app/scenario'
-import type { CalendarSlot } from './contract'
+import type { CalendarSlot } from '../../api/types'
 import {
   BATTERY_PRESETS,
   DEFAULT_REQUIREMENTS,
@@ -34,7 +34,7 @@ function slot(overrides: Partial<CalendarSlot> = {}): CalendarSlot {
     earth_visible_at_start: true,
     passes_requirements: true,
     score: 0.5,
-    cycles: { lunar_day_index: 1, seasonal_phase_deg: 0, draconic_year_Note: 'test' },
+    cycles: { lunar_day_index: 1, seasonal_phase_deg: 0, draconic_year_phase_deg: 41.0 },
     ...overrides,
   }
 }
@@ -346,9 +346,9 @@ describe('toQuery', () => {
       max_darkness_hours: LUNAR_DAY_HOURS,
       require_earth_at_landing: true,
       min_earth_fraction: 0.4,
-      reference_start_utc: null,
-      slip_days: 0,
     })
+    expect('reference_start_utc' in query).toBe(false)
+    expect('slip_days' in query).toBe(false)
   })
 
   test('includes the slip mode when asked', () => {

@@ -1,4 +1,4 @@
-import type { CalendarSlot } from './contract'
+import type { CalendarSlot } from '../../api/types'
 import './windows.css'
 
 interface Props {
