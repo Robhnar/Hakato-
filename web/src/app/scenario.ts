@@ -22,6 +22,8 @@ export interface ViewProps {
   selectScenario: (id: string) => void
   /** Ustawia własne współrzędne w aktywnym scenariuszu (np. kliknięcie na mapie). */
   pickLocation: (lat_deg: number, lon_deg: number) => void
+  /** Widok Windows ustawia start (i opcjonalnie długość) aktywnego scenariusza. */
+  applyWindow: (start_utc: string, duration_hours?: number) => void
 }
 
 /** Jeden dzień księżycowy (miesiąc synodyczny) w godzinach. */

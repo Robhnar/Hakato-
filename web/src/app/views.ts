@@ -5,6 +5,7 @@ import CompareView from '../views/compare'
 import MapView from '../views/map'
 import SkyView from '../views/sky'
 import TimelineView from '../views/timeline'
+import WindowsView from '../views/windows'
 import type { ViewProps } from './scenario'
 
 export interface ViewEntry {
@@ -18,4 +19,5 @@ export const VIEWS: ViewEntry[] = [
   { id: 'timeline', label: 'Timeline', component: TimelineView },
   { id: 'compare', label: 'Compare', component: CompareView },
   { id: 'map', label: 'Map', component: MapView },
+  { id: 'windows', label: 'Windows', component: WindowsView },
 ]
