@@ -17,11 +17,22 @@ lądowania. Katalog nie sugeruje większej dokładności niż źródło.
   widoku w pobliżu bieguna; nie jest oficjalnym miejscem lądowania.
 - Mapa topografii i współrzędnych: https://quickmap.lroc.asu.edu/
 
+### shackleton-ridge
+
+- NASA wymienia „Peak Near Shackleton” / Connecting Ridge wśród regionów Artemis III:
+  https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
+- Punkt na oświetlonym grzbiecie przy Shackletonie: `-89.45°, -137.3°` (ME, długość ujemna = zachód),
+  dobrany jako kontrast do `south-pole-reference` w zagłębieniu; nie jest oficjalnym miejscem lądowania.
+- Mapa: https://quickmap.lroc.asu.edu/
+
 ### nobile-rim-1
 
 - NASA wymienia Nobile Rim 1 jako kandydujący region Artemis III:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Współrzędne krateru Nobile jako punkt odniesienia:
+- Punkt w regionie rim (nie środek krateru Nobile): `-85.423°, 36.19° E`
+  (centrum kwadratu regionu wg zestawienia MoonSnag / USGS region square;
+  wcześniej błędnie użyto środka krateru z długością zachodnią).
+- Środek krateru Nobile dla porównania (IAU): `85.28°S 53.27°E` —
   https://en.wikipedia.org/wiki/Nobile_(crater)
 - To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
 - Mapa: https://quickmap.lroc.asu.edu/
@@ -30,7 +41,9 @@ lądowania. Katalog nie sugeruje większej dokładności niż źródło.
 
 - NASA wymienia de Gerlache Rim 2 jako kandydujący region Artemis III:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Współrzędne krateru de Gerlache jako punkt odniesienia:
+- Punkt w regionie rim (nie dno krateru): `-88.142°, -63.662°`
+  (centrum kwadratu regionu wg zestawienia MoonSnag / USGS region square).
+- Środek krateru de Gerlache dla porównania (IAU): `88.5°S 87.1°W` —
   https://en.wikipedia.org/wiki/De_Gerlache_(crater)
 - To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
 - Mapa: https://quickmap.lroc.asu.edu/
