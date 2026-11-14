@@ -10,7 +10,7 @@ import type {
   OptimalCandidate,
   OptimalSiteQuery,
   OptimalWeights,
-} from './optimalContract'
+} from '../../api/types'
 
 export type Zone = 'sun_only' | 'earth_only' | 'sweet_spot' | 'shadow'
 

@@ -9,7 +9,7 @@ import {
   ZONE_LABELS,
   ZONE_ORDER,
 } from './heatmap'
-import type { OptimalSiteResponse, OptimalWeights } from './optimalContract'
+import type { OptimalSiteResponse, OptimalWeights } from '../../api/types'
 
 interface Props {
   data: OptimalSiteResponse | null

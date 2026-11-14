@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import type { Site } from '../../api/types'
+import type { OptimalSiteResponse, Site } from '../../api/types'
 import type { Scenario } from '../../app/scenario'
 import { latLonToVector3, type Vec3, vectorToLatLon } from './geo'
 import { buildOverlayPixels } from './heatmap'
-import type { OptimalSiteResponse } from './optimalContract'
 
 // Tekstura: NASA SVS "CGI Moon Kit" (SVS 4720), mapa barwna z mozaiki LROC WAC.
 // https://svs.gsfc.nasa.gov/4720/ - dane NASA, domena publiczna, kadr 2048x1024.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Scenario } from '../../app/scenario'
-import type { CursorBodies, OptimalCandidate } from './optimalContract'
+import type { CursorBodies, OptimalCandidate } from '../../api/types'
 import {
   angularDistanceDeg,
   buildOverlayPixels,
