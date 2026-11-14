@@ -1,6 +1,6 @@
 # 018 – Silnik predykcji optymalnego punktu lądowania i polarnej siatki referencyjnej
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** osoba A
 - **Moduł:** `metrics`, `ephemeris`, `terrain`, `api`
 - **Gałąź:** `feat/018-silnik-optimal-site`

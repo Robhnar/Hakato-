@@ -49,9 +49,9 @@ Realizacja propozycji ze zgłoszenia **#29** jako przełączanej warstwy **ON/OF
 
 | Nr | Zadanie | Moduł | Przydzielona osoba | Zależy od | Status |
 | --- | --- | --- | --- | --- | --- |
-| [017](017-kontrakt-optymalnego-punktu.md) | Kontrakt `GET /api/optimal-site`, fixture i klient `api.optimalSite()` | `api`, `contracts`, `web/src/api` | osoba C | – | wolne |
-| [018](018-silnik-optymalnego-punktu.md) | Silnik predykcji optymalnego punktu lądowania i polarnej siatki referencyjnej | `metrics`, `ephemeris`, `terrain` | osoba A | 017 | wolne |
-| [019](019-warstwa-on-off-mapa-cieplna-globus.md) | Widok `map`: przełączana warstwa ON/OFF mapy cieplnej i optymalnego punktu na globusie 3D | widok `map` (`MoonGlobe.tsx`) | osoba F | 017 | wolne |
+| [017](017-kontrakt-optymalnego-punktu.md) | Kontrakt `GET /api/optimal-site`, fixture i klient `api.optimalSite()` | `api`, `contracts`, `web/src/api` | osoba C | – | scalone |
+| [018](018-silnik-optymalnego-punktu.md) | Silnik predykcji optymalnego punktu lądowania i polarnej siatki referencyjnej | `metrics`, `ephemeris`, `terrain` | osoba A | 017 | scalone |
+| [019](019-warstwa-on-off-mapa-cieplna-globus.md) | Widok `map`: przełączana warstwa ON/OFF mapy cieplnej i optymalnego punktu na globusie 3D | widok `map` (`MoonGlobe.tsx`) | osoba F | 017 | scalone |
 
 ## Kolejność prac w Fazie 3
 

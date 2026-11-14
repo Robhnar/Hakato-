@@ -1,6 +1,6 @@
 # 017 – Kontrakt wyszukiwania optymalnego punktu lądowania (`/api/optimal-site`) i fixture
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** osoba C
 - **Moduł:** `api`, `contracts`, `web/src/api`
 - **Gałąź:** `feat/017-kontrakt-optimal-site`

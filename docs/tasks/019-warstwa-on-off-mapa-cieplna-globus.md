@@ -1,6 +1,6 @@
 # 019 – Widok `map`: przełączana warstwa ON/OFF mapy cieplnej i optymalnego punktu na globusie 3D
 
-- **Status:** w recenzji
+- **Status:** scalone
 - **Właściciel:** osoba F
 - **Moduł:** frontend – widok `map` (`MoonGlobe.tsx`, nakładka ON/OFF i panel optymalnego punktu)
 - **Gałąź:** `feat/019-mapa-warstwa-on-off`
@@ -49,7 +49,7 @@ Korzysta z `api.optimalSite()` z zadania 017 oraz `ViewProps` (`active`, `cursor
 
 ## Kryteria ukończenia
 
-- [ ] Przełącznik `Optimal zone overlay` włącza i wyłącza warstwę cieplną, znacznik punktu optymalnego oraz panel `OptimalZonePanel` bez przeładowywania sceny WebGL.
-- [ ] Przy włączonej warstwie (`ON`) zmiana `cursor_utc` lub profilu wag aktualizuje nakładkę oraz wyznaczony punkt optymalny, a przycisk „Move active scenario to optimal zone" przenosi aktywny scenariusz do współrzędnych `optimal`.
-- [ ] Czyste funkcje klasyfikacji stref i generowania bufora kolorów w `web/src/views/map/heatmap.ts` mają testy jednostkowe (`vitest`).
-- [ ] `npm run lint`, `npm run build`, `npm test` przechodzą.
+- [x] Przełącznik `Optimal zone overlay` włącza i wyłącza warstwę cieplną, znacznik punktu optymalnego oraz panel `OptimalZonePanel` bez przeładowywania sceny WebGL.
+- [x] Przy włączonej warstwie (`ON`) zmiana `cursor_utc` lub profilu wag aktualizuje nakładkę oraz wyznaczony punkt optymalny, a przycisk „Move active scenario to optimal zone" przenosi aktywny scenariusz do współrzędnych `optimal`.
+- [x] Czyste funkcje klasyfikacji stref i generowania bufora kolorów w `web/src/views/map/heatmap.ts` mają testy jednostkowe (`vitest`).
+- [x] `npm run lint`, `npm run build`, `npm test` przechodzą.
