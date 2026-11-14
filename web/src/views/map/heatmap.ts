@@ -7,7 +7,6 @@
 import { endUtc, type Scenario } from '../../app/scenario'
 import type {
   CursorBodies,
-  OptimalCandidate,
   OptimalSiteQuery,
   OptimalWeights,
 } from '../../api/types'
@@ -17,26 +16,25 @@ export type Zone = 'sun_only' | 'earth_only' | 'sweet_spot' | 'shadow'
 /** Kolejność stref w legendzie panelu. */
 export const ZONE_ORDER: Zone[] = ['sun_only', 'earth_only', 'sweet_spot', 'shadow']
 
-/** Kolory RGBA nakładki zgodne ze zgłoszeniem #29. */
+/** Kolory RGBA nakładki: delikatny odcień, żeby teren pod spodem pozostał widoczny. */
 export const ZONE_COLORS: Record<Zone, readonly [number, number, number, number]> = {
-  sun_only: [242, 193, 78, 235], // bursztyn/złoto - widoczne Słońce
-  earth_only: [74, 144, 226, 235], // błękit - widoczna Ziemia
-  sweet_spot: [60, 200, 130, 240], // szmaragd - Słońce + Ziemia
-  shadow: [8, 10, 16, 210], // ciemna, półprzezroczysta noc
+  sun_only: [233, 180, 76, 56],
+  earth_only: [90, 162, 224, 56],
+  sweet_spot: [125, 187, 120, 48],
+  shadow: [0, 0, 0, 120],
 }
 
 export const ZONE_LABELS: Record<Zone, string> = {
-  sun_only: 'Sun power',
-  earth_only: 'Earth link',
-  sweet_spot: 'Sweet spot (Sun + Earth)',
-  shadow: 'Shadow',
+  sun_only: 'Sun only',
+  earth_only: 'Earth only',
+  sweet_spot: 'Sun + Earth',
+  shadow: 'Neither',
 }
 
 const DEG = Math.PI / 180
 const HORIZON_DEG = 90
-/** Kolor, w stronę którego rozjaśniamy piksele wokół kandydatów z rankingu. */
-const CANDIDATE_GLOW: readonly [number, number, number] = [150, 255, 200]
-const MAX_CANDIDATE_GLOW = 0.6
+/** Połowa szerokości pasa wygładzenia granicy strefy (stopnie). */
+const EDGE_DEG = 0.6
 
 /** Różnica długości geograficznej w zakresie (−180°, 180°]. */
 function wrapLonDelta(delta_deg: number): number {
@@ -153,57 +151,6 @@ function latLonForPixel(
   }
 }
 
-function blendPixel(
-  pixels: Uint8ClampedArray,
-  width: number,
-  height: number,
-  x: number,
-  y: number,
-  color: readonly [number, number, number],
-  amount: number,
-): void {
-  if (y < 0 || y >= height || amount <= 0) return
-  const wrappedX = ((x % width) + width) % width
-  const index = (y * width + wrappedX) * 4
-  const t = clamp01(amount)
-  pixels[index] = pixels[index] + (color[0] - pixels[index]) * t
-  pixels[index + 1] = pixels[index + 1] + (color[1] - pixels[index + 1]) * t
-  pixels[index + 2] = pixels[index + 2] + (color[2] - pixels[index + 2]) * t
-  // Alfa zostaje z podkładu strefy - rozjaśniamy tylko kolor.
-}
-
-/**
- * Rozjaśnia piksele wokół kandydatów z rankingu (gauss, waga = score).
- * Dzięki temu czapa polarna pokazuje jakość kandydatów, a nie tylko strefy.
- */
-function addCandidateGlow(
-  pixels: Uint8ClampedArray,
-  width: number,
-  height: number,
-  ranking: OptimalCandidate[],
-): void {
-  if (ranking.length === 0) return
-  const radiusPx = Math.max(2, Math.round(Math.min(width, height) / 64))
-  const sigma = radiusPx / 2
-
-  for (const candidate of ranking) {
-    const score = Number.isFinite(candidate.score) ? clamp01(candidate.score / 100) : 0
-    if (score <= 0) continue
-    const center = pixelForLatLon(width, height, candidate.lat_deg, candidate.lon_deg)
-    const reach = Math.ceil(radiusPx * 2)
-    for (let dy = -reach; dy <= reach; dy += 1) {
-      const y = center.y + dy
-      if (y < 0 || y >= height) continue
-      for (let dx = -reach; dx <= reach; dx += 1) {
-        const distance = Math.hypot(dx, dy)
-        if (distance > reach) continue
-        const gaussian = Math.exp(-0.5 * (distance / sigma) ** 2)
-        blendPixel(pixels, width, height, center.x + dx, y, CANDIDATE_GLOW, gaussian * score * MAX_CANDIDATE_GLOW)
-      }
-    }
-  }
-}
-
 /**
  * Buduje bufor RGBA (Uint8ClampedArray) mapy cieplnej w układzie
  * equirectangular zgodnym z teksturą LROC na sferze w `MoonGlobe.tsx`.
@@ -213,26 +160,31 @@ export function buildOverlayPixels(
   width: number,
   height: number,
   cursorBodies: CursorBodies,
-  ranking: OptimalCandidate[] = [],
 ): Uint8ClampedArray {
   const w = Math.max(1, Math.floor(width))
   const h = Math.max(1, Math.floor(height))
   const pixels = new Uint8ClampedArray(w * h * 4)
+  // Udział (0..1) „ciało widoczne": liniowo w pasie ±EDGE_DEG wokół 90°.
+  const inside = (d: number) => clamp01((HORIZON_DEG + EDGE_DEG - d) / (2 * EDGE_DEG))
 
   for (let y = 0; y < h; y += 1) {
     for (let x = 0; x < w; x += 1) {
       const { lat_deg, lon_deg } = latLonForPixel(w, h, x, y)
-      const zone = zoneAt(lat_deg, lon_deg, cursorBodies)
-      const color = ZONE_COLORS[zone]
+      const s = inside(angularDistanceDeg(lat_deg, lon_deg, cursorBodies.subsolar_lat_deg, cursorBodies.subsolar_lon_deg))
+      const e = inside(angularDistanceDeg(lat_deg, lon_deg, cursorBodies.subearth_lat_deg, cursorBodies.subearth_lon_deg))
+      const weights: Record<Zone, number> = {
+        sweet_spot: s * e,
+        sun_only: s * (1 - e),
+        earth_only: (1 - s) * e,
+        shadow: (1 - s) * (1 - e),
+      }
       const index = (y * w + x) * 4
-      pixels[index] = color[0]
-      pixels[index + 1] = color[1]
-      pixels[index + 2] = color[2]
-      pixels[index + 3] = color[3]
+      for (const zone of ZONE_ORDER) {
+        const color = ZONE_COLORS[zone]
+        for (let c = 0; c < 4; c += 1) pixels[index + c] += color[c] * weights[zone]
+      }
     }
   }
-
-  addCandidateGlow(pixels, w, h, ranking)
   return pixels
 }
 
@@ -263,22 +215,22 @@ export interface WeightPreset {
 export const WEIGHT_PRESETS: WeightPreset[] = [
   {
     id: 'balanced',
-    label: 'Balanced (45/25/30)',
+    label: 'Balanced',
     weights: { w_sun: 0.45, w_earth: 0.25, w_overlap: 0.3 },
   },
   {
     id: 'solar',
-    label: 'Solar Power Priority (70/10/20)',
+    label: 'Power first',
     weights: { w_sun: 0.7, w_earth: 0.1, w_overlap: 0.2 },
   },
   {
     id: 'earth',
-    label: 'Earth Comms Priority (15/55/30)',
+    label: 'Comms first',
     weights: { w_sun: 0.15, w_earth: 0.55, w_overlap: 0.3 },
   },
   {
     id: 'sweet-spot',
-    label: 'Sweet-Spot Priority (20/20/60)',
+    label: 'Both at once',
     weights: { w_sun: 0.2, w_earth: 0.2, w_overlap: 0.6 },
   },
 ]

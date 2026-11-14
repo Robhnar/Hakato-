@@ -1,0 +1,584 @@
+/* Tryb prowadzony „Plan a landing” (020). Styl „konsoli misji” (021, zadanie 3):
+   linie 1 px zamiast pudełek, liczby mono, zaznaczenie jasnym tekstem i kreską 2 px.
+   Tylko tokeny z index.css – bez lokalnych kolorów. */
+
+.guide {
+  box-sizing: border-box;
+  max-width: 792px;
+  margin: 0 auto;
+  padding: 8px 16px 48px;
+  font-size: 14px;
+}
+
+/* Wstęp */
+.guide-intro {
+  padding-bottom: 24px;
+}
+
+.guide-intro h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.guide-intro p {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* Kroki formularza: numer mono + pytanie, oddzielone górną linią 1 px. */
+.guide-step {
+  min-width: 0;
+  padding: 20px 0 24px;
+  border-top: 1px solid var(--line);
+}
+
+.guide-step-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.guide-step-no {
+  flex: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* Opcje: jedna ramka, wiersz = jedna opcja, linie między wierszami. */
+.guide-choices {
+  display: grid;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.guide-choice {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: start;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.guide-choice:first-child {
+  border-top: 0;
+}
+
+.guide-choice:hover {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+/* Wybrana opcja: kreska 2 px z lewej i jasny tekst, bez kolorowego obrysu. */
+.guide-choice:has(input:checked) {
+  box-shadow: inset 2px 0 0 var(--text);
+}
+
+.guide-choice:has(input:checked) .guide-choice-title {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.guide-choice:has(input:focus-visible) {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.guide-choice input:focus-visible {
+  outline: none;
+}
+
+.guide input[type='radio'],
+.guide input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--text);
+}
+
+.guide-choice input[type='radio'] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.guide-choice-title {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.guide-choice-blurb {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.guide-choice select {
+  grid-column: 2;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  background: var(--bg);
+}
+
+/* Dodatkowe warunki w kroku 2 – wiersz z checkboxem, cel 44 px. */
+.guide .guide-check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 0 2px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.guide-check input[type='checkbox'] {
+  flex: none;
+  margin: 0;
+}
+
+/* Miesiące w kroku 3 */
+.guide-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0 0;
+}
+
+.guide-row label {
+  flex: 1 1 200px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.guide-row input[type='month'] {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  background: var(--bg);
+}
+
+/* Przyciski: cel 44 px, główna akcja jasnym wypełnieniem (.btn-primary). */
+.guide button {
+  height: auto;
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.guide .btn-primary {
+  min-height: 48px;
+  padding: 0 22px;
+  font-weight: 600;
+}
+
+.guide .btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text) 86%, var(--bg));
+  border-color: color-mix(in srgb, var(--text) 86%, var(--bg));
+}
+
+.guide .btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.guide-submit {
+  width: 100%;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+@media (min-width: 640px) {
+  .guide-submit {
+    width: auto;
+  }
+}
+
+/* Komunikaty */
+.guide-error {
+  margin: 10px 0 0;
+  color: var(--error);
+  font-size: 13px;
+}
+
+.guide-error p {
+  margin: 0 0 10px;
+}
+
+.guide-note {
+  max-width: 62ch;
+  margin: 20px 0 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--warning);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.guide-results > [role='status'] {
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Karta wyniku: jedna ramka na całość, bez ramek wewnętrznych. */
+.guide-result {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.guide-eyebrow {
+  margin: 0 0 6px;
+}
+
+.guide-result h2,
+.guide-empty h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.guide-empty h2 {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.guide h2:focus {
+  outline: none;
+}
+
+.guide h2:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+
+.guide-when {
+  margin: 0 0 18px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.guide-when strong {
+  font-weight: 500;
+}
+
+.guide-when span {
+  color: var(--muted);
+}
+
+/* Trzy oceny jako wiersze tabeli: znak, nazwa, opis, ocena z kropką stanu. */
+.guide-metrics {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.guide-metric {
+  display: grid;
+  grid-template-columns: 12px minmax(8rem, 10rem) minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.guide-metric-sign {
+  justify-self: center;
+  width: 8px;
+  height: 8px;
+  background: var(--muted);
+}
+
+.sign-sun {
+  background: var(--sun);
+}
+
+.sign-earth {
+  border-radius: 50%;
+  background: var(--earth);
+}
+
+.sign-dark {
+  background: var(--muted);
+}
+
+.guide-metric-label {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.guide-metric-value {
+  color: var(--muted);
+}
+
+.guide-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.guide-rating::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.rating-great .guide-rating {
+  color: var(--ok);
+}
+
+.rating-okay .guide-rating {
+  color: var(--warning);
+}
+
+.rating-poor .guide-rating {
+  color: var(--error);
+}
+
+.guide-why {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.guide-why strong {
+  margin-right: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Pasek dzień po dniu: legenda nad paskiem, oś z datami pod paskiem. */
+.day-strip {
+  margin: 18px 0 0;
+}
+
+.day-strip-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.legend-sun::before,
+.legend-earth::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  vertical-align: baseline;
+}
+
+.legend-sun::before {
+  background: var(--sun);
+}
+
+.legend-earth::before {
+  background: var(--earth);
+}
+
+.day-strip-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  height: 72px;
+}
+
+.day-col {
+  flex: 1 1 0;
+  min-width: 2px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  background: var(--line);
+}
+
+.day-sun,
+.day-earth {
+  display: block;
+  width: 100%;
+}
+
+.day-sun {
+  align-self: end;
+  background: var(--sun);
+}
+
+.day-earth {
+  align-self: start;
+  background: var(--earth);
+}
+
+.day-strip-axis {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.day-strip-axis span:nth-child(2) {
+  text-align: center;
+}
+
+.day-strip-axis span:last-child {
+  text-align: right;
+}
+
+.day-strip-status {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Sekcje pod wynikiem: nagłówek etykietą, wiersze oddzielone liniami. */
+.guide-slip,
+.guide-others,
+.guide-empty {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.guide-slip h3,
+.guide-others h3 {
+  margin: 0 0 10px;
+  font-weight: 500;
+}
+
+.guide-slip p,
+.guide-empty p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.guide-slip strong {
+  font-weight: 500;
+}
+
+.guide-others ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.guide-others li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.guide-others li:first-child {
+  border-top: 0;
+}
+
+.guide-other-name {
+  flex: 1 1 200px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.guide-other-when {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.guide-other-why {
+  flex-basis: 100%;
+  order: 3;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.guide-others li button {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .guide {
+    padding: 8px 12px 40px;
+  }
+
+  .guide-metric {
+    grid-template-columns: 12px minmax(0, 1fr) auto;
+    row-gap: 2px;
+  }
+
+  .guide-metric-value {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+
+  .guide-rating {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .guide-submit {
+    width: 100%;
+  }
+
+  .guide-actions button {
+    flex: 1 1 100%;
+  }
+
+  .guide-others li button {
+    margin-left: 0;
+  }
+
+  .day-strip-bars {
+    height: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-choice {
+    transition: none;
+  }
+}

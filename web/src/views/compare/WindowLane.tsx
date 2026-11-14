@@ -3,41 +3,61 @@ import { useAsync } from '../../api/useAsync'
 import { type Scenario, toRangeQuery } from '../../app/scenario'
 import { bandsFromWindows, windowsFromVisibility } from './windows'
 
-/** Pasy okien widoczności na osi godzin od startu (dane z timeline). */
-export default function WindowLane({ scenario }: { scenario: Scenario }) {
+interface Props {
+  scenario: Scenario
+  /** Wspólna oś czasu wszystkich scenariuszy w godzinach. */
+  maxHours: number
+  active: boolean
+}
+
+/**
+ * Pasy okien widoczności jednego scenariusza na wspólnej osi godzin.
+ * Dane z timeline (krok 60 min), więc pasy są dokładniejsze niż podsumowanie.
+ */
+export default function WindowLane({ scenario, maxHours, active }: Props) {
   const query = toRangeQuery(scenario, 60)
   const { data, error, loading } = useAsync(
     () => api.timeline(query),
     `timeline:${JSON.stringify(query)}`,
   )
 
-  if (error) {
-    return <p className="compare-lane-error">Timeline unavailable: {error}</p>
-  }
-  if (!data) {
-    return <p className="compare-lane-loading">{loading ? 'Loading windows…' : ''}</p>
-  }
-
-  const sunBands = bandsFromWindows(
-    scenario.start_utc,
-    scenario.duration_hours,
-    windowsFromVisibility(data.times_utc, data.sun.visible),
-  )
-  const earthBands = bandsFromWindows(
-    scenario.start_utc,
-    scenario.duration_hours,
-    windowsFromVisibility(data.times_utc, data.earth.visible),
-  )
+  const axisHours = maxHours > 0 ? maxHours : scenario.duration_hours
+  const sunBands = data
+    ? bandsFromWindows(
+        scenario.start_utc,
+        scenario.duration_hours,
+        windowsFromVisibility(data.times_utc, data.sun.visible),
+      )
+    : []
+  const earthBands = data
+    ? bandsFromWindows(
+        scenario.start_utc,
+        scenario.duration_hours,
+        windowsFromVisibility(data.times_utc, data.earth.visible),
+      )
+    : []
 
   return (
-    <div className="compare-lanes" aria-label={`Visibility windows for ${scenario.name}`}>
-      <Track label="Sun" bands={sunBands} durationHours={scenario.duration_hours} tone="sun" />
-      <Track label="Earth" bands={earthBands} durationHours={scenario.duration_hours} tone="earth" />
-      <div className="compare-axis">
-        <span>0 h</span>
-        <span>{(scenario.duration_hours / 2).toFixed(0)} h</span>
-        <span>{scenario.duration_hours.toFixed(0)} h</span>
+    <div className={`compare-lane${active ? ' compare-lane-active' : ''}`}>
+      <div className="compare-lane-head">
+        <span className="compare-lane-name">{scenario.name}</span>
       </div>
+
+      {error && <p className="compare-lane-error">Timeline unavailable: {error}</p>}
+      {!data && !error && (
+        <p className="compare-lane-loading">{loading ? 'Loading windows…' : ''}</p>
+      )}
+
+      {data && (
+        <div
+          className="compare-lane-tracks"
+          role="img"
+          aria-label={`Visibility windows for ${scenario.name} from its own start`}
+        >
+          <Track label="Sun" bands={sunBands} axisHours={axisHours} tone="sun" />
+          <Track label="Earth" bands={earthBands} axisHours={axisHours} tone="earth" />
+        </div>
+      )}
     </div>
   )
 }
@@ -45,30 +65,30 @@ export default function WindowLane({ scenario }: { scenario: Scenario }) {
 function Track({
   label,
   bands,
-  durationHours,
+  axisHours,
   tone,
 }: {
   label: string
   bands: { startHours: number; endHours: number }[]
-  durationHours: number
+  axisHours: number
   tone: 'sun' | 'earth'
 }) {
   return (
     <div className="compare-track">
-      <span className="compare-track-label">{label}</span>
-      <div className="compare-track-bar" role="img" aria-label={`${label} visibility bands`}>
+      <span className={`compare-track-label compare-track-label-${tone}`}>{label}</span>
+      <span className="compare-track-bar">
         {bands.map((band) => (
           <span
             key={`${band.startHours}-${band.endHours}`}
             className={`compare-band compare-band-${tone}`}
             style={{
-              left: `${(band.startHours / durationHours) * 100}%`,
-              width: `${((band.endHours - band.startHours) / durationHours) * 100}%`,
+              left: `${(band.startHours / axisHours) * 100}%`,
+              width: `${((band.endHours - band.startHours) / axisHours) * 100}%`,
             }}
-            title={`${band.startHours.toFixed(1)}–${band.endHours.toFixed(1)} h from start`}
+            title={`${label} ${band.startHours.toFixed(1)}–${band.endHours.toFixed(1)} h from start`}
           />
         ))}
-      </div>
+      </span>
     </div>
   )
 }
