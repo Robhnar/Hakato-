@@ -131,7 +131,7 @@
 .timeline-row-label {
   fill: var(--muted);
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -269,5 +269,16 @@
 
   .timeline-ticks > g:nth-child(even) {
     display: none;
+  }
+}
+
+/* Telefon: jak w Sky - minimalna szerokość wykresu i przewijanie poziome kontenera. */
+@media (max-width: 640px) {
+  .timeline-canvas {
+    overflow-x: auto;
+  }
+
+  .timeline-plot {
+    min-width: 640px;
   }
 }
