@@ -1,0 +1,38 @@
+# Sekrety
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Zależności i buildy
+node_modules/
+dist/
+build/
+out/
+.next/
+target/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+.coverage
+
+# Narzędzia i system
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
+*.log
+
+# Lokalne ustawienia asystentów AI
+.claude/settings.local.json
+CLAUDE.local.md
+.cursor/
+.aider*
