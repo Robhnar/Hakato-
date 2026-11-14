@@ -1,6 +1,6 @@
 # 012 – Kalendarz miejsca na lata naprzód (2027–2035) i prekalkulacja
 
-- **Status:** wolne
+- **Status:** w recenzji
 - **Właściciel:** osoba B
 - **Moduł:** `data`, `metrics`
 - **Gałąź:** `feat/012-kalendarz-wieloletni`
@@ -44,7 +44,7 @@ Korzysta z `ephemeris.body_positions`, `terrain.horizon_profile` i struktur z za
 
 ## Kryteria ukończenia
 
-- [ ] `PYTHONPATH=backend python -m data.scripts.build_calendars` generuje pliki w `data/calendars/*.json` dla miejsc polarnych na lata 2027–2035.
-- [ ] Czas generowania jednego roku dla jednego miejsca wynosi poniżej kilku sekund dzięki jednokrotnemu pobraniu horyzontu i wektoryzacji.
-- [ ] Na miejscu `shackleton-ridge` i `south-pole-reference` wyraźnie widać roczną modulację oświetlenia (cykl ~347 dni: polarne lato vs polarna zima).
-- [ ] `ruff` i `pytest` zielone.
+- [x] `PYTHONPATH=backend python -m data.scripts.build_calendars` generuje pliki w `data/calendars/*.json` dla miejsc polarnych na lata 2027–2035.
+- [x] Czas generowania jednego roku dla jednego miejsca wynosi poniżej kilku sekund dzięki jednokrotnemu pobraniu horyzontu i wektoryzacji.
+- [x] Na miejscu `shackleton-ridge` i `south-pole-reference` wyraźnie widać roczną modulację oświetlenia (cykl ~347 dni: polarne lato vs polarna zima).
+- [x] `ruff` i `pytest` zielone.
