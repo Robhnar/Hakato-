@@ -7,6 +7,7 @@ dependencies = [
     "fastapi>=0.115",
     "numpy>=1.26",
     "uvicorn[standard]>=0.30",
+    "spiceypy>=8.0.0",
 ]
 
 [project.optional-dependencies]

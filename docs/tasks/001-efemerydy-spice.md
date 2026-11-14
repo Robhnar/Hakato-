@@ -1,7 +1,7 @@
 # 001 – Efemerydy: Słońce i Ziemia ze SPICE
 
-- **Status:** wolne
-- **Właściciel:** – (sugerowana: osoba A, potem zadanie 003)
+- **Status:** w recenzji
+- **Właściciel:** Przemek (Osoba A)
 - **Moduł:** `ephemeris`
 - **Gałąź:** `feat/001-efemerydy-spice`
 - **Zależy od:** –
@@ -33,10 +33,10 @@ Udostępnia `ephemeris.body_positions()` i `ephemeris.SOURCE` – sygnatura i ks
 
 ## Kryteria ukończenia
 
-- [ ] Z pobranymi jądrami `/api/summary` zwraca `meta.ephemeris = "spice"`.
-- [ ] Test z punktami kontrolnymi Horizons przechodzi (pomijany, gdy brak jąder – CI ich nie pobiera).
-- [ ] Bez jąder wszystkie dotychczasowe testy nadal przechodzą.
-- [ ] `ruff` i `pytest` zielone.
+- [x] Z pobranymi jądrami `/api/summary` zwraca `meta.ephemeris = "spice"`.
+- [x] Test z punktami kontrolnymi Horizons przechodzi (pomijany, gdy brak jąder – CI ich nie pobiera).
+- [x] Bez jąder wszystkie dotychczasowe testy nadal przechodzą.
+- [x] `ruff` i `pytest` zielone.
 
 ## Notatki
 
