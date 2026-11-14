@@ -233,6 +233,12 @@ def search_windows(
     cached_slots = None
     if abs(duration_hours - 708.7) < 2.0:
         cached_slots = load_precomputed_calendar(lat_deg, lon_deg)
+        if cached_slots:
+            starts = [to_utc(datetime.fromisoformat(slot["start_utc"])) for slot in cached_slots]
+            month = timedelta(days=SYNODIC_MONTH_DAYS)
+            # Kalendarz pokrywa tylko część zakresu: nie wolno gubić reszty, liczymy na żądanie.
+            if not (min(starts) <= start_utc + month and max(starts) >= end_utc - month):
+                cached_slots = None
 
     matching_cached = [
         slot
