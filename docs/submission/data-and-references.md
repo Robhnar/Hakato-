@@ -15,11 +15,15 @@ At least one NASA Resource from the challenge is required for Global Awards elig
 
 Challenge Resources snapshot: `lunar-landing-site-navigator-resources.md` in the repo root.
 
+## Originals
+
+We did not modify the original NASA data. SPICE kernels and the LOLA DEM are downloaded unchanged from NAIF and PDS by `data/scripts/fetch_kernels.py` and `data/scripts/fetch_dem.py`. Everything derived from them (horizon profiles in `data/horizons/`, calendars in `data/calendars/`, API results) is computed by our own code and is not NASA data.
+
 ## Catalogue and imagery
 
 - Landing-site list: `data/sites.json` (19 entries: Apollo, CLPS, international, commercial, Artemis candidates).
 - Provenance per site: `data/sites.sources.md`.
-- Globe texture: `web/public/moon_lroc_color_2k.jpg` (LROC-derived colour mosaic; attribute LROC / NASA / ASU as appropriate on slides).
+- Globe texture: `web/public/moon_lroc_color_2k.jpg` (LROC-derived colour mosaic; attribute LROC / NASA / ASU as appropriate on slides). The original NASA mosaic was only downscaled to 2048×1024 and saved as JPEG; we did not otherwise alter its content.
 
 ## Software references (non-exhaustive)
 
