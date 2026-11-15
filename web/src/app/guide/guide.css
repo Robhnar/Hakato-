@@ -1,6 +1,6 @@
-/* Tryb prowadzony „Plan a landing” (020). Styl „konsoli misji” (021, zadanie 3):
-   linie 1 px zamiast pudełek, liczby mono, zaznaczenie jasnym tekstem i kreską 2 px.
-   Tylko tokeny z index.css – bez lokalnych kolorów. */
+/* Guided mode "Plan a landing" (020). "Mission console" style (021, task 3):
+   1 px lines instead of boxes, mono numbers, selection with light text and a 2 px bar.
+   Only tokens from index.css – no local colors. */
 
 .guide {
   box-sizing: border-box;
@@ -10,7 +10,7 @@
   font-size: 14px;
 }
 
-/* Wstęp */
+/* Intro */
 .guide-intro {
   padding-bottom: 24px;
 }
@@ -29,7 +29,7 @@
   line-height: 1.55;
 }
 
-/* Kroki formularza: numer mono + pytanie, oddzielone górną linią 1 px. */
+/* Form steps: mono number + question, separated by a 1 px top line. */
 .guide-step {
   min-width: 0;
   padding: 20px 0 24px;
@@ -54,7 +54,7 @@
   letter-spacing: 0.06em;
 }
 
-/* Opcje: jedna ramka, wiersz = jedna opcja, linie między wierszami. */
+/* Options: one frame, a row = one option, lines between rows. */
 .guide-choices {
   display: grid;
   margin-top: 12px;
@@ -83,7 +83,7 @@
   background: color-mix(in srgb, var(--text) 5%, transparent);
 }
 
-/* Wybrana opcja: kreska 2 px z lewej i jasny tekst, bez kolorowego obrysu. */
+/* Selected option: 2 px bar on the left and light text, no colored outline. */
 .guide-choice:has(input:checked) {
   box-shadow: inset 2px 0 0 var(--text);
 }
@@ -139,7 +139,7 @@
   background: var(--bg);
 }
 
-/* Dodatkowe warunki w kroku 2 – wiersz z checkboxem, cel 44 px. */
+/* Extra conditions in step 2 – a row with a checkbox, 44 px target. */
 .guide .guide-check {
   display: flex;
   flex-direction: row;
@@ -158,7 +158,7 @@
   margin: 0;
 }
 
-/* Miesiące w kroku 3 */
+/* Months in step 3 */
 .guide-row {
   display: flex;
   flex-wrap: wrap;
@@ -181,7 +181,7 @@
   background: var(--bg);
 }
 
-/* Przyciski: cel 44 px, główna akcja jasnym wypełnieniem (.btn-primary). */
+/* Buttons: 44 px target, the main action with a light fill (.btn-primary). */
 .guide button {
   height: auto;
   min-height: 44px;
@@ -217,7 +217,7 @@
   }
 }
 
-/* Komunikaty */
+/* Messages */
 .guide-error {
   margin: 10px 0 0;
   color: var(--error);
@@ -244,7 +244,7 @@
   font-size: 13px;
 }
 
-/* Karta wyniku: jedna ramka na całość, bez ramek wewnętrznych. */
+/* Result card: one frame for the whole, no inner frames. */
 .guide-result {
   margin-top: 24px;
   padding: 20px;
@@ -292,7 +292,7 @@
   color: var(--muted);
 }
 
-/* Trzy oceny jako wiersze tabeli: znak, nazwa, opis, ocena z kropką stanu. */
+/* Three ratings as table rows: mark, name, description, rating with a status dot. */
 .guide-metrics {
   list-style: none;
   margin: 0 0 18px;
@@ -382,7 +382,7 @@
   text-transform: uppercase;
 }
 
-/* Pasek dzień po dniu: legenda nad paskiem, oś z datami pod paskiem. */
+/* Day-by-day strip: legend above the strip, date axis below it. */
 .day-strip {
   margin: 18px 0 0;
 }
@@ -474,7 +474,7 @@
   margin-top: 20px;
 }
 
-/* Sekcje pod wynikiem: nagłówek etykietą, wiersze oddzielone liniami. */
+/* Sections below the result: heading as a label, rows separated by lines. */
 .guide-slip,
 .guide-others,
 .guide-empty {
@@ -583,7 +583,7 @@
   }
 }
 
-/* Wybór miejsca na mapie (zadanie 024). */
+/* Site selection on the map (task 024). */
 .guide-map-picker {
   display: grid;
   gap: 8px;

@@ -1,4 +1,4 @@
-// Rejestr widoków. Nowy widok: katalog w src/views/ + jeden wpis tutaj.
+// View registry. A new view: a directory in src/views/ + one entry here.
 
 import { lazy, type ComponentType } from 'react'
 import CompareView from '../views/compare'

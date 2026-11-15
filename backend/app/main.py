@@ -1,4 +1,4 @@
-"""Start: uvicorn app.main:app --reload (z katalogu backend/)."""
+"""Start: uvicorn app.main:app --reload (from the backend/ directory)."""
 
 from fastapi import FastAPI
 

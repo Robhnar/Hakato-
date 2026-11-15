@@ -1,4 +1,4 @@
-// Tryb prowadzony „Plan a landing” (zadanie 020): trzy proste pytania → rekomendacja miejsca i terminu.
+// Guided mode "Plan a landing" (task 020): three simple questions → a site and date recommendation.
 
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { api } from '../../api/client'
@@ -28,7 +28,7 @@ const CATEGORY_LABEL: Record<SiteCategory, string> = {
   international: 'Other countries',
 }
 
-// Globus (three.js) ładujemy dopiero, gdy ktoś wybiera miejsce na mapie.
+// The globe (three.js) is loaded only when someone picks a site on the map.
 const MoonGlobe = lazy(() => import('../../views/map/MoonGlobe'))
 
 const SLIP_DAYS = 7
@@ -53,7 +53,7 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
     ...defaultMonthRange(new Date()),
   }))
   const [status, setStatus] = useState<Status>({ kind: 'idle' })
-  // Punkt kliknięty na mapie poza katalogiem (`answers.place === PIN_ID`).
+  // A point clicked on the map outside the catalog (`answers.place === PIN_ID`).
   const [pin, setPin] = useState<{ lat_deg: number; lon_deg: number } | null>(null)
   const [mapView, setMapView] = useState<ViewRequest>({ target: 'south', seq: 1 })
   const [mapZoom, setMapZoom] = useState<ZoomRequest | null>(null)
@@ -73,14 +73,14 @@ export default function GuidePanel({ sites, onOpenExpert }: GuidePanelProps) {
     try {
       const searchSites = asked.place === PIN_ID && pin ? [...sites, pinnedSite(pin.lat_deg, pin.lon_deg)] : sites
       const result = await findLandings(asked, searchSites, api.windows)
-      // Starsze zapytanie nie nadpisuje nowszego.
+      // An older request does not overwrite a newer one.
       if (id === requestId.current) setStatus({ kind: 'done', result, answers: asked })
     } catch (error) {
       if (id === requestId.current) setStatus({ kind: 'error', message: error instanceof Error ? error.message : String(error) })
     }
   }
 
-  // Po nowym wyniku fokus na nagłówku rekomendacji (czytniki ekranu i klawiatura).
+  // After a new result, focus the recommendation heading (screen readers and keyboard).
   useEffect(() => {
     if (status.kind === 'done') headingRef.current?.focus()
   }, [status])

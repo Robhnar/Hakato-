@@ -1,6 +1,6 @@
-/* Style widoku mapy. Powłoka trzyma swoje style w src/index.css. */
+/* Styles of the map view. The shell keeps its styles in src/index.css. */
 
-/* Scena zajmuje całą wysokość `.stage-view`; panel nakładki jest dokowany z prawej. */
+/* The stage takes the full height of `.stage-view`; the overlay panel is docked on the right. */
 .map-view {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -14,7 +14,7 @@
   min-height: 0;
 }
 
-/* Globus wypełnia scenę bez ramki i zaokrągleń - tło to sama czerń. */
+/* The globe fills the stage without a frame or rounded corners - the background is pure black. */
 .map-globe {
   position: relative;
   height: 100%;
@@ -32,7 +32,7 @@
   display: block;
 }
 
-/* --- Pasek narzędzi w lewym górnym rogu --- */
+/* --- Toolbar in the top-left corner --- */
 
 .map-toolbar {
   position: absolute;
@@ -73,13 +73,13 @@
   border-radius: 0 var(--radius) var(--radius) 0;
 }
 
-/* Przełącznik nakładki: zaznaczenie to jasny tekst i kreska 2 px. */
+/* Overlay switch: the selection is light text and a 2 px bar. */
 .map-switch[aria-checked='true'] {
   color: var(--text);
   box-shadow: inset 0 -2px 0 var(--text);
 }
 
-/* --- Podpisy miejsc i ciał nad kanwą --- */
+/* --- Site and body labels over the canvas --- */
 
 .map-labels {
   position: absolute;
@@ -110,7 +110,7 @@
   font-weight: 500;
 }
 
-/* Katalog miejsc czytelny dopiero po przybliżeniu - mniejszy i cichszy. */
+/* The site catalog is legible only after zooming in - smaller and quieter. */
 .map-label:not(.map-label-scenario):not(.map-label-sun):not(.map-label-earth):not(.map-label-pole) {
   font-size: 10px;
 }
@@ -135,7 +135,7 @@
   letter-spacing: 0.08em;
 }
 
-/* --- Odczyt pod kursorem i legenda w dolnych rogach --- */
+/* --- Readout under the cursor and legend in the bottom corners --- */
 
 .map-readout {
   position: absolute;
@@ -227,7 +227,7 @@
   }
 }
 
-/* --- Panel Optimization Overlay (021/8) --- */
+/* --- Optimization Overlay panel (021/8) --- */
 
 .map-view.has-panel {
   grid-template-columns: minmax(0, 1fr) 340px;
@@ -452,7 +452,7 @@
   }
 }
 
-/* Telefon: globalne `button { width: 100% }` z index.css rozciągało przyciski panelu i paska narzędzi. */
+/* Phone: the global `button { width: 100% }` from index.css stretched the panel and toolbar buttons. */
 @media (max-width: 640px) {
   .optimal-panel-head button {
     flex: none;

@@ -1,61 +1,61 @@
-# Źródła współrzędnych katalogu miejsc
+# Sources of the site catalog coordinates
 
-Współrzędne są w układzie selenograficznym ME: szerokość dodatnia na północ,
-długość dodatnia na wschód. Zachodnie długości zapisano jako wartości ujemne.
-Podane wartości dla historycznych lądowań są zaokrąglone do dokładności
-opublikowanych lokalizacji. Dla kandydatów Artemis współrzędne są punktami
-orientacyjnymi w obrębie wskazanego regionu, a nie zatwierdzonymi miejscami
-lądowania. Katalog nie sugeruje większej dokładności niż źródło.
+Coordinates are in the selenographic ME frame: latitude positive north,
+longitude positive east. West longitudes are stored as negative values.
+Values for historical landings are rounded to the accuracy of the
+published locations. For Artemis candidates the coordinates are reference
+points within the named region, not approved landing sites. The catalog does
+not imply greater accuracy than its source.
 
-## Miejsca kandydujące
+## Candidate sites
 
 ### south-pole-reference
 
-- NASA, opis południowego bieguna i miejsc rozważanych dla Artemis:
+- NASA, description of the south pole and the sites considered for Artemis:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Punkt referencyjny bieguna południowego (`-89.5, 0.0`), do demonstracji
-  widoku w pobliżu bieguna; nie jest oficjalnym miejscem lądowania.
-- Mapa topografii i współrzędnych: https://quickmap.lroc.asu.edu/
+- South pole reference point (`-89.5, 0.0`), used to demonstrate the
+  view near the pole; not an official landing site.
+- Topography and coordinate map: https://quickmap.lroc.asu.edu/
 
 ### shackleton-ridge
 
-- NASA wymienia „Peak Near Shackleton” / Connecting Ridge wśród regionów Artemis III:
+- NASA lists "Peak Near Shackleton" / Connecting Ridge among the Artemis III regions:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Boazman et al. (2022) identyfikują site 001 na Connecting Ridge przy
-  `89,45°S, 137,31°W` (`222,69°E`):
+- Boazman et al. (2022) identify site 001 on Connecting Ridge at
+  `89.45°S, 137.31°W` (`222.69°E`):
   https://doi.org/10.3847/PSJ/aca590
-- Punkt na oświetlonym grzbiecie przy Shackletonie: `-89.45°, -137.3°` (ME, długość ujemna = zachód),
-  dobrany jako kontrast do `south-pole-reference` w zagłębieniu; nie jest oficjalnym miejscem lądowania.
-- Mapa: https://quickmap.lroc.asu.edu/
+- A point on the illuminated ridge near Shackleton: `-89.45°, -137.3°` (ME, negative longitude = west),
+  chosen as a contrast to `south-pole-reference` in the depression; not an official landing site.
+- Map: https://quickmap.lroc.asu.edu/
 
 ### nobile-rim-1
 
-- NASA wymienia Nobile Rim 1 jako kandydujący region Artemis III:
+- NASA lists Nobile Rim 1 as a candidate Artemis III region:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Punkt w regionie rim (nie środek krateru Nobile): `-85.423°, 36.19° E`
-  (centrum kwadratu regionu wg zestawienia MoonSnag / USGS region square;
-  wcześniej błędnie użyto środka krateru z długością zachodnią).
-- Środek krateru Nobile dla porównania (IAU): `85.28°S 53.27°E` —
+- A point in the rim region (not the center of Nobile crater): `-85.423°, 36.19° E`
+  (center of the region square per the MoonSnag / USGS region square listing;
+  the crater center with a west longitude was wrongly used earlier).
+- Center of Nobile crater for comparison (IAU): `85.28°S 53.27°E` —
   https://en.wikipedia.org/wiki/Nobile_(crater)
-- To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
-- Mapa: https://quickmap.lroc.asu.edu/
+- This is an approximate reference point of the region, not a selected landing site.
+- Map: https://quickmap.lroc.asu.edu/
 
 ### de-gerlache-rim-2
 
-- NASA wymienia de Gerlache Rim 2 jako kandydujący region Artemis III:
+- NASA lists de Gerlache Rim 2 as a candidate Artemis III region:
   https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
-- Punkt w regionie rim (nie dno krateru): `-88.142°, -63.662°`
-  (centrum kwadratu regionu wg zestawienia MoonSnag / USGS region square).
-- Środek krateru de Gerlache dla porównania (IAU): `88.5°S 87.1°W` —
+- A point in the rim region (not the crater floor): `-88.142°, -63.662°`
+  (center of the region square per the MoonSnag / USGS region square listing).
+- Center of de Gerlache crater for comparison (IAU): `88.5°S 87.1°W` —
   https://en.wikipedia.org/wiki/De_Gerlache_(crater)
-- To przybliżony punkt orientacyjny regionu, nie wybrane lądowisko.
-- Mapa: https://quickmap.lroc.asu.edu/
+- This is an approximate reference point of the region, not a selected landing site.
+- Map: https://quickmap.lroc.asu.edu/
 
-## Program Apollo
+## Apollo program
 
-Źródła dokumentują misje i miejsca lądowania Apollo; współrzędne są
-opublikowanymi punktami miejsc lądowania. LROC QuickMap służy do wizualnego
-odniesienia lokalizacji.
+The sources document the Apollo missions and landing sites; the coordinates
+are published landing-site points. LROC QuickMap serves as a visual
+reference for the locations.
 
 ### apollo-11
 
@@ -105,13 +105,13 @@ odniesienia lokalizacji.
   https://apollojournals.org/alsj/a17/a17.html
 - LROC QuickMap: https://quickmap.lroc.asu.edu/
 
-## Misje międzynarodowe
+## International missions
 
 ### luna-9
 
 - Luna 9 landing-site coordinates and mission record:
   https://en.wikipedia.org/wiki/Luna_9
-- NASA/NSSDC, rekord misji Luna 9:
+- NASA/NSSDC, mission record for Luna 9:
   https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1966-006A
 - LROC QuickMap: https://quickmap.lroc.asu.edu/
 
@@ -119,7 +119,7 @@ odniesienia lokalizacji.
 
 - Luna 16 landing-site coordinates and mission record:
   https://en.wikipedia.org/wiki/Luna_16
-- NASA/NSSDC, rekord misji Luna 16:
+- NASA/NSSDC, mission record for Luna 16:
   https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1970-072A
 - LROC QuickMap: https://quickmap.lroc.asu.edu/
 
@@ -127,7 +127,7 @@ odniesienia lokalizacji.
 
 - Chang'e 3 landing-site coordinates and mission record:
   https://en.wikipedia.org/wiki/Chang%27e_3
-- NASA/NSSDC, rekord misji Chang'e 3:
+- NASA/NSSDC, mission record for Chang'e 3:
   https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2013-078A
 - LROC QuickMap: https://quickmap.lroc.asu.edu/
 
@@ -135,20 +135,20 @@ odniesienia lokalizacji.
 
 - Chang'e 4 landing-site coordinates and mission record:
   https://en.wikipedia.org/wiki/Chang%27e_4
-- NASA/NSSDC, rekord misji Chang'e 4:
+- NASA/NSSDC, mission record for Chang'e 4:
   https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2018-103A
 - LROC QuickMap: https://quickmap.lroc.asu.edu/
 
 ### chandrayaan-3
 
-- ISRO podaje prime landing site: `69.367621 S, 32.348126 E`:
+- ISRO gives the prime landing site: `69.367621 S, 32.348126 E`:
   https://www.isro.gov.in/Chandrayaan3_Details.html
 
 ### change-5
 
 - Chang'e 5 landing-site coordinates and mission record:
   https://en.wikipedia.org/wiki/Chang%27e_5
-- NASA/NSSDC, rekord misji Chang'e 5:
+- NASA/NSSDC, mission record for Chang'e 5:
   https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=2020-087A
 - LROC QuickMap: https://quickmap.lroc.asu.edu/
 
@@ -164,14 +164,14 @@ odniesienia lokalizacji.
 
 - Blue Ghost Mission 1 landing-site coordinates and mission record:
   https://en.wikipedia.org/wiki/Blue_Ghost_Mission_1
-- Firefly Aerospace, Blue Ghost Mission 1 i miejsce lądowania w Mare Crisium:
+- Firefly Aerospace, Blue Ghost Mission 1 and the landing site in Mare Crisium:
   https://fireflyspace.com/missions/blue-ghost-mission-1/
 - LROC QuickMap: https://quickmap.lroc.asu.edu/
 
-## Misje komercyjne
+## Commercial missions
 
-Wpisy opisują opublikowane cele misji, nie udane lądowania; dlatego `landing_utc`
-pozostaje `null`.
+The entries describe published mission targets, not successful landings; that is why `landing_utc`
+stays `null`.
 
 ### beresheet-target
 

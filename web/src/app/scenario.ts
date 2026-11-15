@@ -1,5 +1,5 @@
-// Scenariusz = miejsce + okno czasu. To jednostka, którą użytkownik porównuje.
-// Wspólny typ dla powłoki i wszystkich widoków - zmiana wymaga uzgodnienia.
+// Scenario = site + time window. This is the unit the user compares.
+// A type shared by the shell and all views - changing it needs agreement.
 
 import type { RangeQuery, Site } from '../api/types'
 
@@ -12,24 +12,24 @@ export interface Scenario {
   duration_hours: number
 }
 
-/** Każdy widok dostaje te same dane wejściowe i te same akcje. */
+/** Every view gets the same inputs and the same actions. */
 export interface ViewProps {
   scenarios: Scenario[]
   active: Scenario
-  /** Chwila wskazywana przez kursor czasu - wspólna dla wszystkich widoków. */
+  /** The moment pointed to by the time cursor - shared by all views. */
   cursor_utc: string
   setCursorUtc: (utc: string) => void
   selectScenario: (id: string) => void
-  /** Ustawia własne współrzędne w aktywnym scenariuszu (np. kliknięcie na mapie). */
+  /** Sets custom coordinates in the active scenario (e.g. a click on the map). */
   pickLocation: (lat_deg: number, lon_deg: number) => void
-  /** Widok Windows ustawia start (i opcjonalnie długość) aktywnego scenariusza. */
+  /** The Windows view sets the start (and optionally the duration) of the active scenario. */
   applyWindow: (start_utc: string, duration_hours?: number) => void
 }
 
-/** Jeden dzień księżycowy (miesiąc synodyczny) w godzinach. */
+/** One lunar day (synodic month) in hours. */
 export const LUNAR_DAY_HOURS = 708.7
 
-/** Limit scenariuszy w powłoce (zadanie 005). */
+/** Scenario limit in the shell (task 005). */
 export const MAX_SCENARIOS = 4
 
 export const DURATION_PRESETS: { label: string; hours: number }[] = [
@@ -40,7 +40,7 @@ export const DURATION_PRESETS: { label: string; hours: number }[] = [
 
 export type CoordError = 'lat' | 'lon' | 'both' | null
 
-/** Walidacja współrzędnych selenograficznych ME (−90…90, −180…180). */
+/** Validation of selenographic ME coordinates (−90…90, −180…180). */
 export function validateCoords(lat_deg: number, lon_deg: number): CoordError {
   const latBad = !Number.isFinite(lat_deg) || lat_deg < -90 || lat_deg > 90
   const lonBad = !Number.isFinite(lon_deg) || lon_deg < -180 || lon_deg > 180
@@ -93,7 +93,7 @@ export function scenarioFromSite(
   }
 }
 
-/** Kopia scenariusza z nowym id (powielanie w powłoce). */
+/** A copy of the scenario with a new id (duplicating in the shell). */
 export function duplicateScenario(scenario: Scenario): Scenario {
   return { ...scenario, id: `s${nextId++}` }
 }

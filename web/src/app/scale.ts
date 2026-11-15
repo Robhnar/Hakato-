@@ -1,8 +1,8 @@
-// Wspólna skala koloru wyniku (zadanie 021): jedna barwa od ciemnej do jasnej,
-// jaśniej = lepiej. Korzystają z niej mapa cieplna w Windows i warstwa
-// kandydatów w nakładce mapy, więc zmiana stopni zmienia oba widoki naraz.
+// Shared score color scale (task 021): one hue from dark to light,
+// lighter = better. It is used by the heatmap in Windows and the layer of
+// candidates in the map overlay, so changing the stops changes both views at once.
 
-/** Stopnie skali od najgorszego (ciemny) do najlepszego (jasny). */
+/** Scale stops from worst (dark) to best (light). */
 export const SCORE_STOPS: readonly string[] = [
   '#1b2a2e',
   '#1f4a4f',
@@ -22,13 +22,13 @@ function hexToRgb(hex: string): Rgb {
 const STOPS: readonly Rgb[] = SCORE_STOPS.map(hexToRgb)
 
 /**
- * Kolor dla pozycji `t` (0 = najgorzej, 1 = najlepiej). Wartości spoza zakresu
- * i NaN przycinamy do 0, więc skala nigdy nie zwraca `NaN`.
+ * Color for position `t` (0 = worst, 1 = best). Out-of-range values
+ * and NaN are clamped to 0, so the scale never returns `NaN`.
  */
 export function scoreColor(t: number): string {
   const x = Number.isFinite(t) ? Math.min(1, Math.max(0, t)) : 0
   const scaled = x * (STOPS.length - 1)
-  // Ostatni stopień nie ma następnika - interpolacja kończy się na nim.
+  // The last stop has no successor - interpolation ends there.
   const i = Math.min(STOPS.length - 2, Math.floor(scaled))
   const u = scaled - i
   const a = STOPS[i]
@@ -39,7 +39,7 @@ export function scoreColor(t: number): string {
   return `rgb(${r}, ${g}, ${bl})`
 }
 
-/** Pasek legendy: gradient przez wszystkie stopnie skali. */
+/** Legend bar: a gradient through all the scale stops. */
 export function scoreRampCss(): string {
   return `linear-gradient(to right, ${SCORE_STOPS.join(', ')})`
 }

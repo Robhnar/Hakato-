@@ -125,7 +125,7 @@ test('findLandings rejects an invalid month range before calling the API', async
 })
 
 test('findLandings samples 8 lunar phases for missions of 300 h or more', async () => {
-  // Backend przesuwa długie okna co miesiąc synodyczny, więc jeden start = jedna faza Księżyca.
+  // The backend steps long windows by a synodic month, so one start = one phase of the Moon.
   const queries: WindowsQuery[] = []
   await findLandings(ANSWERS, SITES, async (q) => {
     queries.push(q)

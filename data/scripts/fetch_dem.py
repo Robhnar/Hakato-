@@ -1,7 +1,7 @@
-"""Pobiera biegunowy model wysokości (DEM) LOLA z PDS Geosciences Node do data/raw/dem/.
+"""Downloads the LOLA polar elevation model (DEM) from the PDS Geosciences Node to data/raw/dem/.
 
-Domyślny produkt: ldem_75s_120m (120 m/pix, obszar -90°..-75° S, ~111 MiB),
-który obejmuje całą okolicę +/-150 km wokół każdego punktu poniżej -80° szerokości.
+Default product: ldem_75s_120m (120 m/pix, area -90°..-75° S, ~111 MiB),
+which covers the whole +/-150 km neighborhood of every point below -80° latitude.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def _download(url: str, dest: Path, force: bool = False) -> None:
     with urllib.request.urlopen(req, timeout=60) as resp:
         total = int(resp.headers.get("Content-Length") or 0)
         if dest.exists() and not force and total and dest.stat().st_size == total:
-            print(f"[skip] {dest.name} już istnieje ({total} B)")
+            print(f"[skip] {dest.name} already exists ({total} B)")
             return
 
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -56,7 +56,7 @@ def _download(url: str, dest: Path, force: bool = False) -> None:
 def fetch_dem(
     product: str = DEFAULT_PRODUCT, dest_dir: Path = DEM_DIR, force: bool = False
 ) -> Path:
-    """Pobiera pliki .lbl i .img wybranego produktu LOLA."""
+    """Downloads the .lbl and .img files of the chosen LOLA product."""
     for ext in (".lbl", ".img"):
         filename = f"{product}{ext}"
         url = f"{BASE_URL}/{filename}"
@@ -65,16 +65,16 @@ def fetch_dem(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Pobiera model wysokości LOLA z PDS.")
+    parser = argparse.ArgumentParser(description="Downloads the LOLA elevation model from PDS.")
     parser.add_argument(
         "--product",
         default=DEFAULT_PRODUCT,
-        help=f"Nazwa produktu w polar/img/ bez rozszerzenia (domyślnie: {DEFAULT_PRODUCT})",
+        help=f"Product name in polar/img/ without extension (default: {DEFAULT_PRODUCT})",
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Pobierz ponownie nawet jeśli plik już istnieje.",
+        help="Download again even if the file already exists.",
     )
     args = parser.parse_args(argv)
     path = fetch_dem(product=args.product, force=args.force)

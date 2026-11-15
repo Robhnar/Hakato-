@@ -1,6 +1,6 @@
-"""Prekalkuluje wieloletnie kalendarze dni księżycowych (2027–2035) dla miejsc z data/sites.json.
+"""Precomputes multi-year lunar-day calendars (2027–2035) for the sites in data/sites.json.
 
-Uruchom z katalogu głównego repozytorium:
+Run from the repository root:
     PYTHONPATH=backend python -m data.scripts.build_calendars
 """
 

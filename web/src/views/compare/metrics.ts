@@ -1,7 +1,7 @@
-// Wiersze tabeli porównania scenariuszy (zadanie 021).
-// Każdy wiersz to jedna metryka: sposób porównania (do wyboru najlepszej
-// wartości w wierszu) i gotowy tekst do wyświetlenia. Logika rankingu siedzi
-// w `pickBest.ts` i zostaje bez zmian.
+// Rows of the scenario comparison table (task 021).
+// Each row is one metric: how to compare (for picking the best
+// value in the row) and ready text to display. The ranking logic lives
+// in `pickBest.ts` and stays unchanged.
 
 import type { Summary } from '../../api/types'
 import { formatDeg, formatHours, formatPercent } from '../../app/format'
@@ -10,12 +10,12 @@ import { isBest } from './pickBest'
 export interface CompareRow {
   id: string
   label: string
-  /** Liczba do porównania w wierszu; `null` = wiersz bez „najlepszej” wartości. */
+  /** Number to compare in the row; `null` = a row without a "best" value. */
   metric: ((summary: Summary) => number) | null
   format: (summary: Summary) => string
 }
 
-/** Stan ciała na starcie okna: widoczne + kiedy zajdzie/wzejdzie. */
+/** State of the body at the window start: visible + when it sets/rises. */
 function describeAtStart(visible: boolean, hoursUntilChange: number | null): string {
   if (hoursUntilChange === null) return `${visible ? 'up' : 'down'} · no change`
   const change = `${visible ? 'sets' : 'rises'} in ${formatHours(hoursUntilChange)}`
@@ -63,7 +63,7 @@ export const COMPARE_ROWS: CompareRow[] = [
   },
 ]
 
-/** Flaga „najlepsza w wierszu” dla każdej kolumny; brak danych = brak flagi. */
+/** "Best in row" flag for each column; no data = no flag. */
 export function rowBests(row: CompareRow, summaries: (Summary | null)[]): boolean[] {
   const metric = row.metric
   if (!metric) return summaries.map(() => false)

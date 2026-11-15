@@ -1,4 +1,4 @@
-"""Endpointy HTTP. Opis w docs/ARCHITECTURE.md, przykłady w contracts/fixtures/."""
+"""HTTP endpoints. Description in docs/ARCHITECTURE.md, examples in contracts/fixtures/."""
 
 import json
 from copy import deepcopy
@@ -32,13 +32,13 @@ def _check_range(start_utc: datetime, end_utc: datetime, step_minutes: float) ->
     e_utc = to_utc(end_utc)
     if not (MIN_YEAR <= s_utc.year <= MAX_YEAR and MIN_YEAR <= e_utc.year <= MAX_YEAR):
         raise HTTPException(
-            422, f"Daty muszą mieścić się w zakresie lat {MIN_YEAR}–{MAX_YEAR} (pokrycie SPICE)"
+            422, f"Dates must fall within the years {MIN_YEAR}–{MAX_YEAR} (SPICE coverage)"
         )
     span_minutes = (e_utc - s_utc).total_seconds() / 60.0
     if span_minutes <= 0:
-        raise HTTPException(422, "end_utc musi być późniejszy niż start_utc")
+        raise HTTPException(422, "end_utc must be later than start_utc")
     if span_minutes / step_minutes > MAX_SAMPLES:
-        raise HTTPException(422, f"Za dużo próbek (limit {MAX_SAMPLES}); zwiększ step_minutes")
+        raise HTTPException(422, f"Too many samples (limit {MAX_SAMPLES}); increase step_minutes")
 
 
 @router.get("/health")
@@ -156,7 +156,7 @@ def windows(
     slip_days: Annotated[float, Query(ge=-3650, le=3650)] = 0.0,
 ) -> dict:
     if to_utc(search_end_utc) <= to_utc(search_start_utc):
-        raise HTTPException(422, "search_end_utc musi być późniejszy niż search_start_utc")
+        raise HTTPException(422, "search_end_utc must be later than search_start_utc")
     try:
         return deepcopy(
             _cached_windows(

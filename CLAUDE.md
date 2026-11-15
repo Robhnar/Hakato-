@@ -1,5 +1,5 @@
 # CLAUDE.md
 
-Zasady pracy w tym repo są w `AGENTS.md` (wspólne dla wszystkich narzędzi):
+The working rules for this repo are in `AGENTS.md` (shared by all tools):
 
 @AGENTS.md

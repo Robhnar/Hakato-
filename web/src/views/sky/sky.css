@@ -1,5 +1,5 @@
-/* Widok nieba (zadanie 021): wykres panoramy, suwak czasu i odczyt w stylu
-   konsoli misji. Bursztyn = Słońce, błękit = Ziemia — nigdzie indziej. */
+/* Sky view (task 021): panorama chart, time slider and readout in the style of
+   a mission console. Amber = Sun, blue = Earth — nowhere else. */
 
 .sky {
   display: flex;
@@ -23,7 +23,7 @@
   max-height: 460px;
 }
 
-/* Siatka i podziałki */
+/* Grid and ticks */
 
 .sky-grid {
   stroke: var(--line);
@@ -52,7 +52,7 @@
   text-transform: uppercase;
 }
 
-/* Terrain: ciemne wypełnienie, wyraźna górna krawędź. */
+/* Terrain: dark fill, a distinct top edge. */
 
 .sky-terrain {
   fill: #1d1e21;
@@ -64,7 +64,7 @@
   stroke-width: 1;
 }
 
-/* Ślady: ciągły = widoczny, przerywany = za terenem. */
+/* Tracks: solid = visible, dashed = behind terrain. */
 
 .sky-trail {
   fill: none;
@@ -86,7 +86,7 @@
   opacity: 0.6;
 }
 
-/* Początek okna (puste kółko) i koniec (kreska). */
+/* Window start (empty circle) and end (bar). */
 
 .sky-start {
   fill: none;
@@ -105,7 +105,7 @@
   stroke: var(--earth);
 }
 
-/* Znaczniki pozycji przy kursorze czasu. */
+/* Position markers at the time cursor. */
 
 .sky-marker {
   stroke-width: 1;
@@ -121,7 +121,7 @@
   stroke: var(--earth);
 }
 
-/* Zasłonięty: puste kółko z przerywanym obrysem — czytelne bez koloru. */
+/* Occluded: an empty circle with a dashed outline — legible without color. */
 .sky-marker-occulted {
   fill: var(--bg);
   stroke-dasharray: 2 2;
@@ -140,7 +140,7 @@
   fill: var(--earth);
 }
 
-/* Suwak czasu */
+/* Time slider */
 
 .sky-cursor {
   display: flex;
@@ -161,7 +161,7 @@
   color: var(--text);
 }
 
-/* Legenda: jedna linia pod wykresem */
+/* Legend: one line below the chart */
 
 .sky-legend {
   display: flex;
@@ -204,7 +204,7 @@
   border-top: 1px dashed var(--muted);
 }
 
-/* Odczyt pod wykresem: dwa wiersze, liczby mono do prawej */
+/* Readout below the chart: two rows, mono numbers aligned right */
 
 .sky-readout-wrap {
   overflow-x: auto;
@@ -269,7 +269,7 @@
   }
 }
 
-/* Telefon: wykres nie kurczy się poniżej czytelnej skali (etykiety >= ok. 10 px), panel przewija się poziomo. */
+/* Phone: the chart does not shrink below a readable scale (labels >= about 10 px), the panel scrolls horizontally. */
 @media (max-width: 640px) {
   .sky-panel {
     overflow-x: auto;

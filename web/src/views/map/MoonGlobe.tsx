@@ -9,23 +9,23 @@ import { GRATICULE, horizonCircle, meridianPoints, parallelPoints, type GlobePoi
 import { latLonToVector3, vectorToLatLon } from './geo'
 import { buildOverlayPixels } from './heatmap'
 
-// Tekstura: NASA SVS "CGI Moon Kit" (SVS 4720), mapa barwna z mozaiki LROC WAC.
-// https://svs.gsfc.nasa.gov/4720/ - dane NASA, domena publiczna, kadr 2048x1024.
+// Texture: NASA SVS "CGI Moon Kit" (SVS 4720), a color map from the LROC WAC mosaic.
+// https://svs.gsfc.nasa.gov/4720/ - NASA data, public domain, 2048x1024 crop.
 const TEXTURE_URL = '/moon_lroc_color_2k.jpg'
 
-// Kolory z tokenów powłoki (index.css).
+// Colors from the shell tokens (index.css).
 const SITE_COLOR = 0xb9b6ae
 const SCENARIO_COLOR = 0xe9e6df
 const ACTIVE_COLOR = 0xffffff
 const SUN_COLOR = 0xe9b44c
 const EARTH_COLOR = 0x5aa2e0
 
-// Rozmiary znaczników (promień kuli w jednostkach globusa).
+// Marker sizes (sphere radius in globe units).
 const SITE_RADIUS = 0.01
 const SCENARIO_RADIUS = 0.016
 const ACTIVE_RADIUS = 0.022
 
-// Linie siatki i kół leżą tuż nad powierzchnią, żeby nie walczyły o głębię.
+// Grid and circle lines lie just above the surface so they do not z-fight.
 const GRATICULE_RADIUS = 1.002
 const HORIZON_RADIUS = 1.004
 const LABEL_RADIUS = 1.01
@@ -33,19 +33,19 @@ const HORIZON_SEGMENTS = 180
 
 const MIN_DISTANCE = 1.15
 const MAX_DISTANCE = 6
-// Poniżej tej odległości kamery podpisy katalogu i etykiety siatki są widoczne.
+// Below this camera distance the catalog labels and grid labels are visible.
 const CLOSE_UP_DISTANCE = 2.4
 const FLY_MS = 600
 const ZOOM_MS = 200
 const ZOOM_IN = 0.8
 const ZOOM_OUT = 1.25
 
-// Nakładka ON/OFF (zadanie 019): bufor equirectangular; krycie niesie alfa pikseli.
+// ON/OFF overlay (task 019): an equirectangular buffer; opacity is carried by the pixel alpha.
 const OVERLAY_WIDTH = 1024
 const OVERLAY_HEIGHT = 512
 const OVERLAY_OPACITY = 1
 
-// Warstwa kandydatów (zadanie 021): dyski w skali wyniku, zwycięzcy większe.
+// Candidates layer (task 021): discs on the score scale, winners larger.
 const CANDIDATE_RADIUS = 1.006
 const CANDIDATE_SMALL = 0.007
 const CANDIDATE_TOP = 0.012
@@ -54,17 +54,17 @@ const CANDIDATE_OUTLINE = 0.002
 
 export type { GlobePoint }
 
-/** Dokąd leci kamera: nad biegun, na stronę bliższą Ziemi albo nad konkretny punkt. */
+/** Where the camera flies: over a pole, to the Earth-facing side or over a specific point. */
 export type ViewTarget = 'south' | 'north' | 'near' | GlobePoint
 
 export interface ViewRequest {
   target: ViewTarget
-  /** Rosnący licznik - ten sam cel można wybrać dwa razy pod rząd. */
+  /** An increasing counter - the same target can be chosen twice in a row. */
   seq: number
 }
 
 export interface ZoomRequest {
-  /** 1 = bliżej, −1 = dalej. */
+  /** 1 = closer, −1 = farther. */
   direction: 1 | -1
   seq: number
 }
@@ -79,20 +79,20 @@ export interface MoonGlobeProps {
   sites: Site[]
   scenarios: Scenario[]
   activeId: string
-  /** Punkt podsłoneczny - oświetlenie, terminator i podpis „Sun overhead". */
+  /** Subsolar point - lighting, terminator and the "Sun overhead" label. */
   subsolar: GlobePoint | null
-  /** Punkt podziemski - granica widoczności Ziemi i podpis „Earth overhead". */
+  /** Sub-Earth point - Earth visibility limit and the "Earth overhead" label. */
   subearth: GlobePoint | null
   onSelect: (id: string) => void
   onPick: (lat_deg: number, lon_deg: number) => void
   viewRequest: ViewRequest | null
   zoomRequest: ZoomRequest | null
   onHover?: (info: HoverInfo | null) => void
-  /** Warstwa stref zasilania/łączności i znacznik optymalnego punktu (019). */
+  /** Layer of power/communication zones and the optimal-point marker (019). */
   overlayEnabled?: boolean
-  /** Wynik `/api/optimal-site`; `null` dopóki nie ma danych. */
+  /** Result of `/api/optimal-site`; `null` until there is data. */
   optimalSite?: OptimalSiteResponse | null
-  /** Kandydaci nakładki z pozycjami; pusta lista = brak warstwy. */
+  /** Overlay candidates with positions; an empty list = no layer. */
   candidates?: RankedCandidate[]
   highlightId?: string | null
   selectedId?: string | null
@@ -126,7 +126,7 @@ interface LabelSpec {
   width: number
   height: number
   priority: number
-  /** `true` = widoczny zawsze; `false` = dopiero po przybliżeniu albo pod kursorem. */
+  /** `true` = always visible; `false` = only after zooming in or under the cursor. */
   always: boolean
 }
 
@@ -158,7 +158,7 @@ export default function MoonGlobe({
 }: MoonGlobeProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const globeRef = useRef<GlobeApi | null>(null)
-  // Akcje powłoki w ref, żeby scena three.js powstała raz, a nie przy każdym renderze.
+  // Shell actions in a ref so the three.js scene is created once, not on every render.
   const actions = useRef({ onSelect, onPick, onHover, onCandidateHover, onCandidateSelect })
 
   useEffect(() => {
@@ -175,7 +175,7 @@ export default function MoonGlobe({
     const canvas = renderer.domElement
     stage.appendChild(canvas)
 
-    // Podpisy są elementami HTML nad kanwą - trzy.js nie rysuje tekstu.
+    // Labels are HTML elements over the canvas - three.js does not draw text.
     const labelLayer = document.createElement('div')
     labelLayer.className = 'map-labels'
     stage.appendChild(labelLayer)
@@ -186,8 +186,8 @@ export default function MoonGlobe({
 
     const controls = new OrbitControls(camera, canvas)
     controls.enablePan = false
-    // Kółko obsługujemy sami: przybliża tylko nad tarczą globusa, poza nią
-    // przewija stronę (zgłoszenie z przeglądu 021).
+    // We handle the wheel ourselves: it zooms only over the globe disc, outside it
+    // it scrolls the page (a finding from review 021).
     controls.enableZoom = false
     controls.enableDamping = true
     controls.dampingFactor = 0.08
@@ -196,9 +196,9 @@ export default function MoonGlobe({
     controls.rotateSpeed = 0.6
     controls.update()
 
-    // Mapa NASA ma długość 0° na środku i rośnie na wschód, a SphereGeometry
-    // kładzie u = 0.75 na −Z - w naszym układzie to wschód. Kadr pasuje bez odbicia;
-    // odbicie lustrzane przestawia Mare Crisium na zachodnią stronę.
+    // The NASA map has longitude 0° in the center and increases east, and SphereGeometry
+    // puts u = 0.75 on −Z - in our frame that is east. The crop fits without mirroring;
+    // mirroring would move Mare Crisium to the western side.
     const texture = new THREE.TextureLoader().load(TEXTURE_URL, requestRender)
     texture.colorSpace = THREE.SRGBColorSpace
 
@@ -207,8 +207,8 @@ export default function MoonGlobe({
     const globe = new THREE.Mesh(globeGeometry, globeMaterial)
     scene.add(globe)
 
-    // Słońce rzeźbi dzień i noc; słabe, chłodne światło otoczenia to "poświata Ziemi",
-    // dzięki której nocna strona nie jest czarną plamą i widać na niej morza.
+    // The Sun sculpts day and night; the weak, cool ambient light is "earthshine",
+    // so the night side is not a black blob and the maria are visible on it.
     const sunLight = new THREE.DirectionalLight(0xfff3e0, 1.3)
     scene.add(sunLight, new THREE.AmbientLight(0xa8bcd8, 0.3))
 
@@ -218,7 +218,7 @@ export default function MoonGlobe({
     let sunPoint: GlobePoint | null = null
     let earthPoint: GlobePoint | null = null
 
-    // --- Siatka współrzędnych ------------------------------------------------
+    // --- Coordinate grid ------------------------------------------------
 
     const graticule = new THREE.Group()
     scene.add(graticule)
@@ -243,7 +243,7 @@ export default function MoonGlobe({
       graticule.add(polyline(meridianPoints(lon_deg), GRATICULE_RADIUS, 0xffffff, lon_deg === 0 ? 0.25 : 0.12))
     }
 
-    // --- Terminator i granica widoczności Ziemi ------------------------------
+    // --- Terminator and Earth visibility limit ------------------------------
 
     function horizonLine(color: number, dashed: boolean): THREE.Line {
       const geometry = new THREE.BufferGeometry()
@@ -279,7 +279,7 @@ export default function MoonGlobe({
     const earthLimit = horizonLine(EARTH_COLOR, true)
     scene.add(terminator, earthLimit)
 
-    // --- Znaczniki na powierzchni --------------------------------------------
+    // --- Markers on the surface --------------------------------------------
 
     const markers = new THREE.Group()
     scene.add(markers)
@@ -324,7 +324,7 @@ export default function MoonGlobe({
     let activeRing: THREE.Mesh | null = null
     let flownToOptimal = false
 
-    // --- Podpisy HTML --------------------------------------------------------
+    // --- HTML labels --------------------------------------------------------
 
     let labels: LabelSpec[] = []
     let hoveredKey: string | null = null
@@ -399,7 +399,7 @@ export default function MoonGlobe({
       addLabel('grid-80s', '80°S', -80, 0, 60, false, 'map-label map-label-grid')
       addLabel('grid-85s', '85°S', -85, 0, 60, false, 'map-label map-label-grid')
 
-      // Jedno wymuszenie układu na wszystkie podpisy zamiast jednego na każdy.
+      // One forced layout for all labels instead of one for each.
       for (const label of labels) {
         label.width = label.el.offsetWidth
         label.height = label.el.offsetHeight
@@ -418,7 +418,7 @@ export default function MoonGlobe({
       const ordered = [...labels].sort((a, b) => b.priority - a.priority)
 
       for (const label of ordered) {
-        // Podpis z tylnej półkuli globusa jest zasłonięty przez sam globus.
+        // A label on the globe's far hemisphere is hidden by the globe itself.
         const facing = label.position.dot(cameraDirection)
         const wanted = label.always || closeUp || label.key === hoveredKey
         if (facing <= 0.02 || !wanted) {
@@ -440,7 +440,7 @@ export default function MoonGlobe({
           continue
         }
 
-        // Zachłannie: podpis o niższym priorytecie znika, gdy nachodzi na wyższy.
+        // Greedy: a lower-priority label disappears when it overlaps a higher one.
         const collides = placed.some(
           (other) =>
             rect.left < other.right &&
@@ -459,7 +459,7 @@ export default function MoonGlobe({
       }
     }
 
-    // --- Nakładka stref (zadanie 019) ---------------------------------------
+    // --- Zone overlay (task 019) ---------------------------------------
 
     const overlayCanvas = document.createElement('canvas')
     overlayCanvas.width = OVERLAY_WIDTH
@@ -483,7 +483,7 @@ export default function MoonGlobe({
 
     overlay.renderOrder = 1
 
-    // --- Warstwa kandydatów --------------------------------------------------
+    // --- Candidates layer --------------------------------------------------
 
     const candidateMarkers = new THREE.Group()
     candidateMarkers.visible = false
@@ -558,12 +558,12 @@ export default function MoonGlobe({
       overlayTexture.needsUpdate = true
     }
 
-    // --- Pętla rysowania -----------------------------------------------------
+    // --- Render loop -----------------------------------------------------
 
     let frame = 0
 
     function renderScene() {
-      // Pierścień aktywnego scenariusza zawsze patrzy w kamerę.
+      // The active scenario's ring always faces the camera.
       if (activeRing) activeRing.quaternion.copy(camera.quaternion)
       if (highlightRing.visible) highlightRing.quaternion.copy(camera.quaternion)
       if (selectedRing.visible) selectedRing.quaternion.copy(camera.quaternion)
@@ -573,8 +573,8 @@ export default function MoonGlobe({
 
     function draw() {
       frame = 0
-      // `update()` zwraca `true`, dopóki tłumienie obrotu trwa - dzięki temu
-      // pętla nie gaśnie w połowie ruchu i nie pali klatek, gdy scena stoi.
+      // `update()` returns `true` while rotation damping lasts - so
+      // the loop does not stop mid-motion and does not burn frames when the scene is still.
       const moving = controls.update()
       renderScene()
       if (moving) requestRender()
@@ -595,7 +595,7 @@ export default function MoonGlobe({
       requestRender()
     }
 
-    // --- Kamera: przelot i przybliżanie -------------------------------------
+    // --- Camera: fly-over and zoom -------------------------------------
 
     let flyFrame = 0
     let zoomGoal = 0
@@ -618,7 +618,7 @@ export default function MoonGlobe({
         return
       }
 
-      // Krótszą drogą w długości geograficznej, żeby kamera nie okrążała globusa.
+      // By the shorter way in longitude so the camera does not circle the globe.
       let deltaTheta = goal.theta - start.theta
       if (deltaTheta > Math.PI) deltaTheta -= 2 * Math.PI
       if (deltaTheta < -Math.PI) deltaTheta += 2 * Math.PI
@@ -670,7 +670,7 @@ export default function MoonGlobe({
       })
     }
 
-    // --- Wskaźnik, najechanie, kliknięcie, kółko -----------------------------
+    // --- Pointer, hover, click, wheel -----------------------------
 
     const raycaster = new THREE.Raycaster()
     const pointer = new THREE.Vector2()
@@ -769,7 +769,7 @@ export default function MoonGlobe({
     }
 
     function onClick(event: MouseEvent) {
-      if (dragged) return // to było obracanie globusa, nie kliknięcie
+      if (dragged) return // that was rotating the globe, not a click
       setPointer(event)
       const { marker, surface } = hitTest()
       if (marker) {
@@ -791,7 +791,7 @@ export default function MoonGlobe({
 
     function onWheel(event: WheelEvent) {
       setPointer(event)
-      // Poza tarczą globusa nie zabieramy kółka - strona przewija się normalnie.
+      // Outside the globe disc we do not take the wheel - the page scrolls normally.
       if (raycaster.intersectObject(globe, false).length === 0) return
       event.preventDefault()
       zoom(event.deltaY > 0 ? -1 : 1)
@@ -803,8 +803,8 @@ export default function MoonGlobe({
     canvas.addEventListener('pointerleave', onPointerLeave)
     canvas.addEventListener('click', onClick)
     canvas.addEventListener('wheel', onWheel, { passive: false })
-    // Podniesienie przycisku może wypaść poza kanwą (przeciąganie); zdejmujemy
-    // klasę kursora globalnie, żeby nie zostawała „łapka".
+    // Releasing the button may happen outside the canvas (dragging); we remove
+    // the cursor class globally so the "hand" does not stay.
     window.addEventListener('pointerup', onPointerUp)
     controls.addEventListener('change', requestRender)
 
@@ -817,7 +817,7 @@ export default function MoonGlobe({
         siteRows = nextSites
         scenarioRows = nextScenarios
         activeScenarioId = nextActiveId
-        // Geometrie i materiały są wspólne - czyszczenie grupy ich nie zwalnia.
+        // Geometries and materials are shared - clearing the group does not dispose them.
         markers.clear()
         activeRing = null
 
@@ -866,7 +866,7 @@ export default function MoonGlobe({
         sunPoint = nextSubsolar
         earthPoint = nextSubearth
 
-        // Bez danych zostawiamy Słońce nad punktem (0°, 0°), żeby globus nie był czarny.
+        // Without data we leave the Sun over the point (0°, 0°) so the globe is not black.
         const light = nextSubsolar
           ? latLonToVector3(nextSubsolar.lat_deg, nextSubsolar.lon_deg, 8)
           : { x: 8, y: 0, z: 0 }
@@ -893,10 +893,10 @@ export default function MoonGlobe({
         overlay.visible = enabled
         candidateMarkers.visible = enabled
         if (site) drawOverlay(site)
-        // Bez danych nie pokazujemy starej tekstury (np. po błędzie zapytania).
+        // Without data we do not show the old texture (e.g. after a request error).
         else clearOverlay()
 
-        // Pierwsze włączenie z danymi: kamera na najlepszy punkt.
+        // First switch-on with data: camera to the best point.
         if (enabled && site && !flownToOptimal) {
           flownToOptimal = true
           flyTo({ lat_deg: site.optimal.lat_deg, lon_deg: site.optimal.lon_deg })

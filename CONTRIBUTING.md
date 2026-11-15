@@ -1,31 +1,31 @@
-# Jak pracujemy
+# How we work
 
-Jedno zadanie to jedna gałąź i jeden pull request. Integrator sprawdza PR-y i scala je do `main`.
+One task is one branch and one pull request. The integrator reviews PRs and merges them into `main`.
 
-## Krok po kroku
+## Step by step
 
-1. **Weź pozycję** z listy w `docs/tasks/README.md` albo poproś integratora o przydział.
-2. **Uruchom projekt** według `README.md` i sprawdź, że testy przechodzą.
-3. **Utwórz gałąź** z aktualnego `main`:
+1. **Pick an item** from the list in `docs/tasks/README.md`, or ask the integrator to assign one.
+2. **Run the project** following `README.md` and check that the tests pass.
+3. **Create a branch** from the current `main`:
 
    ```bash
    git switch main && git pull
-   git switch -c feat/<nr>-<opis>
+   git switch -c feat/<nr>-<name>
    ```
 
-4. **Commituj często** i pushuj regularnie, żeby praca nie zginęła.
-5. **Otwórz PR do `main`** i wypełnij szablon. Daj znać integratorowi, że czeka.
+4. **Commit often** and push regularly so the work is not lost.
+5. **Open a PR to `main`** and fill in the template. Let the integrator know it is waiting.
 
-## Zasady
+## Rules
 
-- Nikt nie pushuje bezpośrednio do `main`.
-- Zmieniasz tylko swój moduł. Potrzebujesz zmiany w cudzym – napisz do jego właściciela albo integratora.
-- Zmiana kontraktu (API, format danych, schemat bazy) idzie osobnym PR-em, razem ze zmianą w `docs/ARCHITECTURE.md`, i jest scalana przed kodem, który z niej korzysta.
-- Gdy `main` się zmienił, dociągnij go do swojej gałęzi przez `git merge main` (nie rebase po otwarciu PR).
+- Nobody pushes directly to `main`.
+- Change only your own module. If you need a change in someone else's, tell its owner or the integrator.
+- A contract change (API, data format, database schema) goes in a separate PR, together with the change in `docs/ARCHITECTURE.md`, and is merged before the code that depends on it.
+- When `main` has moved on, bring it into your branch with `git merge main` (not rebase after the PR is open).
 
-## Nazwy
+## Naming
 
-| Co | Wzór | Przykład |
+| What | Pattern | Example |
 | --- | --- | --- |
-| Gałąź | `feat/<nr>-<opis>` lub `fix/<nr>-<opis>` | `feat/026-eksport-danych` |
-| Tytuł PR | `[<nr>] <co robi>` | `[026] Eksport danych` |
+| Branch | `feat/<nr>-<name>` or `fix/<nr>-<name>` | `feat/026-data-export` |
+| PR title | `[<nr>] <what it does>` | `[026] Data export` |

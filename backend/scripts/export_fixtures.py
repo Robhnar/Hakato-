@@ -1,11 +1,11 @@
-"""Generuje contracts/fixtures/*.json - przykładowe odpowiedzi API dla frontendu.
+"""Generates contracts/fixtures/*.json - sample API responses for the frontend.
 
-Uruchom z katalogu backend/ po każdej zmianie kontraktu:  python -m scripts.export_fixtures
+Run from the backend/ directory after every contract change:  python -m scripts.export_fixtures
 
-Scenariusz: punkt odniesienia przy biegunie południowym, 30 dni od 2027-01-01, krok 1 h.
-Położenia zawsze z modelu przybliżonego (także gdy jądra SPICE są pobrane).
-Horyzont jest SZTUCZNY (source = "synthetic"), żeby widoki miały na czym pracować,
-zanim powstanie prawdziwy profil z danych LOLA.
+Scenario: a reference point near the south pole, 30 days from 2027-01-01, 1 h step.
+Positions always from the approximate model (even when the SPICE kernels are downloaded).
+The horizon is SYNTHETIC (source = "synthetic") so the views have something to work with
+before a real profile from LOLA data exists.
 """
 
 import json
@@ -35,7 +35,7 @@ def synthetic_horizon() -> dict:
 
 
 def build() -> dict[str, object]:
-    """Fixtures zawsze z modelu przybliżonego - wynik nie może zależeć od pobranych jąder SPICE."""
+    """Fixtures always from the approximate model - the result must not depend on downloaded SPICE kernels."""
     previous = os.environ.get("HAKATO_FORCE_PLACEHOLDER")
     os.environ["HAKATO_FORCE_PLACEHOLDER"] = "1"
     try:

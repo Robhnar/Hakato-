@@ -1,7 +1,7 @@
 import type { CalendarSlot } from '../../api/types'
 import { scoreColor } from '../../app/scale'
 
-/** Parametry dostępne na mapie cieplnej (014). */
+/** Parameters available on the heatmap (014). */
 export type HeatMetric =
   | 'sunlight_hours'
   | 'sun_visible_fraction'
@@ -39,7 +39,7 @@ export function metricValue(slot: CalendarSlot, metric: HeatMetric): number {
   return slot[metric]
 }
 
-/** Zakres skali; przy jednym punkcie dodaje ±epsilon, żeby kolor nie był NaN. */
+/** Scale range; with a single point it adds ±epsilon so the color is not NaN. */
 export function scaleBounds(values: number[]): { min: number; max: number } {
   if (values.length === 0) return { min: 0, max: 1 }
   let min = Math.min(...values)
@@ -52,14 +52,14 @@ export function scaleBounds(values: number[]): { min: number; max: number } {
   return { min, max }
 }
 
-/** t∈[0,1] → kolor ze wspólnej skali wyniku (ciemny = słabo, jasny = dobrze). */
+/** t∈[0,1] → color from the shared score scale (dark = poor, light = good). */
 export function heatColor(t: number): string {
   return scoreColor(t)
 }
 
 /**
- * Pozycja wartości na skali koloru (0…1). `invert=true` (np. najdłuższa noc):
- * niższa wartość dostaje jaśniejszy, czyli lepszy kolor.
+ * Position of a value on the color scale (0…1). `invert=true` (e.g. the longest night):
+ * a lower value gets the lighter, i.e. better, color.
  */
 export function colorPosition(
   value: number,
@@ -73,7 +73,7 @@ export function colorPosition(
 }
 
 /**
- * Kolor komórki. `invert=true` (np. najdłuższa noc): niższa wartość = lepszy kolor.
+ * Cell color. `invert=true` (e.g. the longest night): lower value = better color.
  */
 export function colorForValue(
   value: number,
@@ -84,7 +84,7 @@ export function colorForValue(
   return heatColor(colorPosition(value, min, max, invert))
 }
 
-/** Grupuje sloty po roku startu (etykiety osi). */
+/** Groups slots by start year (axis labels). */
 export function groupByStartYear(grid: CalendarSlot[]): { year: number; slots: CalendarSlot[] }[] {
   const map = new Map<number, CalendarSlot[]>()
   for (const slot of grid) {

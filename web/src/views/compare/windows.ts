@@ -6,12 +6,12 @@ export interface HourBand {
   endHours: number
 }
 
-/** Przelicza UTC na godziny od startu scenariusza. */
+/** Converts UTC to hours since the scenario start. */
 export function hoursFromStart(startUtc: string, instantUtc: string): number {
   return (Date.parse(instantUtc) - Date.parse(startUtc)) / 3_600_000
 }
 
-/** Okna widoczności jako pasy na osi 0…durationHours. */
+/** Visibility windows as bands on the 0…durationHours axis. */
 export function bandsFromWindows(
   startUtc: string,
   durationHours: number,
@@ -26,7 +26,7 @@ export function bandsFromWindows(
   return bands
 }
 
-/** Buduje okna z serii `visible` na wspólnej siatce czasu (wspólna implementacja z Timeline). */
+/** Builds windows from a `visible` series on a shared time grid (implementation shared with Timeline). */
 export function windowsFromVisibility(
   timesUtc: string[],
   visible: boolean[],

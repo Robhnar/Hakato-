@@ -1,5 +1,5 @@
-/* Widok osi czasu (zadanie 021). Bursztyn = Słońce, błękit = Ziemia; linia
-   Ziemi jest przerywana, więc oba ciała da się rozróżnić bez koloru. */
+/* Timeline view (task 021). Amber = Sun, blue = Earth; the Earth
+   line is dashed, so the two bodies can be told apart without color. */
 
 .timeline {
   display: grid;
@@ -48,7 +48,7 @@
   background: var(--earth);
 }
 
-/* „Both" = pas dzielony w poprzek, bez gradientu. */
+/* "Both" = a band split across, no gradient. */
 .timeline-chip-both {
   background: var(--sun);
 }
@@ -98,7 +98,7 @@
   box-sizing: border-box;
   width: 100%;
   height: auto;
-  /* Outline zamiast border: obramowanie nie zawęża content boxu, do którego mapuje się viewBox. */
+  /* Outline instead of border: the frame does not narrow the content box that the viewBox maps to. */
   outline: 1px solid var(--line);
   background: var(--bg);
   cursor: pointer;
@@ -114,7 +114,7 @@
   outline-offset: 2px;
 }
 
-/* Pasy widoczności */
+/* Visibility bands */
 
 .timeline-track {
   fill: var(--line);
@@ -141,7 +141,7 @@
   font-size: 14px;
 }
 
-/* Wykres wysokości */
+/* Elevation chart */
 
 .timeline-chart-bg {
   fill: #101011;
@@ -192,7 +192,7 @@
   stroke: var(--sun);
 }
 
-/* Ziemia przerywana — rozróżnialna także bez koloru. */
+/* Earth dashed — distinguishable without color too. */
 .timeline-line-earth {
   stroke: var(--earth);
   stroke-dasharray: 6 3;
@@ -248,8 +248,8 @@
     overflow-x: auto;
   }
 
-  /* Tekst w SVG skaluje się razem z wykresem — na wąskim ekranie podbijamy go
-     i pokazujemy co drugi tick, żeby etykiety nie nachodziły na siebie. */
+  /* Text in SVG scales with the chart — on a narrow screen we enlarge it
+     and show every second tick so the labels do not overlap. */
   .timeline-axis-label {
     font-size: 22px;
   }
@@ -272,7 +272,7 @@
   }
 }
 
-/* Telefon: jak w Sky - minimalna szerokość wykresu i przewijanie poziome kontenera. */
+/* Phone: as in Sky - a minimum chart width and horizontal scrolling of the container. */
 @media (max-width: 640px) {
   .timeline-canvas {
     overflow-x: auto;

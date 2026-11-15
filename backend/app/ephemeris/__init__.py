@@ -1,4 +1,4 @@
-"""Moduł efemeryd: gdzie na niebie są Słońce i Ziemia. Kontrakt w docs/ARCHITECTURE.md."""
+"""Ephemeris module: where the Sun and Earth are in the sky. Contract in docs/ARCHITECTURE.md."""
 
 import os
 import threading
@@ -27,8 +27,8 @@ _REQUIRED_KERNELS = [
 ]
 
 _KERNELS_LOADED = False
-# CSPICE ma globalny stan i nie jest wątkowo bezpieczny: równoległe str2et/spkpos zwracają
-# błędy albo wywalają proces. Każde wywołanie SPICE (też z innych modułów) trzyma ten zamek.
+# CSPICE has global state and is not thread-safe: concurrent str2et/spkpos calls return
+# errors or crash the process. Every SPICE call (including from other modules) holds this lock.
 SPICE_LOCK = threading.RLock()
 _KERNEL_LOCK = SPICE_LOCK
 
@@ -74,7 +74,7 @@ def __getattr__(name: str):
 
 
 def body_positions(lat_deg: float, lon_deg: float, times_utc: list[datetime]) -> dict:
-    """Azymut i wysokość Słońca i Ziemi dla każdej chwili z times_utc."""
+    """Azimuth and elevation of the Sun and Earth for each moment in times_utc."""
     out = {
         "sun": {"az_deg": [], "el_deg": []},
         "earth": {"az_deg": [], "el_deg": []},

@@ -21,7 +21,7 @@ interface Props {
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-/** Próg zmiany tekstu na czarny; czarny/biały daje >= 4.5:1 na całej skali (zad. 021/9). */
+/** Threshold for switching the text to black; black/white gives >= 4.5:1 across the whole scale (task 021/9). */
 const DARK_TEXT_FROM = 0.48
 
 function monthOf(iso: string): string {
@@ -33,7 +33,7 @@ function scoreText(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '—'
 }
 
-/** Mapa cieplna „data startu × parametr” (zadania 014 i 021). */
+/** Heatmap "start date × parameter" (tasks 014 and 021). */
 export default function CalendarHeatmap({
   grid,
   durationHours = LUNAR_DAY_HOURS,
@@ -52,8 +52,8 @@ export default function CalendarHeatmap({
   const years = useMemo(() => groupByStartYear(grid), [grid])
   const focus = hover ?? grid.find((s) => s.start_utc === selectedStartUtc) ?? null
 
-  // Metryki odwrócone (np. najdłuższa noc) mają jaśniejszy, czyli lepszy kolor
-  // po lewej; stąd gradient legendy biegnie w drugą stronę.
+  // Inverted metrics (e.g. the longest night) have the lighter, i.e. better, color
+  // on the left; hence the legend gradient runs the other way.
   const ramp = meta.invert ? scoreRampCss().replace('to right', 'to left') : scoreRampCss()
 
   return (

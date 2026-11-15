@@ -1,13 +1,13 @@
-// Rozkład dzień po dniu: jaka część każdego dnia UTC ma Słońce i Ziemię nad horyzontem.
+// Day-by-day breakdown: what part of each UTC day has the Sun and Earth above the horizon.
 
 import type { Timeline } from '../../api/types'
 
 export interface DayShare {
-  /** Dzień UTC, YYYY-MM-DD. */
+  /** UTC day, YYYY-MM-DD. */
   day: string
-  /** Ułamek próbek dnia ze Słońcem nad horyzontem (0–1). */
+  /** Fraction of the day's samples with the Sun above the horizon (0–1). */
   sun: number
-  /** Ułamek próbek dnia z Ziemią nad horyzontem (0–1). */
+  /** Fraction of the day's samples with Earth above the horizon (0–1). */
   earth: number
 }
 

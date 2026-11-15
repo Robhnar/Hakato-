@@ -1,11 +1,11 @@
-/** Wybór najlepszej wartości w kolumnie metryk (porównanie scenariuszy). */
+/** Picking the best value in a metrics column (scenario comparison). */
 
 export type MetricDirection = 'max' | 'min'
 
 /**
- * Zwraca indeksy pozycji z najlepszą wartością.
- * `null`/`undefined`/NaN pomija. Remis → wszystkie remisujące indeksy.
- * Brak danych → pusta tablica.
+ * Returns the indexes of the items with the best value.
+ * Skips `null`/`undefined`/NaN. A tie → all tied indexes.
+ * No data → an empty array.
  */
 export function pickBestIndices(
   values: Array<number | null | undefined>,

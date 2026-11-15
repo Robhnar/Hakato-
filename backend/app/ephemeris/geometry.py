@@ -1,8 +1,8 @@
-"""Geometria: wektor do ciała w układzie Księżyca -> azymut i wysokość nad horyzontem.
+"""Geometry: vector to a body in the Moon frame -> azimuth and elevation above the horizon.
 
-Układ: selenograficzny Mean Earth / Polar Axis, początek w środku Księżyca,
-oś X przez (szer. 0, dł. 0), oś Z przez biegun północny. Jednostki: km i stopnie.
-Ten plik nie zależy od źródła efemeryd - korzysta z niego i wersja tymczasowa, i SPICE.
+Frame: selenographic Mean Earth / Polar Axis, origin at the center of the Moon,
+X axis through (lat 0, lon 0), Z axis through the north pole. Units: km and degrees.
+This file does not depend on the ephemeris source - both the placeholder and SPICE use it.
 """
 
 import math
@@ -24,10 +24,10 @@ def _dot(a: Vec, b: Vec) -> float:
 def az_el(
     lat_deg: float, lon_deg: float, body_pos_km: Vec, site_height_km: float = 0.0
 ) -> tuple[float, float]:
-    """Azymut (0 = północ, 90 = wschód) i wysokość ciała widzianego z miejsca na powierzchni.
+    """Azimuth (0 = north, 90 = east) and elevation of a body seen from a point on the surface.
 
-    body_pos_km: położenie ciała względem środka Księżyca w układzie ME.
-    Wysokość liczona względem lokalnej płaszczyzny poziomej kuli o promieniu MOON_RADIUS_KM.
+    body_pos_km: position of the body relative to the center of the Moon in the ME frame.
+    Elevation is measured against the local horizontal plane of a sphere of radius MOON_RADIUS_KM.
     """
     lat, lon = math.radians(lat_deg), math.radians(lon_deg)
     up = unit_vector(lat_deg, lon_deg)

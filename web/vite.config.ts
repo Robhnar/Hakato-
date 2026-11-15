@@ -4,9 +4,9 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Backend: uvicorn na porcie 8000 (patrz README).
+    // Backend: uvicorn on port 8000 (see README).
     proxy: { '/api': 'http://localhost:8000' },
-    // Pozwala importować contracts/fixtures/ spoza katalogu web/.
+    // Allows importing contracts/fixtures/ from outside the web/ directory.
     fs: { allow: ['..'] },
   },
   test: { environment: 'node' },

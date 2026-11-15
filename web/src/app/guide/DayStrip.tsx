@@ -1,11 +1,11 @@
-// Pasek dzień po dniu: kolumny pokazują, jaką część każdego dnia UTC Słońce
-// i Ziemia są nad horyzontem. Dane z api.timeline, agregacja z daily.ts.
+// Day-by-day strip: the columns show what part of each UTC day the Sun
+// and Earth are above the horizon. Data from api.timeline, aggregation from daily.ts.
 
 import { api } from '../../api/client'
 import { useAsync } from '../../api/useAsync'
 import { dailyShares, type DayShare } from './daily'
 
-/** Dodaje `hours` do czasu UTC i zwraca ISO bez milisekund. */
+/** Adds `hours` to a UTC time and returns ISO without milliseconds. */
 function addHours(startUtc: string, hours: number): string {
   return new Date(new Date(startUtc).getTime() + hours * 3600 * 1000).toISOString().slice(0, 19) + 'Z'
 }
@@ -20,7 +20,7 @@ function formatDay(day: string): string {
   })
 }
 
-/** Łączy kolejne trójki dni, uśredniając udziały; etykieta = pierwszy dzień. */
+/** Merges consecutive triples of days, averaging the shares; label = first day. */
 function groupShares(shares: DayShare[]): DayShare[] {
   const columns: DayShare[] = []
   for (let i = 0; i < shares.length; i += 3) {

@@ -7,8 +7,8 @@ export interface AsyncState<T> {
 }
 
 /**
- * Pobiera dane i odświeża je, gdy zmieni się `key`.
- * Przykład: useAsync(() => api.timeline(query), JSON.stringify(query))
+ * Fetches data and refreshes it when `key` changes.
+ * Example: useAsync(() => api.timeline(query), JSON.stringify(query))
  */
 export function useAsync<T>(load: () => Promise<T>, key: string): AsyncState<T> {
   const [state, setState] = useState<AsyncState<T>>({ data: null, error: null, loading: true })
@@ -27,7 +27,7 @@ export function useAsync<T>(load: () => Promise<T>, key: string): AsyncState<T> 
     return () => {
       cancelled = true
     }
-    // `load` zmienia się przy każdym renderze; o odświeżeniu decyduje `key`.
+    // `load` changes on every render; `key` decides about refreshing.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
 

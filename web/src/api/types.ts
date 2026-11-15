@@ -1,5 +1,5 @@
-// Kształt odpowiedzi API. Lustrzane odbicie backend/app/api/schemas.py -
-// to jest kontrakt, zmiana wymaga osobnego PR (patrz AGENTS.md).
+// Shape of the API responses. A mirror of backend/app/api/schemas.py -
+// this is a contract, changing it needs a separate PR (see AGENTS.md).
 
 export type SiteCategory = 'apollo' | 'clps' | 'commercial' | 'international' | 'candidate'
 export type HorizonSource = 'flat' | 'lola' | 'synthetic' | 'mixed'
@@ -119,7 +119,7 @@ export interface RangeQuery {
   step_minutes?: number
 }
 
-/** Parametry GET /api/windows (zadanie 011). */
+/** Parameters of GET /api/windows (task 011). */
 export interface WindowsQuery {
   lat_deg: number
   lon_deg: number

@@ -13,12 +13,12 @@ interface Props {
   onChange: (requirements: MissionRequirements) => void
 }
 
-/** Wartość liczbowa pola; niepoprawna liczba pokazuje puste pole zamiast "NaN". */
+/** Numeric value of a field; an invalid number shows an empty field instead of "NaN". */
 function numberValue(value: number): number | string {
   return Number.isFinite(value) ? value : ''
 }
 
-/** Ułamek 0…1 pokazujemy jako procent bez artefaktów zmiennoprzecinkowych. */
+/** A fraction 0…1 is shown as a percentage without floating-point artifacts. */
 function percentValue(fraction: number): number | string {
   if (!Number.isFinite(fraction)) return ''
   return Math.round(fraction * 10_000) / 100
@@ -41,9 +41,9 @@ function sameRequirements(a: MissionRequirements, b: MissionRequirements): boole
 }
 
 /**
- * Formularz wymagań misji (zadania 015 i 021). Sterowany przez rodzica: każda
- * zmiana leci od razu do góry, gdzie lista dopasowań jest filtrowana po stronie
- * klienta. Cztery grupy w jednej siatce, bez ramek w ramkach.
+ * Mission requirements form (tasks 015 and 021). Controlled by the parent: every
+ * change goes straight up, where the list of matches is filtered on the
+ * client side. Four groups in one grid, no frames within frames.
  */
 export default function RequirementsPanel({ value, onChange }: Props) {
   const errors = validateRequirements(value)

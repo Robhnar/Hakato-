@@ -1,14 +1,14 @@
-// Czysta matematyka siatki i wielkich kół dla globusa Księżyca.
+// Pure math of the grid and great circles for the Moon globe.
 //
-// Brak importów three.js: moduł liczy tylko współrzędne i da się testować
-// w Node bez WebGL. Zamiana na wektory i rysowanie linii to robota MoonGlobe.
+// No three.js imports: the module only computes coordinates and can be tested
+// in Node without WebGL. Converting to vectors and drawing lines is MoonGlobe's job.
 
 export interface GlobePoint {
   lat_deg: number
   lon_deg: number
 }
 
-/** Układ ten sam co w `geo.ts`: +X = (0°, 0°), +Y = biegun północny, +Z = 90°W. */
+/** Same frame as in `geo.ts`: +X = (0°, 0°), +Y = north pole, +Z = 90°W. */
 const DEG = Math.PI / 180
 
 function toVector(lat_deg: number, lon_deg: number): [number, number, number] {
@@ -38,7 +38,7 @@ function normalize(v: readonly [number, number, number]): [number, number, numbe
   return [v[0] / length, v[1] / length, v[2] / length]
 }
 
-/** Zamknięty równoleżnik: ostatni punkt jest kopią pierwszego. */
+/** Closed parallel: the last point is a copy of the first. */
 export function parallelPoints(lat_deg: number, segments = 180): GlobePoint[] {
   const count = Math.max(1, Math.floor(segments))
   const points: GlobePoint[] = []
@@ -49,7 +49,7 @@ export function parallelPoints(lat_deg: number, segments = 180): GlobePoint[] {
   return points
 }
 
-/** Południk od bieguna południowego (−90°) do północnego (90°). */
+/** Meridian from the south pole (−90°) to the north pole (90°). */
 export function meridianPoints(lon_deg: number, segments = 90): GlobePoint[] {
   const count = Math.max(1, Math.floor(segments))
   const points: GlobePoint[] = []
@@ -60,11 +60,11 @@ export function meridianPoints(lon_deg: number, segments = 90): GlobePoint[] {
 }
 
 /**
- * Wielkie koło punktów odległych o 90° od środka - terminator dla punktu
- * podsłonecznego, granica widoczności Ziemi dla punktu podziemskiego.
+ * Great circle of points 90° from the center - the terminator for the
+ * subsolar point, the Earth visibility limit for the sub-Earth point.
  *
- * Baza ortonormalna (u, v) prostopadła do wektora środka; dla środka blisko
- * bieguna oś X jest zbyt równoległa, więc pomocniczą osią zostaje Z.
+ * Orthonormal basis (u, v) perpendicular to the center vector; for a center near
+ * the pole the X axis is too parallel, so Z becomes the helper axis.
  */
 export function horizonCircle(center: GlobePoint, segments = 180): GlobePoint[] {
   const count = Math.max(3, Math.floor(segments))
@@ -84,7 +84,7 @@ export function horizonCircle(center: GlobePoint, segments = 180): GlobePoint[] 
   return points
 }
 
-/** Siatka globusa: równoleżniki co 30° plus pierścienie 80° i 85° przy biegunach. */
+/** Globe grid: parallels every 30° plus rings at 80° and 85° near the poles. */
 export const GRATICULE: { parallels: number[]; meridians: number[] } = {
   parallels: [-85, -80, -60, -30, 0, 30, 60, 80, 85],
   meridians: [-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180],

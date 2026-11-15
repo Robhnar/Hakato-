@@ -1,15 +1,15 @@
-// Formatowanie dat i zakresów dla przewodnika po lądowaniu.
-// Czyste funkcje: biorą stringi UTC / liczby i zwracają tekst dla UI.
+// Formatting of dates and ranges for the landing guide.
+// Pure functions: take UTC strings / numbers and return text for the UI.
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-// Klucz miesiąca "YYYY-MM" z miesiąca indeksowanego od zera.
+// Month key "YYYY-MM" from a zero-indexed month.
 function monthKey(year: number, month: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}`
 }
 
-// Parse "YYYY-MM" na rok i miesiąc (0–11); null przy pustym lub błędnym wejściu.
+// Parse "YYYY-MM" into a year and month (0–11); null for empty or invalid input.
 function parseMonth(value: string): { year: number; month: number } | null {
   const match = /^(\d{4})-(\d{2})$/.exec(value)
   if (!match) return null

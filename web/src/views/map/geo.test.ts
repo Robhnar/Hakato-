@@ -35,16 +35,16 @@ test('lat/lon survives a round trip, poles and ±180° included', () => {
   for (const [lat, lon] of cases) {
     const back = vectorToLatLon(latLonToVector3(lat, lon))
     expect(back.lat_deg).toBeCloseTo(lat, 9)
-    // ±180° to ten sam punkt kuli - atan2 zwraca jedną z dwóch wartości.
+    // ±180° is the same point on the sphere - atan2 returns one of the two values.
     const lonDiff = Math.abs(((back.lon_deg - lon + 540) % 360) - 180)
     expect(lonDiff).toBeCloseTo(0, 6)
   }
 })
 
 test('a survey point on the visible side sits east of the disc centre', () => {
-  // Kamera stoi na +X (punkt podsłoneczny/podziemski ~(0°,0°)), wschód to −Z.
+  // The camera stands on +X (subsolar/sub-Earth point ~(0°,0°)), east is −Z.
   const apollo11 = latLonToVector3(0.674, 23.473) // Mare Tranquillitatis
-  const crisium = latLonToVector3(17, 59) // Mare Crisium, dalej na wschód
+  const crisium = latLonToVector3(17, 59) // Mare Crisium, farther east
   expect(apollo11.x).toBeGreaterThan(0.9)
   expect(apollo11.z).toBeLessThan(-0.3)
   expect(crisium.z).toBeLessThan(apollo11.z)
@@ -70,7 +70,7 @@ test('az/el at an off-equator site keeps the frame orthonormal', () => {
 })
 
 test('the subsolar point recovered from az/el is the point the Sun stands over', () => {
-  // Słońce nad (10°, 40°E) widziane z (0°, 0°): azymut i wysokość wprost z kuli.
+  // The Sun over (10°, 40°E) seen from (0°, 0°): azimuth and elevation straight from the sphere.
   const site = { lat: 0, lon: 0 }
   const target = latLonToVector3(10, 40)
   const latRad = site.lat * (Math.PI / 180)
@@ -87,7 +87,7 @@ test('the subsolar point recovered from az/el is the point the Sun stands over',
   expect(back.lon_deg).toBeCloseTo(40, 6)
 })
 
-// Wartości z /api/timeline (lat 0, lon 0) i /api/optimal-site (cursor_bodies) dla 2027-03-10T12:00:00Z.
+// Values from /api/timeline (lat 0, lon 0) and /api/optimal-site (cursor_bodies) for 2027-03-10T12:00:00Z.
 test('subBodyPoint finds the subsolar point from az/el seen at (0°, 0°)', () => {
   const point = subBodyPoint(88.521, -59.622)
   expect(point.lat_deg).toBeCloseTo(0.748, 2)

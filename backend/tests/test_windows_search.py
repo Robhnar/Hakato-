@@ -1,4 +1,4 @@
-"""Testy modułu wyszukiwarki okien lądowania (zadanie 013)."""
+"""Tests of the landing-window search module (task 013)."""
 
 import time
 from datetime import UTC, datetime, timedelta
@@ -20,14 +20,14 @@ def test_calculate_max_darkness_hours():
     t_start = datetime(2027, 1, 1, 0, 0, tzinfo=UTC)
     t_end = datetime(2027, 1, 2, 0, 0, tzinfo=UTC)  # 24 h
 
-    # 1. Całkowita ciemność (brak okien)
+    # 1. Total darkness (no windows)
     assert _calculate_max_darkness_hours([], t_start, t_end) == 24.0
 
-    # 2. Okno w środku: ciemność 6h przed, 12h okno, 6h po
+    # 2. A window in the middle: 6h of darkness before, a 12h window, 6h after
     w1 = [{"start_utc": "2027-01-01T06:00:00Z", "end_utc": "2027-01-01T18:00:00Z"}]
     assert _calculate_max_darkness_hours(w1, t_start, t_end) == 6.0
 
-    # 3. Dwa okna z przerwą nocną 8h
+    # 3. Two windows with an 8h night gap
     w2 = [
         {"start_utc": "2027-01-01T00:00:00Z", "end_utc": "2027-01-01T08:00:00Z"},
         {"start_utc": "2027-01-01T16:00:00Z", "end_utc": "2027-01-02T00:00:00Z"},
@@ -66,7 +66,7 @@ def test_search_windows_filters_and_sorts_by_score():
     assert "cycles_summary" in res
     assert res["cycles_summary"]["synodic_month_days"] == pytest.approx(29.53, abs=0.1)
 
-    # Wszystkie matches muszą spełniać kryteria i być posortowane malejąco po score
+    # All matches must meet the criteria and be sorted by score descending
     matches = res["matches"]
     for m in matches:
         assert m["passes_requirements"] is True
@@ -79,7 +79,7 @@ def test_search_windows_filters_and_sorts_by_score():
 
 def test_slip_analysis_detects_drop_and_finds_equivalent_slot():
     ref_start = datetime(2027, 1, 15, 0, 0, tzinfo=UTC)
-    slip_days = 14.0  # Połowa dnia księżycowego (przejście dzień -> noc)
+    slip_days = 14.0  # Half a lunar day (day -> night transition)
 
     res = search_windows(
         lat_deg=-89.5,
@@ -99,12 +99,12 @@ def test_slip_analysis_detects_drop_and_finds_equivalent_slot():
     assert "delta_sunlight_hours" in slip
     assert "explanation" in slip
 
-    # Najbliższe okno równoważne powinno wypadać ok. ~29.5 dnia po dacie pierwotnej
+    # The nearest equivalent window should fall about ~29.5 days after the original date
     nearest = slip["nearest_equivalent_slot"]
     if nearest:
         nearest_dt = datetime.fromisoformat(nearest["start_utc"])
         diff_days = (nearest_dt - ref_start).total_seconds() / 86400.0
-        assert diff_days >= 28.0  # Co najmniej jeden cykl synodyczny później
+        assert diff_days >= 28.0  # At least one synodic cycle later
 
 
 def test_search_windows_performance_one_year_under_2_seconds():
@@ -123,11 +123,11 @@ def test_search_windows_performance_one_year_under_2_seconds():
     elapsed = time.perf_counter() - t0
 
     assert len(res["grid"]) >= 12
-    assert elapsed < 2.0, f"Przeszukiwanie roku trwało za długo: {elapsed:.3f} s"
+    assert elapsed < 2.0, f"Searching a year took too long: {elapsed:.3f} s"
 
 
 def test_search_windows_rejects_out_of_range():
-    # Poza zakresem SPICE (np. rok 1800 lub 2200)
+    # Outside the SPICE range (e.g. year 1800 or 2200)
     start_bad = datetime(1800, 1, 1, 0, 0, tzinfo=UTC)
     end_bad = datetime(1801, 1, 1, 0, 0, tzinfo=UTC)
 
@@ -159,12 +159,12 @@ def _site_with_calendar():
             "2026-06-01T00:00:00Z",
             "2027-03-01T00:00:00Z",
             "2027-01-01",
-        ),  # zaczyna się przed kalendarzem
-        ("2035-06-01T00:00:00Z", "2036-06-01T00:00:00Z", "2035-12-31"),  # kończy się po kalendarzu
+        ),  # starts before the calendar
+        ("2035-06-01T00:00:00Z", "2036-06-01T00:00:00Z", "2035-12-31"),  # ends after the calendar
     ],
 )
 def test_search_beyond_calendar_range_is_computed_not_dropped(start, end, marker):
-    """Zakres wychodzący poza kalendarz 2027-2035 nie może gubić slotów spoza kalendarza."""
+    """A range extending beyond the 2027-2035 calendar must not lose slots outside the calendar."""
     site = _site_with_calendar()
     result = search_windows(
         lat_deg=site["lat_deg"],
@@ -174,8 +174,8 @@ def test_search_beyond_calendar_range_is_computed_not_dropped(start, end, marker
         duration_hours=708.7,
     )
     starts = sorted(s["start_utc"] for s in result["grid"])
-    assert starts, "wyszukiwanie nie zwróciło żadnego okna"
+    assert starts, "the search returned no window"
     if marker == "2027-01-01":
-        assert starts[0] < marker, f"brak slotów sprzed kalendarza, pierwszy: {starts[0]}"
+        assert starts[0] < marker, f"no slots from before the calendar, first: {starts[0]}"
     else:
-        assert starts[-1] > marker, f"brak slotów po kalendarzu, ostatni: {starts[-1]}"
+        assert starts[-1] > marker, f"no slots after the calendar, last: {starts[-1]}"

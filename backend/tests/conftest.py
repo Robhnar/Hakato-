@@ -1,4 +1,4 @@
-"""Wspólna konfiguracja testów."""
+"""Shared test configuration."""
 
 import pytest
 
@@ -7,7 +7,7 @@ from app.api import routes
 
 @pytest.fixture(autouse=True)
 def clear_api_caches():
-    """Pamięć podręczna endpointów nie może przenosić wyników między testami."""
+    """The endpoint cache must not carry results between tests."""
 
     def clear():
         for name in dir(routes):

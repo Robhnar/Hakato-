@@ -1,5 +1,5 @@
-// Ranking terminów lądowania w trybie prowadzonym (zadanie 020).
-// Czyste funkcje: biorą sloty z /api/windows i układają je wg priorytetu laika.
+// Ranking of landing dates in guided mode (task 020).
+// Pure functions: take slots from /api/windows and order them by the layperson's priority.
 
 import type { CalendarSlot, Site } from '../../api/types'
 import { LUNAR_DAY_HOURS } from '../scenario'
@@ -20,18 +20,18 @@ export interface Candidate {
 }
 
 export interface RankedCandidate extends Candidate {
-  /** Ocena 0–100 wg priorytetu użytkownika. */
+  /** Score 0–100 by the user's priority. */
   points: number
 }
 
-/** Wagi: Słońce / Ziemia / brak długiej ciemności. */
+/** Weights: Sun / Earth / no long darkness. */
 const WEIGHTS: Record<Priority, { sun: number; earth: number; dark: number }> = {
   power: { sun: 0.6, earth: 0.15, dark: 0.25 },
   earth: { sun: 0.2, earth: 0.6, dark: 0.2 },
   both: { sun: 0.4, earth: 0.4, dark: 0.2 },
 }
 
-/** Lądowanie przy Słońcu pod horyzontem jest trudniejsze — mnożnik kary. */
+/** Landing with the Sun below the horizon is harder — penalty multiplier. */
 const DARK_LANDING_FACTOR = 0.8
 
 export function scoreSlot(slot: CalendarSlot, priority: Priority, durationHours: number): number {
@@ -73,7 +73,7 @@ export function rateDarkness(hours: number): Rating {
   return 'poor'
 }
 
-/** Najlepsza opcja w tym samym miejscu, gdy start przesunie się o `days` dni. */
+/** The best option at the same site if the start slips by `days` days. */
 export function nextAfterSlip(
   ranked: RankedCandidate[],
   best: RankedCandidate,

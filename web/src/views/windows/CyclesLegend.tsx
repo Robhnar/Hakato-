@@ -28,7 +28,7 @@ const PERIODS: { key: keyof CyclesSummary; label: string; hint: string }[] = [
   },
 ]
 
-/** Cykle astronomiczne pod mapą cieplną (zadania 014 i 021); domyślnie zwinięte. */
+/** Astronomical cycles below the heatmap (tasks 014 and 021); collapsed by default. */
 export default function CyclesLegend({ cycles, focus }: Props) {
   return (
     <details className="windows-cycles">

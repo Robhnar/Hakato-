@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { SCORE_STOPS, scoreColor, scoreRampCss } from './scale'
 
 describe('scoreColor', () => {
-  it('skala rośnie jasnością i przycina zakres', () => {
+  it('the scale grows in lightness and clamps the range', () => {
     expect(scoreColor(0)).toBe('rgb(27, 42, 46)')
     expect(scoreColor(1)).toBe('rgb(214, 236, 198)')
     expect(scoreColor(-3)).toBe(scoreColor(0))
@@ -10,7 +10,7 @@ describe('scoreColor', () => {
     expect(scoreColor(Number.NaN)).toBe(scoreColor(0))
   })
 
-  it('pomiędzy stopniami jaśnieje monotonicznie', () => {
+  it('it brightens monotonically between stops', () => {
     const luminance = (rgb: string) => {
       const [r, g, b] = rgb.replace(/[^0-9,]/g, '').split(',').map(Number)
       return r + g + b
@@ -22,7 +22,7 @@ describe('scoreColor', () => {
 })
 
 describe('scoreRampCss', () => {
-  it('pasek legendy zawiera wszystkie stopnie w kolejności', () => {
+  it('the legend bar contains all the stops in order', () => {
     const css = scoreRampCss()
     expect(css.startsWith('linear-gradient(to right, ')).toBe(true)
     for (const stop of SCORE_STOPS) expect(css).toContain(stop)

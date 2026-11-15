@@ -1,4 +1,4 @@
-"""Testy prekalkulacji i ładowania wieloletnich kalendarzy (zadanie 012)."""
+"""Tests of precomputing and loading multi-year calendars (task 012)."""
 
 from app.metrics.calendar_store import build_site_calendar, load_precomputed_calendar
 
@@ -24,7 +24,7 @@ def test_load_precomputed_calendar_finds_polar_sites():
     cal = load_precomputed_calendar(-89.5, 0.0)
     assert cal is not None
     assert len(cal) >= 100
-    # Na biegunie południowym oświetlenie modulowane jest w cyklu ~347 dni (polarne lato vs zima)
+    # At the south pole illumination is modulated on a ~347-day cycle (polar summer vs winter)
     sun_hours = [s["sunlight_hours"] for s in cal]
     assert max(sun_hours) > min(sun_hours)
 

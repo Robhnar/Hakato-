@@ -1,4 +1,4 @@
-"""Testy modułu terenu (profil horyzontu z modelu wysokości LOLA i fallback płaski)."""
+"""Tests of the terrain module (horizon profile from the LOLA elevation model and the flat fallback)."""
 
 import json
 import math
@@ -59,7 +59,7 @@ def test_flat_sphere_gives_near_zero_horizon():
     assert profile["source"] == "lola"
     assert profile["azimuth_step_deg"] == 1.0
     assert len(profile["elevation_deg"]) == 360
-    # Przy h_obs = 2 m na gładkiej kuli geometryczny spadek horyzontu wynosi ok. -0.087°
+    # With h_obs = 2 m on a smooth sphere the geometric horizon dip is about -0.087°
     for el in profile["elevation_deg"]:
         assert -0.15 < el <= 0.0
 
@@ -84,16 +84,16 @@ def test_single_hill_gives_expected_elevation_at_correct_azimuth(target_az: int)
     assert profile is not None
     elevs = profile["elevation_deg"]
 
-    # Maksimum na oczekiwanym azymucie (z dokładnością do szerokości wierzchołka)
+    # Maximum at the expected azimuth (to within the peak width)
     peak_az = int(np.argmax(elevs))
     assert abs(peak_az - target_az) <= 1
 
-    # Pozostałe kierunki prostopadłe i przeciwny pozostają blisko 0
+    # The remaining perpendicular and opposite directions stay close to 0
     for other_az in (0, 90, 180, 270):
         if other_az != target_az:
             assert elevs[other_az] < 0.0
 
-    # Porównanie kąta z dokładnym wzorem uwzględniającym krzywiznę Księżyca i 2 m obserwatora
+    # Compare the angle with the exact formula accounting for the Moon's curvature and a 2 m observer
     delta = dist_m / dem.radius_m
     r0 = dem.radius_m + 2.0
     r1 = dem.radius_m + hill_height_m
@@ -159,14 +159,14 @@ def test_api_horizon_south_pole_returns_lola_with_variation():
 
 
 def test_site_near_raster_edge_ignores_out_of_bounds_ray_points():
-    # Raster +/-310 km wokół bieguna: punkt IM-1 Odysseus (-80.13°, 1.44°) leży ~300 km od bieguna,
-    # więc mieści się w rastrze, ale promień 160 km na północ wychodzi poza krawędź.
+    # Raster +/-310 km around the pole: the IM-1 Odysseus point (-80.13°, 1.44°) lies ~300 km from the pole,
+    # so it fits in the raster, but the 160 km radius to the north goes past the edge.
     dem = _make_synthetic_dem(size=1241, scale_m=500.0)
     profile = compute_horizon_profile(dem, lat_deg=-80.13, lon_deg=1.44, max_distance_m=160_000.0)
     assert profile is not None
     assert profile["source"] == "lola"
     assert len(profile["elevation_deg"]) == 360
 
-    # Gdy sam obserwator leży poza rastrem (np. zbyt mały raster), funkcja zwraca None.
+    # When the observer itself lies outside the raster (e.g. a raster that is too small), the function returns None.
     tiny_dem = _make_synthetic_dem(size=201, scale_m=500.0)
     assert compute_horizon_profile(tiny_dem, lat_deg=-80.13, lon_deg=1.44) is None

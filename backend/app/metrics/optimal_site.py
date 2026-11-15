@@ -1,6 +1,6 @@
-"""Silnik wyznaczania optymalnego punktu lądowania i polarnej siatki referencyjnej.
+"""Engine for determining the optimal landing site and the polar reference grid.
 
-Kontrakt i założenia: docs/ARCHITECTURE.md.
+Contract and assumptions: docs/ARCHITECTURE.md.
 """
 
 from __future__ import annotations
@@ -31,12 +31,12 @@ DEFAULT_W_SUN = 0.45
 DEFAULT_W_EARTH = 0.25
 DEFAULT_W_OVERLAP = 0.30
 
-# Polarna siatka referencyjna wokół bieguna południowego (-85° ... -89.5°)
+# Polar reference grid around the south pole (-85° ... -89.5°)
 POLAR_GRID_SPECS: list[tuple[float, int]] = [
-    (-89.5, 8),  # co 45°
-    (-88.5, 8),  # co 45°
-    (-87.0, 12),  # co 30°
-    (-85.5, 12),  # co 30°
+    (-89.5, 8),  # every 45°
+    (-88.5, 8),  # every 45°
+    (-87.0, 12),  # every 30°
+    (-85.5, 12),  # every 30°
 ]
 
 
@@ -47,9 +47,9 @@ def _candidate_horizon(lat_deg: float, lon_deg: float, placeholder_flag: str = "
 
 
 def _sub_body_point(body_pos_km: tuple[float, float, float]) -> tuple[float, float]:
-    """Współrzędne selenograficzne (szerokość, długość) podpunktu ciała na Księżycu.
+    """Selenographic coordinates (latitude, longitude) of the sub-point of a body on the Moon.
 
-    body_pos_km: wektor ze środka Księżyca do ciała w układzie MOON_ME.
+    body_pos_km: vector from the center of the Moon to the body in the MOON_ME frame.
     """
     x, y, z = body_pos_km
     hyp = math.hypot(x, y)
@@ -59,7 +59,7 @@ def _sub_body_point(body_pos_km: tuple[float, float, float]) -> tuple[float, flo
 
 
 def _load_catalog_sites() -> list[dict]:
-    """Wczytaj katalog z data/sites.json."""
+    """Load the catalog from data/sites.json."""
     sites_path = DATA_DIR / "sites.json"
     if sites_path.exists():
         try:
@@ -70,10 +70,10 @@ def _load_catalog_sites() -> list[dict]:
 
 
 def _generate_candidates() -> list[dict]:
-    """Wygeneruj pełny zbiór kandydatów: miejsca katalogowe + polarna siatka referencyjna."""
+    """Generate the full set of candidates: catalog sites + the polar reference grid."""
     candidates = []
 
-    # 1. Miejsca katalogowe w regionie bieguna południowego (<= -75°S)
+    # 1. Catalog sites in the south pole region (<= -75°S)
     for site in _load_catalog_sites():
         if float(site["lat_deg"]) > -75.0:
             continue
@@ -90,7 +90,7 @@ def _generate_candidates() -> list[dict]:
             }
         )
 
-    # 2. Polarna siatka referencyjna wokół bieguna południowego
+    # 2. Polar reference grid around the south pole
     for lat, count in POLAR_GRID_SPECS:
         step_deg = 360.0 / count
         for i in range(count):
@@ -118,41 +118,41 @@ def find_optimal_site(
     w_earth: float = DEFAULT_W_EARTH,
     w_overlap: float = DEFAULT_W_OVERLAP,
 ) -> dict:
-    """Wyznacza optymalny punkt lądowania oraz ranking kandydatów dla danego okna i wag.
+    """Determines the optimal landing site and a ranking of candidates for a given window and weights.
 
-    Zwraca słownik zgodny ze schematem OptimalSiteResponse.
+    Returns a dict matching the OptimalSiteResponse schema.
     """
     start_dt = to_utc(start_utc)
     end_dt = to_utc(end_utc)
 
     if end_dt <= start_dt:
-        raise ValueError("end_utc musi być późniejszy niż start_utc")
+        raise ValueError("end_utc must be later than start_utc")
     if step_minutes <= 0:
-        raise ValueError("step_minutes musi być dodatni")
+        raise ValueError("step_minutes must be positive")
 
     if not (
         MIN_VALID_YEAR <= start_dt.year <= MAX_VALID_YEAR
         and MIN_VALID_YEAR <= end_dt.year <= MAX_VALID_YEAR
     ):
         raise ValueError(
-            f"Daty wyszukiwania muszą mieścić się w zakresie lat {MIN_VALID_YEAR}–{MAX_VALID_YEAR} (pokrycie jąder DE440)"
+            f"Search dates must fall within the years {MIN_VALID_YEAR}–{MAX_VALID_YEAR} (DE440 kernel coverage)"
         )
 
-    # Chwila kursora
+    # Cursor moment
     c_dt = to_utc(cursor_utc) if cursor_utc is not None else start_dt
 
-    # Walidacja i normalizacja wag
+    # Validate and normalize the weights
     sum_w = w_sun + w_earth + w_overlap
     if sum_w <= 0 or w_sun < 0 or w_earth < 0 or w_overlap < 0:
         w_sun, w_earth, w_overlap = DEFAULT_W_SUN, DEFAULT_W_EARTH, DEFAULT_W_OVERLAP
         sum_w = w_sun + w_earth + w_overlap
 
-    # Wygeneruj próbki czasu
+    # Generate time samples
     times = time_range(start_dt, end_dt, step_minutes)
     n_samples = len(times)
     total_hours = max((end_dt - start_dt).total_seconds() / 3600.0, 0.0)
 
-    # Pozycje Słońca i Ziemi w układzie MOON_ME dla wszystkich próbek
+    # Sun and Earth positions in the MOON_ME frame for all samples
     if ephemeris.are_kernels_loaded() and spice is not None:
         check_spice_range(times[0], times[-1], c_dt)
         iso_times = [to_utc(t).strftime("%Y-%m-%dT%H:%M:%SZ") for t in times]
@@ -180,7 +180,7 @@ def find_optimal_site(
         cursor_sun_vec = placeholder.sun_position_km(c_dt)
         cursor_earth_vec = placeholder.earth_position_km(c_dt)
 
-    # Oblicz współrzędne podsłoneczne i podziemskie
+    # Compute the subsolar and sub-Earth coordinates
     subsolar_lat, subsolar_lon = _sub_body_point(cursor_sun_vec)
     subearth_lat, subearth_lon = _sub_body_point(cursor_earth_vec)
 
@@ -205,7 +205,7 @@ def find_optimal_site(
         earth_visible_flags: list[bool] = []
         overlap_flags: list[bool] = []
 
-        # Wektorowa ocena widoczności po próbkach czasu
+        # Vectorized visibility evaluation over the time samples
         for ps, pe in zip(pos_sun_arr, pos_earth_arr):
             az_s, el_s = az_el(lat, lon, ps)
             h_s = horizon_elevation_at(profile, az_s)
@@ -219,19 +219,19 @@ def find_optimal_site(
 
             overlap_flags.append(s_vis and e_vis)
 
-        # Ułamki widoczności
+        # Visibility fractions
         f_sun = sum(sun_visible_flags) / n_samples if n_samples > 0 else 0.0
         f_earth = sum(earth_visible_flags) / n_samples if n_samples > 0 else 0.0
         f_overlap = sum(overlap_flags) / n_samples if n_samples > 0 else 0.0
 
-        # Spełnienie nierówności 0 <= f_overlap <= min(f_sun, f_earth)
+        # Satisfies the inequality 0 <= f_overlap <= min(f_sun, f_earth)
         f_overlap = max(0.0, min(f_overlap, min(f_sun, f_earth)))
 
         sunlight_hours = round(f_sun * total_hours, 2)
         earth_hours = round(f_earth * total_hours, 2)
         overlap_hours = round(f_overlap * total_hours, 2)
 
-        # Obliczenie najdłuższego okresu nocy (max_darkness_hours)
+        # Compute the longest night period (max_darkness_hours)
         sun_windows: list[dict[str, str]] = []
         in_win = False
         win_start = None
@@ -248,14 +248,14 @@ def find_optimal_site(
 
         max_darkness_hours = _calculate_max_darkness_hours(sun_windows, start_dt, end_dt)
 
-        # Widoczność w chwili kursora
+        # Visibility at the cursor moment
         az_cur_s, el_cur_s = az_el(lat, lon, cursor_sun_vec)
         sun_vis_cursor = el_cur_s > horizon_elevation_at(profile, az_cur_s)
 
         az_cur_e, el_cur_e = az_el(lat, lon, cursor_earth_vec)
         earth_vis_cursor = el_cur_e > horizon_elevation_at(profile, az_cur_e)
 
-        # Obliczenie punktacji Score (0..100)
+        # Compute the Score (0..100)
         raw_score = 100.0 * (w_sun * f_sun + w_earth * f_earth + w_overlap * f_overlap) / sum_w
         score = round(max(0.0, min(100.0, raw_score)), 2)
 
@@ -281,7 +281,7 @@ def find_optimal_site(
             }
         )
 
-    # Sortowanie rankingu malejąco po punktacji score, następnie overlap_fraction, następnie f_sun
+    # Sort the ranking by descending score, then overlap_fraction, then f_sun
     evaluated_candidates.sort(
         key=lambda c: (c["score"], c["overlap_fraction"], c["sun_visible_fraction"]),
         reverse=True,

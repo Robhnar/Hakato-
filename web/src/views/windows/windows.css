@@ -1,6 +1,6 @@
-/* Style widoku wyszukiwarki okien (zadania 014, 015, 021).
-   Język „konsola misji": linie 1 px zamiast kart, promień 2 px, zero cieni.
-   Sekcje oddziela górna linia, a nie ramka wokół każdego bloku. */
+/* Styles of the window search view (tasks 014, 015, 021).
+   "Mission console" language: 1 px lines instead of cards, 2 px radius, no shadows.
+   Sections are separated by a top line, not a frame around each block. */
 
 .windows {
   display: flex;
@@ -39,7 +39,7 @@
   font-size: 0.85rem;
 }
 
-/* Tytuł sekcji: mała etykieta zamiast nagłówka karty. */
+/* Section title: a small label instead of a card heading. */
 .windows-panel-title {
   margin: 0;
   color: var(--muted);
@@ -49,7 +49,7 @@
   text-transform: uppercase;
 }
 
-/* --- Mapa cieplna --- */
+/* --- Heatmap --- */
 
 .windows-viz {
   display: grid;
@@ -137,7 +137,7 @@
   gap: 2px;
 }
 
-/* Komórka: miesiąc startu, obrys = spełnia wymagania, podwójny = wybrana. */
+/* Cell: start month, outline = meets the requirements, double = selected. */
 .windows-heat-cell {
   width: 40px;
   height: 28px;
@@ -219,7 +219,7 @@
   font-size: 11px;
 }
 
-/* --- Wymagania misji --- */
+/* --- Mission requirements --- */
 
 .windows-validation {
   margin: 0 0 0 auto;
@@ -331,7 +331,7 @@
   height: auto;
 }
 
-/* --- Ranking dopasowań --- */
+/* --- Ranking of matches --- */
 
 .windows-matches-count {
   margin-left: auto;
@@ -340,7 +340,7 @@
 }
 
 .windows-table-wrap {
-  position: relative; /* kotwica dla .windows-visually-hidden, inaczej ucieka poza przewijanie */
+  position: relative; /* anchor for .windows-visually-hidden, otherwise it escapes the scrolling */
   overflow-x: auto;
   border-top: 1px solid var(--line);
 }
@@ -425,7 +425,7 @@
   border: 0;
 }
 
-/* --- Symulator opóźnienia --- */
+/* --- Delay simulator --- */
 
 .windows-slip-hint {
   margin-left: auto;
@@ -469,7 +469,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Original i Delayed w jednej ramce, oddzielone pionową linią. */
+/* Original and Delayed in one frame, separated by a vertical line. */
 .windows-slip-compare {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -542,7 +542,7 @@
   color: var(--error);
 }
 
-/* Różnice po opóźnieniu: jeden wiersz, wartości ze znakiem i kolorem stanu. */
+/* Differences after the delay: one row, values with a sign and a status color. */
 .windows-deltas {
   display: grid;
   grid-auto-flow: column;
@@ -642,7 +642,7 @@
   font-size: 0.8rem;
 }
 
-/* --- Cykle astronomiczne (zwijane) --- */
+/* --- Astronomical cycles (collapsible) --- */
 
 .windows-cycles {
   font-size: 0.8rem;
@@ -684,7 +684,7 @@
   font-size: 0.8rem;
 }
 
-/* --- Układ --- */
+/* --- Layout --- */
 
 .windows-layout {
   display: grid;
@@ -754,7 +754,7 @@
   }
 }
 
-/* Scena jest węższa od okna o panel boczny (300 px) - dwie kolumny mieszczą się dopiero od ok. 1200 px. */
+/* The stage is narrower than the window by the side panel (300 px) - two columns fit only from about 1200 px. */
 @media (max-width: 1200px) {
   .windows-layout {
     grid-template-columns: minmax(0, 1fr);

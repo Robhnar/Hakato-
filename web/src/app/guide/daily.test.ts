@@ -22,7 +22,7 @@ test('dailyShares groups samples by UTC day', () => {
 })
 
 test('dailyShares counts only the samples of a partial day', () => {
-  // start 18:00 → pierwszy dzień ma 6 próbek, z czego 3 ze Słońcem
+  // start 18:00 → the first day has 6 samples, 3 of them with the Sun
   const t = hourly(12, '2028-05-01T18:00:00Z', (i) => i < 3, (i) => i >= 6)
   expect(dailyShares(t)).toEqual([
     { day: '2028-05-01', sun: 0.5, earth: 0 },

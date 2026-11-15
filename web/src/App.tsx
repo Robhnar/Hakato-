@@ -19,9 +19,9 @@ import GuidePanel from './app/guide/GuidePanel'
 import SummaryStrip, { DataBadge } from './app/SummaryStrip'
 import { VIEWS } from './app/views'
 
-// Powłoka (zadanie 005): miejsce, czas, scenariusze.
-// Widoki w src/views/ dostają dane przez ViewProps i nie zależą od tego pliku.
-// Układ „konsoli misji” (zadanie 021): nagłówek, panel boczny 300 px, scena.
+// Shell (task 005): site, time, scenarios.
+// Views in src/views/ get data through ViewProps and do not depend on this file.
+// "Mission console" layout (task 021): header, 300 px side panel, stage.
 
 const CATEGORY_ORDER: SiteCategory[] = [
   'apollo',
@@ -62,7 +62,7 @@ function matchingSiteId(sites: Site[], scenario: Scenario): string {
   return match?.id ?? ''
 }
 
-/** Stabilny klucz selecta — unika niespójności float (np. 708.7 * 3). */
+/** Stable select key — avoids float inconsistencies (e.g. 708.7 * 3). */
 function durationKey(hours: number): string {
   return hours.toFixed(4)
 }
@@ -98,7 +98,7 @@ function Shell({ sites }: { sites: Site[] }) {
   ])
   const [activeId, setActiveId] = useState(scenarios[0].id)
   const [viewId, setViewId] = useState(VIEWS[0].id)
-  // Tryb prowadzony dla laików (020) jest domyślny; Expert = dotychczasowe narzędzia.
+  // Guided mode for laypeople (020) is the default; Expert = the existing tools.
   const [mode, setMode] = useState<'simple' | 'expert'>('simple')
   const [cursor, setCursor] = useState<string | null>(null)
   const [latDraft, setLatDraft] = useState('')
@@ -124,7 +124,7 @@ function Shell({ sites }: { sites: Site[] }) {
   function activateScenario(id: string) {
     const scenario = scenarios.find((candidate) => candidate.id === id) ?? scenarios[0]
     setActiveId(scenario.id)
-    // Wspólny kursor nie jest zerowany przy zmianie scenariusza — przytnij do jego okna.
+    // The shared cursor is not reset when the scenario changes — clamp it to its window.
     setCursor((current) => {
       if (!current) return current
       const start = new Date(scenario.start_utc).getTime()
@@ -177,7 +177,7 @@ function Shell({ sites }: { sites: Site[] }) {
     updateActive({ name, lat_deg, lon_deg })
   }
 
-  /** Nowy scenariusz: kolejne wolne miejsce z katalogu (albo pierwsze) i bieżąca godzina UTC. */
+  /** New scenario: the next free site from the catalog (or the first) and the current UTC hour. */
   function addScenario() {
     if (atLimit) return
     const usedIds = new Set(
@@ -192,7 +192,7 @@ function Shell({ sites }: { sites: Site[] }) {
     syncCoordDrafts(created)
   }
 
-  /** Dokładna kopia aktywnego scenariusza (to samo miejsce, start i okno). */
+  /** An exact copy of the active scenario (same site, start and window). */
   function duplicateActive() {
     if (atLimit) return
     const copy = duplicateScenario(active)
@@ -201,7 +201,7 @@ function Shell({ sites }: { sites: Site[] }) {
     syncCoordDrafts(copy)
   }
 
-  /** Usuwa wskazany wiersz; przy usunięciu aktywnego wybiera sąsiada z listy. */
+  /** Removes the given row; when the active one is removed, selects a neighbor from the list. */
   function removeScenario(id: string) {
     if (scenarios.length <= 1) return
     const index = scenarios.findIndex((scenario) => scenario.id === id)
@@ -467,7 +467,7 @@ function Shell({ sites }: { sites: Site[] }) {
           )}
 
           <main className="stage-view">
-            {/* Zawsze zamontowany: odpowiedzi i wynik przetrwają wycieczkę do Expert. */}
+            {/* Always mounted: answers and the result survive a trip to Expert. */}
             <div className="guide-shell" hidden={mode !== 'simple'}>
               <GuidePanel sites={sites} onOpenExpert={openExpert} />
             </div>

@@ -166,7 +166,7 @@ def test_single_sample_summary_and_outside_calendar_windows():
     assert body["earth"]["visible_at_start"] is True
     assert body["earth"]["visible_fraction"] == 1.0
 
-    # Zakres w roku 2026 (poza prekomputowanym kalendarzem 2027-2035) liczy się na żądanie
+    # A range in 2026 (outside the precomputed 2027-2035 calendar) is computed on demand
     win_2026 = client.get(
         "/api/windows",
         params={
@@ -247,7 +247,7 @@ def test_summary_response_is_cached_by_query(monkeypatch):
     routes._cached_summary.cache_clear()
 
 
-@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Requires downloaded SPICE kernels")
 def test_timeline_rejects_spice_out_of_range():
     r = client.get(
         "/api/timeline",
@@ -261,7 +261,7 @@ def test_timeline_rejects_spice_out_of_range():
     assert r.status_code == 422
 
 
-@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Requires downloaded SPICE kernels")
 def test_optimal_site_rejects_spice_out_of_range_cursor():
     r = client.get(
         "/api/optimal-site",
@@ -274,7 +274,7 @@ def test_optimal_site_rejects_spice_out_of_range_cursor():
     assert r.status_code == 422
 
 
-@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Requires downloaded SPICE kernels")
 def test_windows_rejects_spice_out_of_range_search():
     r = client.get(
         "/api/windows",
@@ -289,7 +289,7 @@ def test_windows_rejects_spice_out_of_range_search():
     assert r.status_code == 422
 
 
-@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Wymaga pobranych jąder SPICE")
+@pytest.mark.skipif(not ephemeris.are_kernels_loaded(), reason="Requires downloaded SPICE kernels")
 def test_windows_rejects_spice_out_of_range_reference():
     r = client.get(
         "/api/windows",

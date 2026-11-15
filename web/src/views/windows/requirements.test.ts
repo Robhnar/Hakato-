@@ -39,7 +39,7 @@ function slot(overrides: Partial<CalendarSlot> = {}): CalendarSlot {
   }
 }
 
-/** Wymagania z nadpisanymi tylko interesującymi nas polami. */
+/** Requirements with only the fields we care about overridden. */
 function requirements(overrides: Partial<MissionRequirements> = {}): MissionRequirements {
   return { ...DEFAULT_REQUIREMENTS, ...overrides }
 }
@@ -133,7 +133,7 @@ describe('validateRequirements', () => {
     expect(validateRequirements(requirements({ duration_hours: 24, min_sunlight_hours: 25 }))).toHaveProperty(
       'min_sunlight_hours',
     )
-    // Równość z czasem trwania jest poprawna.
+    // Equality with the duration is valid.
     expect(validateRequirements(requirements({ duration_hours: 24, min_sunlight_hours: 24 }))).toEqual({})
   })
 

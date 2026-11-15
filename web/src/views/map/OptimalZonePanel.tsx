@@ -1,5 +1,5 @@
-// Panel Optimization Overlay (zadanie 021): profil misji, suwaki wag, wybrany
-// kandydat, ranking z remisami i legenda. Dokowany z prawej strony globusa.
+// Optimization Overlay panel (task 021): mission profile, weight sliders, the selected
+// candidate, a ranking with ties and a legend. Docked on the right side of the globe.
 
 import type { OptimalWeights, OptimalSiteResponse } from '../../api/types'
 import { formatCoords, formatHours, formatPercent, wrapLon } from '../../app/format'

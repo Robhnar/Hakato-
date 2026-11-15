@@ -1,4 +1,4 @@
-"""Kształt odpowiedzi API. To jest kontrakt - zmiana wymaga osobnego PR (patrz AGENTS.md)."""
+"""Shape of the API responses. This is a contract - changing it needs a separate PR (see AGENTS.md)."""
 
 from typing import Literal
 
@@ -52,7 +52,7 @@ class BodySummary(BaseModel):
 
 
 class SolarUncertainty(BaseModel):
-    """Opcjonalne wyniki z zadania 016."""
+    """Optional results from task 016."""
 
     typical_sunlight_hours: float | None = None
     worst_case_sunlight_hours: float | None = None
@@ -76,7 +76,7 @@ class Summary(BaseModel):
     eclipses: list[Eclipse] | None = None
 
 
-# --- Wyszukiwarka okien lądowania (zadanie 011) ---
+# --- Landing-window search (task 011) ---
 
 
 class SlotCycles(BaseModel):
@@ -88,7 +88,7 @@ class SlotCycles(BaseModel):
 
 
 class SlotUncertainty(SolarUncertainty):
-    """Margines niepewności dla pojedynczego okna wyszukiwarki."""
+    """Uncertainty margin for a single search window."""
 
 
 class CalendarSlot(BaseModel):
@@ -135,7 +135,7 @@ class WindowsResponse(BaseModel):
     meta: Meta
 
 
-# --- Optymalny punkt lądowania (zadanie 017) ---
+# --- Optimal landing site (task 017) ---
 
 
 class OptimalWeights(BaseModel):

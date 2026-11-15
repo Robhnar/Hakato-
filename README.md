@@ -1,13 +1,13 @@
 # Hakato
 
-Narzędzie do szybkiego porównywania miejsc i dat lądowania na Księżycu: pokazuje położenie Słońca i Ziemi względem horyzontu, okna zasilania słonecznego i okna łączności bezpośredniej z Ziemią. Projekt na NASA Space Apps Challenge 2026.
+A tool for quickly comparing lunar landing sites and dates: it shows the position of the Sun and Earth relative to the horizon, solar-power windows and direct-to-Earth communication windows. A project for the NASA Space Apps Challenge 2026.
 
-- Treść wyzwania: [lunar-landing-site-navigator-details.md](lunar-landing-site-navigator-details.md)
-- Źródła danych: [lunar-landing-site-navigator-resources.md](lunar-landing-site-navigator-resources.md)
+- Challenge text: [lunar-landing-site-navigator-details.md](lunar-landing-site-navigator-details.md)
+- Data sources: [lunar-landing-site-navigator-resources.md](lunar-landing-site-navigator-resources.md)
 
-## Uruchomienie
+## Running
 
-Potrzebne: Python 3.11 lub nowszy i Node.js 22 lub nowszy.
+Required: Python 3.11 or newer and Node.js 22 or newer.
 
 Backend (terminal 1):
 
@@ -16,11 +16,11 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
-python ../data/scripts/fetch_kernels.py  # Pobiera jądra NAIF SPICE do data/raw/kernels/ (opcjonalne, bez nich działa model przybliżony)
+python ../data/scripts/fetch_kernels.py  # Downloads NAIF SPICE kernels to data/raw/kernels/ (optional; without them an approximate model is used)
 uvicorn app.main:app --reload
 ```
 
-Frontend (terminal 2), potem otwórz http://localhost:5173:
+Frontend (terminal 2), then open http://localhost:5173:
 
 ```bash
 cd web
@@ -28,53 +28,53 @@ npm install
 npm run dev
 ```
 
-Sam frontend, bez backendu – dane z `contracts/fixtures/`:
+Frontend only, without the backend – data from `contracts/fixtures/`:
 
 ```bash
 npm run dev:fixtures
 ```
 
-## Testy i lint
+## Tests and lint
 
-Uruchom przed każdym PR. To samo sprawdza CI.
+Run before every PR. CI checks the same.
 
-| Gdzie | Polecenia |
+| Where | Commands |
 | --- | --- |
 | `backend/` | `ruff check .` · `ruff format --check .` · `pytest -q` |
 | `web/` | `npm run lint` · `npm run build` · `npm test` |
 
-Po zmianie kontraktu albo katalogu miejsc odśwież przykładowe odpowiedzi (z katalogu `backend/`):
+After changing a contract or the site catalog, refresh the sample responses (from the `backend/` directory):
 
 ```bash
 python -m scripts.export_fixtures
 ```
 
-## Stan danych i możliwości aplikacji
+## Data status and app capabilities
 
-Wszystkie fazy projektu (**Faza 1: `000`–`010`**, **Faza 2: `011`–`016`**, **Faza 3: `017`–`019`**) są scalone na `main`:
+All project phases (**Phase 1: `000`–`010`**, **Phase 2: `011`–`016`**, **Phase 3: `017`–`019`**) are merged into `main`:
 
-- **Efemerydy (`SPICE`) i teren (`LOLA`):** repozytorium zawiera wygenerowane profile horyzontu LOLA (`data/horizons/*.json`) oraz wieloletnie kalendarze dni księżycowych 2027–2035 (`data/calendars/*.json`) dla wszystkich 5 polarnych miejsc lądowania. Po pobraniu jąder NAIF SPICE (`python data/scripts/fetch_kernels.py`) backend liczy dokładne efemerydy `de440s` + `MOON_ME`; bez pobranych jąder automatycznie przełącza się na model przybliżony (`meta.ephemeris = "placeholder"`).
-- **5 widoków nawigatora:**
-  1. **Sky** — panorama horyzontu LOLA (360°) ze ścieżkami Słońca i Ziemi oraz znacznikami wschodów/zachodów.
-  2. **Timeline** — interaktywna oś czasu wysokości, pasm widoczności i wspólnego kursora `cursor_utc`.
-  3. **Compare** — porównanie do 4 scenariuszy lądowania obok siebie.
-  4. **Windows** — wieloletnia wyszukiwarka okien lądowania (2027–2035), mapa cieplna „data startu × parametr", filtrowanie po wymaganiach misji (bateria, oświetlenie, łączność), symulator opóźnienia startu **„Launch delayed by +N days"** z najbliższym równoważnym oknem, cykle astronomiczne oraz model tarczy słonecznej ($0{,}53^\circ$), niepewności horyzontu ($\pm 0{,}2^\circ$) i zaćmień.
-  5. **Map** — interaktywny globus 3D Księżyca (`Three.js` + tekstura NASA LROC), przelot kamery nad bieguny, siatka współrzędnych, terminator i granica widoczności Ziemi, podpisy miejsc, odczyt współrzędnych pod kursorem; przełącznik **`Optimal zones`** pokazuje delikatne strefy (Sun only, Earth only, Sun + Earth, Neither) oraz kandydatów w skali wyniku z rankingiem, suwakami wag (profil misji) i przyciskiem **`Move scenario here`**.
+- **Ephemerides (`SPICE`) and terrain (`LOLA`):** the repository contains generated LOLA horizon profiles (`data/horizons/*.json`) and multi-year lunar-day calendars for 2027–2035 (`data/calendars/*.json`) for all 5 polar landing sites. After downloading the NAIF SPICE kernels (`python data/scripts/fetch_kernels.py`) the backend computes exact `de440s` + `MOON_ME` ephemerides; without the kernels it automatically falls back to an approximate model (`meta.ephemeris = "placeholder"`).
+- **5 navigator views:**
+  1. **Sky** — LOLA horizon panorama (360°) with Sun and Earth paths and rise/set markers.
+  2. **Timeline** — interactive timeline of elevation, visibility bands and a shared `cursor_utc` cursor.
+  3. **Compare** — side-by-side comparison of up to 4 landing scenarios.
+  4. **Windows** — multi-year landing-window search (2027–2035), a "start date × parameter" heatmap, filtering by mission requirements (battery, illumination, communication), a **"Launch delayed by +N days"** simulator with the nearest equivalent window, astronomical cycles, and models of the solar disc ($0.53^\circ$), horizon uncertainty ($\pm 0.2^\circ$) and eclipses.
+  5. **Map** — interactive 3D globe of the Moon (`Three.js` + NASA LROC texture), camera fly-over to the poles, coordinate grid, terminator and Earth visibility limit, site labels, coordinate readout under the cursor; the **`Optimal zones`** switch shows soft zones (Sun only, Earth only, Sun + Earth, Neither) and candidates on a score scale with a ranking, weight sliders (mission profile) and a **`Move scenario here`** button.
 
-## Jak pracujemy
+## How we work
 
-| Chcesz… | Zajrzyj do |
+| You want to… | See |
 | --- | --- |
-| zacząć pracę | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| zobaczyć listę zadań | [docs/tasks/](docs/tasks/README.md) |
-| zrozumieć podział na moduły | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| start working | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| see the task list | [docs/tasks/](docs/tasks/README.md) |
+| understand the module split | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 
-## Użycie SI (AI assistance)
+## AI assistance
 
-Projekt powstał z pomocą narzędzi SI: Claude Code, Cursor, Codex, Gemini CLI i GitHub Copilot. Pomagały w kodowaniu, debugowaniu, testach i dokumentacji; kod i dane oznaczone są trailerami `Co-Authored-By` w historii commitów. Architekturę, podział zadań i weryfikację wyników robili ludzie. Szczegóły: [docs/submission/ai-disclosure.md](docs/submission/ai-disclosure.md). Wykorzystane dane i zasoby: [docs/submission/data-and-references.md](docs/submission/data-and-references.md).
+The project was built with the help of AI tools: Claude Code, Cursor, Codex, Gemini CLI and GitHub Copilot. They helped with coding, debugging, tests and documentation; code and data are marked with `Co-Authored-By` trailers in the commit history. Architecture, task split and verification of results were done by people. Details: [docs/submission/ai-disclosure.md](docs/submission/ai-disclosure.md). Data and resources used: [docs/submission/data-and-references.md](docs/submission/data-and-references.md).
 
-## Zespół (Contributors)
+## Contributors
 
-- [MichalSzuba](https://github.com/MichalSzuba) – projekt architektury ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)), kontrakty API i metryki.
-- [Robhnar](https://github.com/Robhnar) – szkielet repo, integracja, zadania 020–025.
-- [wampirrrr](https://github.com/wampirrrr), [Micello421](https://github.com/Micello421), [OverrLoss](https://github.com/OverrLoss), [Tomaszkawa](https://github.com/Tomaszkawa) – moduły backendu i widoki frontendu (zadania 001–019).
+- [MichalSzuba](https://github.com/MichalSzuba) – architecture design ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)), API contracts and metrics.
+- [Robhnar](https://github.com/Robhnar) – repo skeleton, integration, tasks 020–025.
+- [wampirrrr](https://github.com/wampirrrr), [Micello421](https://github.com/Micello421), [OverrLoss](https://github.com/OverrLoss), [Tomaszkawa](https://github.com/Tomaszkawa) – backend modules and frontend views (tasks 001–019).

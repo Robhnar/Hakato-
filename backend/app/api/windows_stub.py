@@ -1,8 +1,8 @@
-"""Stały payload zaślepki GET /api/windows (zadanie 011) — wspólny dla API i fixtures."""
+"""Fixed payload of the GET /api/windows stub (task 011) — shared by the API and fixtures."""
 
 
 def windows_fixture() -> dict:
-    """Przykładowa siatka dwóch dni księżycowych przy biegunie (scenariusz fixtures)."""
+    """Sample grid of two lunar days near the pole (fixtures scenario)."""
     slot_a = {
         "start_utc": "2027-01-01T00:00:00Z",
         "end_utc": "2027-01-30T12:42:00Z",
