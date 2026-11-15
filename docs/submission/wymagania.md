@@ -57,9 +57,8 @@ Projekt musi **rzeczywiście korzystać** z co najmniej jednego źródła NASA z
 | [project-description.md](project-description.md) | Pełniejszy opis EN |
 | [data-and-references.md](data-and-references.md) | Dane NASA + referencje |
 | [ai-disclosure.md](ai-disclosure.md) | Ujawnienie AI |
-| [demo-script.md](demo-script.md) | Scenariusz demo na `main` |
 | [slides-outline.md](slides-outline.md) | Konspekt 7 slajdów (do zrzutów / PDF) |
 
 ## Uwaga o nagraniu
 
-Teksty i konspekt slajdów są w repo. **Samo nagranie wideo lub eksport PDF slajdów** robi człowiek z zespołu na działającym `main` (patrz demo-script) i wkleja link w formularzu — plików binarnych nie commitujemy.
+Teksty i konspekt slajdów są w repo. **Samo nagranie wideo lub eksport PDF slajdów** robi człowiek z zespołu na działającym `main` i wkleja link w formularzu — plików binarnych nie commitujemy.

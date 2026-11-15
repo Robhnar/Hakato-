@@ -12,7 +12,7 @@ Hakato helps mission planners and educators compare lunar landing sites, multi-y
 
 ## Project Demo
 
-_TODO before submit:_ paste link to ≤30 s video **or** ≤7-slide PDF/deck built from [slides-outline.md](slides-outline.md) using [demo-script.md](demo-script.md).
+_TODO before submit:_ paste link to ≤30 s video **or** ≤7-slide PDF/deck built from [slides-outline.md](slides-outline.md).
 
 ## Final Project
 
@@ -30,7 +30,7 @@ Hakato is a FastAPI + React application for the Lunar Landing Site Navigator cha
 
 See [ai-disclosure.md](ai-disclosure.md). Short version:
 
-AI coding assistants (Cursor, Claude, Codex, and related tools) helped implement modules, tests, and docs under human architecture and review. No AI-generated images are used in the core UI; LROC-derived Moon imagery is credited separately. Any later AI promo art will be watermarked.
+We used AI tools (Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot) for coding, debugging, tests, docs and brainstorming. Humans designed, wrote, reviewed and verified the work and merged every PR. Commits made with AI help carry `Co-Authored-By` trailers. No AI-generated images, video or audio are used.
 
 ## NASA / Partner Data
 

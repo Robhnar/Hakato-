@@ -1,24 +1,26 @@
-# Use of Artificial Intelligence / SI tools
-
-Paste a shortened version into the Space Apps **Use of AI** form field. Expand if the form allows more text.
+# Use of Super Intelligence (SI) tools
 
 ## Summary for the form
 
-We used AI coding assistants (Cursor Agent, Claude, Codex, and related CLI agents) throughout the hackathon to scaffold modules, draft tests, review diffs against task briefs, and write documentation. Humans defined architecture, task splits, acceptance criteria, and merged pull requests. No AI-generated imagery is used in the core UI; the Moon globe texture is an LROC-derived NASA/ASU mosaic, not an AI image. If any slide or promo graphic is later AI-generated, it will carry a visible “AI-generated” watermark as required by Space Apps 2026 rules.
+We used AI tools — Claude Code, Cursor, Codex, Gemini CLI and GitHub Copilot — for coding, debugging, tests, brainstorming and documentation (including the README, task docs and this submission pack). Humans designed the architecture and task split, wrote and reviewed code, verified the results and merged every pull request. Commits made with AI help carry `Co-Authored-By` trailers. No AI-generated images, video or audio are used; the Moon texture is a NASA LROC/ASU mosaic. Any AI-generated graphic added later will carry a visible "AI-generated" watermark.
 
-## Detail (for judges / appendix)
+## Options to tick in the form
 
-| Tool | Role |
+- Ideation or Brainstorming
+- Research or Information Gathering
+- Coding, Debugging, or Troubleshooting
+- Writing, Editing, or Translation
+- Data Analysis and Interpretation (only if you used it)
+- Presentation, Video, or Audio / Visual Design or Image Creation: tick only if AI produced such material
+
+## Tools
+
+| Tool | Used for |
 | --- | --- |
-| Cursor / Composer agents | Frontend shell, compare view, docs, submission pack |
-| Claude / Codex / Gemini CLI (as available on team machines) | Parallel module work (ephemeris, terrain, metrics, views) per `AGENTS.md` |
-| GitHub Copilot-style assistants (where used) | Local autocomplete |
+| Claude Code | coding, debugging, tests, docs (README, `docs/`, submission pack) |
+| Cursor | coding, docs |
+| Codex | coding, tests |
+| Gemini CLI | coding, research |
+| GitHub Copilot | autocomplete |
 
-AI did **not** replace:
-
-- reading NASA challenge text and Resources,
-- deciding module contracts (`docs/ARCHITECTURE.md`),
-- verifying scientific sanity (e.g. Horizons cross-checks for SPICE, LOLA horizon checks),
-- final PR review and merge by the team integrator.
-
-Secrets and credentials were never placed in the repository; AI prompts used public challenge materials and this open codebase.
+Secrets were never placed in the repository. See [data-and-references.md](data-and-references.md) for the data and software we used.

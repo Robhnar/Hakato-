@@ -1,6 +1,6 @@
 ## Zadanie
 
-<!-- Link do pliku zadania, np. docs/tasks/003-logowanie.md -->
+<!-- Numer pozycji z docs/tasks/README.md -->
 
 ## Co się zmienia
 
@@ -15,8 +15,7 @@
 - [ ] Zmiany mieszczą się w zakresie zadania i w moim module
 - [ ] Testy i lint przechodzą lokalnie
 - [ ] Nie ma sekretów ani plików `.env` w zmianach
-- [ ] Status w pliku zadania jest zaktualizowany
-- [ ] Przeczytałem kod wygenerowany przez AI
+- [ ] Pozycja na liście `docs/tasks/README.md` jest odhaczona
 
 ## Uwaga dla integratora
 

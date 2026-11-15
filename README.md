@@ -65,7 +65,16 @@ Wszystkie fazy projektu (**Faza 1: `000`–`010`**, **Faza 2: `011`–`016`**, *
 
 | Chcesz… | Zajrzyj do |
 | --- | --- |
-| zacząć pracę nad zadaniem | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| zacząć pracę | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | zobaczyć listę zadań | [docs/tasks/](docs/tasks/README.md) |
 | zrozumieć podział na moduły | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| skonfigurować asystenta AI | [AGENTS.md](AGENTS.md) – większość narzędzi czyta go sama |
+
+## Użycie SI (AI assistance)
+
+Projekt powstał z pomocą narzędzi SI: Claude Code, Cursor, Codex, Gemini CLI i GitHub Copilot. Pomagały w kodowaniu, debugowaniu, testach i dokumentacji; kod i dane oznaczone są trailerami `Co-Authored-By` w historii commitów. Architekturę, podział zadań i weryfikację wyników robili ludzie. Szczegóły: [docs/submission/ai-disclosure.md](docs/submission/ai-disclosure.md). Wykorzystane dane i zasoby: [docs/submission/data-and-references.md](docs/submission/data-and-references.md).
+
+## Zespół (Contributors)
+
+- [MichalSzuba](https://github.com/MichalSzuba) – projekt architektury ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)), kontrakty API i metryki.
+- [Robhnar](https://github.com/Robhnar) – szkielet repo, integracja, zadania 020–025.
+- [wampirrrr](https://github.com/wampirrrr), [Micello421](https://github.com/Micello421), [OverrLoss](https://github.com/OverrLoss), [Tomaszkawa](https://github.com/Tomaszkawa) – moduły backendu i widoki frontendu (zadania 001–019).

@@ -1,6 +1,6 @@
 # Architektura
 
-> **Status: obowiązuje.** Szkielet z zadania 000 implementuje wszystko, co tu opisano. Zmiana kontraktu wymaga osobnego PR.
+> **Status: obowiązuje.** Zmiana kontraktu wymaga osobnego PR.
 
 ## Co budujemy
 
@@ -15,7 +15,7 @@ Dlaczego teren jest tu kluczowy: na biegunie południowym Słońce nigdy nie wzn
 | Obliczenia i API | Python 3.11+, FastAPI | SPICE i narzędzia do danych rastrowych są w Pythonie najdojrzalsze |
 | Efemerydy | SPICE przez `spiceypy`, jądra NAIF | to samo źródło, z którego korzysta JPL Horizons; działa lokalnie, bez limitów zapytań |
 | Teren | modele wysokości LOLA (PDS), `numpy` | wymienione w zasobach wyzwania; potrzebne do realnego horyzontu |
-| Frontend | TypeScript, React, Vite | szybki start, dobre wsparcie modeli AI |
+| Frontend | TypeScript, React, Vite | szybki start, duża społeczność i bogaty ekosystem |
 | Testy | `pytest`, `vitest` | |
 
 Horizons służy nam do **weryfikacji** wyników (porównanie kilku punktów kontrolnych), nie jako zależność w czasie działania.
@@ -122,7 +122,7 @@ Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 
 `hours_until_change`: czas od `start_utc` do najbliższego zachodu (gdy widoczne) albo wschodu (gdy niewidoczne); `null`, jeśli w zadanym zakresie nic się nie zmienia.
 `uncertainty` i `eclipses` są opcjonalnymi rozszerzeniami: czas oświetlenia uwzględnia widoczny ułamek tarczy Słońca i pasmo dla marginesu horyzontu ±0,2°, a zaćmienia opisują nakładanie się tarcz Ziemi i Słońca widzianych z Księżyca. Dotychczasowe pola widoczności pozostają bez zmian.
 
-**`GET /api/windows?lat_deg&lon_deg&search_start_utc&search_end_utc&…`** – wyszukiwarka okien lądowania (Faza 2).
+**`GET /api/windows?lat_deg&lon_deg&search_start_utc&search_end_utc&…`** – wyszukiwarka okien lądowania.
 
 Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_landing_deg` (-90.0), `min_sunlight_hours` (0), `max_darkness_hours` (708.7), `require_earth_at_landing` (false), `min_earth_fraction` (0), opcjonalnie `reference_start_utc` i `slip_days` (0, w zakresie ±3650) dla trybu „start się opóźnił". Maksymalny przedział wyszukiwania to 10 lat i 500 okien.
 
@@ -144,11 +144,9 @@ Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_land
 
 `matches` to podzbiór `grid` spełniający wymagania, posortowany malejąco po `score`. Pola `uncertainty` i `eclipses` są opcjonalne dla każdego okna. Do czasu zadań 012/013 endpoint może zwracać zaślepkę o tym kształcie.
 
-**`GET /api/optimal-site?start_utc&end_utc&cursor_utc&step_minutes&w_sun&w_earth&w_overlap`** – ranking miejsca optymalnego dla wybranego okna (Faza 3). `cursor_utc` jest opcjonalny i domyślnie równy `start_utc`; `step_minutes` domyślnie wynosi 60, a wagi odpowiednio 0,45, 0,25 i 0,30.
+**`GET /api/optimal-site?start_utc&end_utc&cursor_utc&step_minutes&w_sun&w_earth&w_overlap`** – ranking miejsca optymalnego dla wybranego okna. `cursor_utc` jest opcjonalny i domyślnie równy `start_utc`; `step_minutes` domyślnie wynosi 60, a wagi odpowiednio 0,45, 0,25 i 0,30.
 
 Odpowiedź zawiera `optimal`, `ranking`, pozycje podpunktów Słońca i Ziemi w `cursor_bodies`, użyte `weights` i `meta`. Każdy element rankingu ma współrzędne, wynik (`score` 0–100), ułamki/czasy widoczności oraz flagi widoczności w chwili kursora. Ranking obejmuje katalog miejsc i referencyjną siatkę polarną.
-
-Do czasu zadania 018 endpoint i `contracts/fixtures/optimal_site.json` używają wyraźnie tymczasowej odpowiedzi kontraktowej: metryki są zerowe, a współrzędne podpunktów zastępcze; nie są to wyniki astronomiczne ani rekomendacja miejsca. Silnik optymalizacji zastąpi tę zaślepkę.
 
 ### Kontrakt między powłoką a widokami (frontend)
 

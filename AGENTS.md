@@ -1,39 +1,36 @@
-# Instrukcje dla asystentów AI
+# Zasady pracy w repo
 
-Ten plik czyta każdy model AI pracujący w tym repo (Claude Code przez `CLAUDE.md`, pozostałe narzędzia bezpośrednio). Obowiązuje tak samo ludzi.
-
-Nad projektem pracuje równolegle kilka osób, każda ze swoim asystentem. Zasady poniżej istnieją po to, żeby te prace dało się scalić bez konfliktów.
+Obowiązują wszystkich pracujących w repo, ludzi i narzędzia. Powstały po to, żeby równoległe prace dało się scalić bez konfliktów.
 
 ## Projekt
 
-Budujemy rozwiązanie wyzwania Lunar Landing Site Navigator (NASA Space Apps 2026). Treść wyzwania jest w `lunar-landing-site-navigator-details.md`, dozwolone źródła danych w `lunar-landing-site-navigator-resources.md`.
+Rozwiązanie wyzwania Lunar Landing Site Navigator (NASA Space Apps 2026). Treść wyzwania: `lunar-landing-site-navigator-details.md`, dozwolone źródła danych: `lunar-landing-site-navigator-resources.md`.
 
 ## Zanim zaczniesz
 
-1. Przeczytaj plik swojego zadania w `docs/tasks/`. Jeśli użytkownik nie wskazał zadania, zapytaj o nie, zamiast zgadywać.
-2. Przeczytaj `docs/ARCHITECTURE.md` – podział na moduły i kontrakty między nimi.
-3. Uruchom projekt i testy według `README.md`, żeby mieć pewność, że startujesz z działającego stanu.
-4. Pobierz aktualny `main` i utwórz gałąź `feat/<nr-zadania>-<krótki-opis>` (np. `feat/003-logowanie`).
+1. Wybierz pozycję z `docs/tasks/README.md`.
+2. Przeczytaj `docs/ARCHITECTURE.md` (moduły i kontrakty).
+3. Uruchom projekt i testy według `README.md`.
+4. Utwórz gałąź z aktualnego `main`: `feat/<nr>-<krótki-opis>`.
 
-## Zasady pracy
+## Zasady
 
-- **Trzymaj się zakresu zadania.** Zmieniaj tylko pliki wymienione w zadaniu lub leżące w katalogu twojego modułu. Błąd w cudzym module zgłoś w opisie PR, nie naprawiaj go przy okazji.
-- **Nie zmieniaj kontraktów po cichu.** Kontrakt to wszystko, z czego korzysta inny moduł: endpointy API, formaty danych, schemat bazy, wspólne typy. Zmiana kontraktu wymaga osobnego PR, który zmienia też `docs/ARCHITECTURE.md`.
-- **Nie pushuj do `main`** i nie scalaj własnych PR-ów. Scalaniem zajmuje się integrator.
+- **Trzymaj się zakresu zadania.** Zmieniaj tylko pliki zadania lub swojego modułu. Błąd w cudzym module zgłoś w opisie PR.
+- **Nie zmieniaj kontraktów po cichu.** Kontrakt to endpointy API, formaty danych, schemat bazy i wspólne typy. Zmiana idzie osobnym PR-em razem z `docs/ARCHITECTURE.md`.
+- **Nie pushuj do `main`** i nie scalaj własnych PR-ów.
 - **Nie przepisuj historii** współdzielonych gałęzi (`push --force`, rebase po otwarciu PR).
-- **Żadnych sekretów w repo.** Klucze i hasła trzymaj w `.env` (jest w `.gitignore`); nową zmienną dopisz do `.env.example` bez wartości.
-- **Nowa zależność** (biblioteka, usługa) – wymień ją w opisie PR razem z powodem.
-- **Bez refaktorów przy okazji.** Formatowanie i porządki w cudzym kodzie powodują konflikty u innych.
-- **Pracujesz autonomicznie (tryb agentowy)?** Te same zasady: jedna gałąź, jedno zadanie, żadnych zmian poza zakresem, żadnego scalania. Kończysz na otwartym PR.
-- **Nie zostawiaj atrap.** Jeśli coś jest zaślepką albo nie działa, napisz to wprost w opisie PR.
+- **Żadnych sekretów w repo.** Klucze trzymaj w `.env`; nową zmienną dopisz do `.env.example` bez wartości.
+- **Nowa zależność** – wymień ją w opisie PR razem z powodem.
+- **Bez refaktorów przy okazji.**
+- **Nie zostawiaj atrap.** Zaślepkę albo coś, co nie działa, opisz wprost w PR.
 
 ## Oddawanie pracy
 
-1. Uruchom testy i lint (polecenia w `README.md`) i upewnij się, że przechodzą.
-2. Zaktualizuj status w pliku zadania.
-3. Otwórz PR do `main` według szablonu. Jedno zadanie to jeden PR.
-4. Opisz, jak sprawdziłeś, że to działa – i czego nie sprawdziłeś.
+1. Uruchom testy i lint (polecenia w `README.md`).
+2. Odhacz pozycję w `docs/tasks/README.md`.
+3. Otwórz PR do `main` według szablonu, jedna pozycja to jeden PR.
+4. Opisz, jak sprawdziłeś, że to działa, i czego nie sprawdziłeś.
 
 ## Gdy coś jest niejasne
 
-Zadanie jest sprzeczne z architekturą, brakuje kontraktu albo potrzebujesz zmiany w cudzym module: zatrzymaj się i powiedz o tym użytkownikowi. Zgadywanie w takich miejscach kończy się pracą, której nie da się scalić.
+Zadanie jest sprzeczne z architekturą, brakuje kontraktu albo potrzebna jest zmiana w cudzym module: zatrzymaj się i zapytaj.

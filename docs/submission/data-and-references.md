@@ -31,3 +31,27 @@ Challenge Resources snapshot: `lunar-landing-site-navigator-resources.md` in the
 - GitHub Actions
 
 Full dependency pins: `backend/pyproject.toml`, `web/package.json`.
+
+## Form fields: link text + URL
+
+**NASA Data**
+
+- NAIF SPICE kernels (de440s, MOON_ME) — https://naif.jpl.nasa.gov/naif/data.html
+- JPL Horizons System — https://ssd.jpl.nasa.gov/horizons/
+- LRO LOLA digital elevation model (PDS) — https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/
+- LROC Quickmap — https://quickmap.lroc.asu.edu/
+- NASA Moon Trek — https://trek.nasa.gov/moon/
+- NASA Artemis III candidate landing regions — https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-moon/
+
+**Space Agency Partner & Other Data**
+
+- Moon texture (LROC-derived colour mosaic, NASA/GSFC/ASU) — https://svs.gsfc.nasa.gov/4720/
+- FastAPI — https://github.com/fastapi/fastapi
+- spiceypy — https://github.com/AndrewAnnex/SpiceyPy
+- NumPy — https://github.com/numpy/numpy
+- Uvicorn — https://github.com/encode/uvicorn
+- React — https://github.com/facebook/react
+- three.js — https://github.com/mrdoob/three.js
+- Vite — https://github.com/vitejs/vite
+- IBM Plex fonts (via Fontsource) — https://github.com/IBM/plex
+- AI tools: Claude Code https://claude.com/claude-code · Cursor https://cursor.com · Codex https://openai.com/codex · Gemini CLI https://github.com/google-gemini/gemini-cli · GitHub Copilot https://github.com/features/copilot

@@ -1,6 +1,6 @@
 """Silnik wyznaczania optymalnego punktu lądowania i polarnej siatki referencyjnej.
 
-Realizuje zadanie 018 (Faza 3) z opisu w docs/tasks/018-silnik-optymalnego-punktu.md.
+Kontrakt i założenia: docs/ARCHITECTURE.md.
 """
 
 from __future__ import annotations

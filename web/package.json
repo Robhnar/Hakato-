@@ -1,5 +1,6 @@
 {
   "name": "hakato-web",
+  "description": "Lunar Landing Site Navigator - frontend (developed with AI assistance, see README)",
   "private": true,
   "version": "0.0.0",
   "type": "module",

@@ -1,6 +1,6 @@
 """Silnik wyszukiwania okien lądowania, cykli astronomicznych i analizy opóźnień startu.
 
-Kontrakt i założenia w docs/tasks/011-kontrakt-wyszukiwarki-okien.md i 013-silnik-wyszukiwania-i-opoznien.md.
+Kontrakt i założenia: docs/ARCHITECTURE.md.
 """
 
 from __future__ import annotations
