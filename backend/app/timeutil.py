@@ -1,14 +1,14 @@
-"""Czas w kontraktach: zawsze UTC, ISO 8601 z sufiksem Z."""
+"""Time in contracts: always UTC, ISO 8601 with the Z suffix."""
 
 from datetime import UTC, datetime, timedelta
 
-# Pokrycie jądra SPICE de440s.bsp (1849-12-25 .. 2150-01-21) z marginesem jednej doby.
+# Coverage of the SPICE kernel de440s.bsp (1849-12-25 .. 2150-01-21) with a one-day margin.
 SPICE_MIN_UTC = datetime(1849, 12, 26, tzinfo=UTC)
 SPICE_MAX_UTC = datetime(2150, 1, 20, tzinfo=UTC)
 
 
 def check_spice_range(*times: datetime) -> None:
-    """Rzuca ValueError, gdy którykolwiek z czasów leży poza pokryciem SPICE de440s."""
+    """Raises ValueError when any of the times lies outside the SPICE de440s coverage."""
     for t in times:
         t_utc = to_utc(t)
         if not (SPICE_MIN_UTC <= t_utc <= SPICE_MAX_UTC):
@@ -19,7 +19,7 @@ def check_spice_range(*times: datetime) -> None:
 
 
 def to_utc(t: datetime) -> datetime:
-    """Czas bez strefy traktujemy jako UTC."""
+    """A time without a zone is treated as UTC."""
     if t.tzinfo is None:
         return t.replace(tzinfo=UTC)
     return t.astimezone(UTC)
@@ -30,7 +30,7 @@ def iso_z(t: datetime) -> str:
 
 
 def time_range(start: datetime, end: datetime, step_minutes: float) -> list[datetime]:
-    """Próbki od start do end włącznie, co step_minutes."""
+    """Samples from start to end inclusive, every step_minutes."""
     start, end = to_utc(start), to_utc(end)
     step = timedelta(minutes=step_minutes)
     count = int((end - start) / step) + 1

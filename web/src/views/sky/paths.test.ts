@@ -52,7 +52,7 @@ test('horizonSilhouettePath closes with Z', () => {
   expect(d.startsWith('M')).toBe(true)
 })
 
-test('tnie ślad na widoczny i zasłonięty z wspólnym punktem granicznym', () => {
+test('splits the track into visible and occluded with a shared boundary point', () => {
   const parts = splitTrailByVisibility({
     az_deg: [10, 20, 30, 40],
     el_deg: [1, 2, 3, 4],
@@ -63,7 +63,7 @@ test('tnie ślad na widoczny i zasłonięty z wspólnym punktem granicznym', () 
   expect(parts[1].az_deg).toEqual([30, 40])
 })
 
-test('stała widoczność daje jeden odcinek, pusta seria – zero', () => {
+test('constant visibility gives one segment, an empty series – none', () => {
   expect(
     splitTrailByVisibility({ az_deg: [1, 2], el_deg: [0, 0], visible: [true, true] }),
   ).toHaveLength(1)

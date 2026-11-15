@@ -9,11 +9,11 @@ import {
   visibilitySegments,
 } from './windows'
 
-// Date.UTC obcina ułamkowe godziny, więc liczymy w milisekundach.
+// Date.UTC truncates fractional hours, so we compute in milliseconds.
 const t = (hours: number) => new Date(Date.UTC(2027, 0, 1) + hours * 3_600_000).toISOString()
 
 test('a segment starts at the first true and closes at the first false', () => {
-  // Nierówny krok czasu: znaczniki bierzemy z serii, nie z siatki.
+  // Uneven time step: we take timestamps from the series, not from the grid.
   const times = [t(0), t(0.5), t(1.75), t(3), t(6)]
   expect(visibilitySegments(times, [false, true, true, false, false])).toEqual([
     { start_utc: t(0.5), end_utc: t(3) },
@@ -49,9 +49,9 @@ test('overlap keeps only the shared part, touching ends excluded', () => {
     { start_utc: t(8), end_utc: t(12) },
   ]
   const earth = [
-    // Styka się z pierwszym przedziałem Słońca tylko końcem (4 h) - nie liczy się.
+    // It touches the first Sun interval only at the end (4 h) - it does not count.
     { start_utc: t(4), end_utc: t(14) },
-    // Zagnieżdżony w drugim przedziale Słońca.
+    // Nested in the second Sun interval.
     { start_utc: t(9), end_utc: t(10) },
   ]
   expect(overlapSegments(sun, earth)).toEqual([
@@ -65,9 +65,9 @@ test('overlap keeps only the shared part, touching ends excluded', () => {
 test('hoursUntilChange measures the wait to the next flip', () => {
   const times = [t(0), t(1), t(2), t(3), t(4), t(5)]
   const visible = [true, true, false, false, true, true]
-  // W kursorze (01:30) widoczność z próbki 01:00, zmiana o 02:00.
+  // At the cursor (01:30) visibility from the 01:00 sample, the change at 02:00.
   expect(hoursUntilChange(times, visible, t(1.5))).toBeCloseTo(0.5, 9)
-  // Kursor dokładnie na próbce nie szuka zmiany w tej samej próbce.
+  // A cursor exactly on a sample does not look for a change in the same sample.
   expect(hoursUntilChange(times, visible, t(2))).toBeCloseTo(2, 9)
   expect(hoursUntilChange(times, visible, t(0))).toBeCloseTo(2, 9)
 })
@@ -75,7 +75,7 @@ test('hoursUntilChange measures the wait to the next flip', () => {
 test('a cursor before the first sample borrows the first sample', () => {
   const times = [t(1), t(2), t(3)]
   const visible = [true, true, false]
-  // Start serii 01:00, kursor 00:00 - zmiana dopiero o 03:00.
+  // Series start 01:00, cursor 00:00 - the change only at 03:00.
   expect(hoursUntilChange(times, visible, t(0))).toBeCloseTo(3, 9)
 })
 
@@ -107,7 +107,7 @@ test('stepMinutesFor stays within 5…120 minutes and never rises with a shorter
     expect(step).toBeGreaterThanOrEqual(5)
     expect(step).toBeLessThanOrEqual(120)
     expect(step).toBeGreaterThanOrEqual(previous)
-    // Ponad 1600 h krok 120 min nie zmieściłby się już w 800 próbkach.
+    // Above 1600 h a 120 min step would no longer fit in 800 samples.
     expect((duration * 60) / step).toBeLessThanOrEqual(800)
     previous = step
   }
@@ -115,26 +115,26 @@ test('stepMinutesFor stays within 5…120 minutes and never rises with a shorter
 
 test('advance moves the cursor at the chosen speed and stops at the end of the window', () => {
   const end = 24 * 3_600_000
-  // 6 h/s przez 1 s to 6 h, czyli 1/4 okna 24-godzinnego.
+  // 6 h/s for 1 s is 6 h, i.e. 1/4 of a 24-hour window.
   const quarter = advance(0, 1000, 6, end)
   expect(quarter.position).toBeCloseTo(6 * 3_600_000, 0)
   expect(quarter.done).toBe(false)
 
-  // Blisko końca krok jest przycinany do `end` i kończy animację.
+  // Near the end the step is clamped to `end` and finishes the animation.
   const last = advance(end - 60_000, 1000, 240, end)
   expect(last.position).toBe(end)
   expect(last.done).toBe(true)
 
-  // Ujemna delta (cofnięty zegar) nie przesuwa kursora do tyłu.
+  // A negative delta (clock set back) does not move the cursor backwards.
   expect(advance(5_000, -1000, 60, end).position).toBe(5_000)
 })
 
-test('okrągłe podziałki z zerem', () => {
+test('round ticks including zero', () => {
   expect(niceTicks(-1.2, 6.3)).toEqual([0, 2, 4, 6])
   expect(niceTicks(0, 0)).toEqual([0])
 })
 
-test('podziałki dni o północy UTC', () => {
+test('day ticks at UTC midnight', () => {
   const ticks = dayTicks(Date.parse('2027-05-19T19:13:00Z'), Date.parse('2027-05-22T19:13:00Z'))
   expect(ticks.map((tick) => new Date(tick).toISOString())).toEqual([
     '2027-05-20T00:00:00.000Z',
@@ -143,15 +143,15 @@ test('podziałki dni o północy UTC', () => {
   ])
 })
 
-test('podziałki dni rozrzedzają się do limitu', () => {
+test('day ticks thin out to the limit', () => {
   const ticks = dayTicks(Date.parse('2027-05-01T00:00:00Z'), Date.parse('2027-06-01T00:00:00Z'))
   expect(ticks.length).toBeLessThanOrEqual(7)
   expect(ticks.length).toBeGreaterThan(1)
   for (const tick of ticks) expect(new Date(tick).getUTCHours()).toBe(0)
 })
 
-// Review Focus 4: okno bez wschodów i zachodów nie może dać pustego wykresu.
-test('okno ze 100% widocznością to jeden pełny pas i brak zmian', () => {
+// Review Focus 4: a window without sunrises and sunsets must not give an empty chart.
+test('a window with 100% visibility is one full band and no changes', () => {
   const times = [t(0), t(6), t(12), t(18), t(24)]
   expect(visibilitySegments(times, [true, true, true, true, true])).toEqual([
     { start_utc: t(0), end_utc: t(24) },
@@ -159,7 +159,7 @@ test('okno ze 100% widocznością to jeden pełny pas i brak zmian', () => {
   expect(hoursUntilChange(times, [true, true, true, true, true], t(0))).toBeNull()
 })
 
-test('okno z zerową widocznością nie daje pasa, ale też nie ma zmian', () => {
+test('a window with zero visibility gives no band, but also no changes', () => {
   const times = [t(0), t(6), t(12), t(18), t(24)]
   expect(visibilitySegments(times, [false, false, false, false, false])).toEqual([])
   expect(hoursUntilChange(times, [false, false, false, false, false], t(0))).toBeNull()

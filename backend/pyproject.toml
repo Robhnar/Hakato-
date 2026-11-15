@@ -1,7 +1,7 @@
 [project]
 name = "hakato-backend"
 version = "0.1.0"
-description = "Lunar Landing Site Navigator - obliczenia i API (developed with AI assistance, see README)"
+description = "Lunar Landing Site Navigator - computation and API (developed with AI assistance, see README)"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",

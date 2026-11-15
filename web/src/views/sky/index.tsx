@@ -20,7 +20,7 @@ const WIDTH = 900
 const HEIGHT = 400
 const PADDING = { top: 24, right: 20, bottom: 56, left: 60 }
 
-/** Podziałka azymutu co 45°: strona świata + stopnie (0° na lewo, 360° na prawo). */
+/** Azimuth ticks every 45°: cardinal direction + degrees (0° on the left, 360° on the right). */
 const AZIMUTH_MARKS: { az: number; label: string }[] = [
   { az: 0, label: 'N 0°' },
   { az: 45, label: 'NE 45°' },
@@ -49,13 +49,13 @@ function buildLayout(horizon: Horizon, timeline: Timeline): PlotLayout {
   return { width: WIDTH, height: HEIGHT, padding: PADDING, elMin, elMax }
 }
 
-/** Różnica wysokości ze znakiem: `+0.42°`, `−1.20°`. */
+/** Signed elevation difference: `+0.42°`, `−1.20°`. */
 function signedDeg(value: number): string {
   if (!Number.isFinite(value)) return '—'
   return `${value < 0 ? '−' : '+'}${formatDeg(Math.abs(value))}`
 }
 
-/** Pierwszy i ostatni poprawny punkt serii (NaN pomijamy). */
+/** First and last valid point of the series (NaN skipped). */
 function endpoints(series: BodySeries): { first: number; last: number } {
   const n = Math.min(series.az_deg.length, series.el_deg.length)
   let first = -1
@@ -92,11 +92,11 @@ function Trail({
         />
       ))}
       {start && (
-        // Początek okna: puste kółko.
+        // Window start: an empty circle.
         <circle className={`sky-start sky-mark-${tone}`} cx={start.x} cy={start.y} r={3} />
       )}
       {end && (
-        // Koniec okna: krótka pionowa kreska.
+        // Window end: a short vertical bar.
         <line
           className={`sky-end sky-mark-${tone}`}
           x1={end.x}
@@ -124,7 +124,7 @@ function BodyMarker({
 }) {
   if (!Number.isFinite(az) || !Number.isFinite(el)) return null
   const { x, y } = toSvgPoint(az, el, layout)
-  // Podpis z prawej, ale przy prawej krawędzi przechodzi na lewo od znacznika.
+  // Label on the right, but near the right edge it moves to the left of the marker.
   const flip = x > WIDTH * 0.8
   const labelX = flip ? x - 10 : x + 10
   const className = `sky-marker sky-marker-${tone}${visible ? '' : ' sky-marker-occulted'}`
@@ -224,7 +224,7 @@ export default function SkyView({ active, cursor_utc, setCursorUtc }: ViewProps)
           role="img"
           aria-label="Sky panorama: Sun and Earth against the local terrain horizon"
         >
-          {/* Siatka azymutu i opisy stron świata */}
+          {/* Azimuth grid and cardinal-direction labels */}
           {AZIMUTH_MARKS.map(({ az, label }) => {
             const x = azToX(az, layout)
             return (
@@ -253,7 +253,7 @@ export default function SkyView({ active, cursor_utc, setCursorUtc }: ViewProps)
             </text>
           </g>
 
-          {/* Podziałka wysokości */}
+          {/* Elevation ticks */}
           {elevationTicks.map((el) => {
             const y = elToY(el, layout)
             return (
@@ -271,12 +271,12 @@ export default function SkyView({ active, cursor_utc, setCursorUtc }: ViewProps)
             )
           })}
 
-          {/* Geometryczny horyzont 0° */}
+          {/* Geometric horizon 0° */}
           {layout.elMin < 0 && layout.elMax > 0 && (
             <line className="sky-zero" x1={inner.x} y1={yZero} x2={rightEdge} y2={yZero} />
           )}
 
-          {/* Sylwetka terenu: wypełnienie + wyraźna górna krawędź */}
+          {/* Terrain silhouette: fill + a distinct top edge */}
           <path className="sky-terrain" d={terrainFill} />
           <path className="sky-terrain-edge" d={terrainEdge} />
 
@@ -286,7 +286,7 @@ export default function SkyView({ active, cursor_utc, setCursorUtc }: ViewProps)
           <BodyMarker tone="sun" az={sunAz} el={sunEl} visible={sunVisible} layout={layout} />
           <BodyMarker tone="earth" az={earthAz} el={earthEl} visible={earthVisible} layout={layout} />
 
-          {/* Opisy osi */}
+          {/* Axis labels */}
           <text
             className="sky-axis-title"
             x={16}
@@ -388,7 +388,7 @@ export default function SkyView({ active, cursor_utc, setCursorUtc }: ViewProps)
   )
 }
 
-/** Kilka czytelnych znaczników wysokości w zakresie [elMin, elMax]. */
+/** A few readable elevation ticks in the range [elMin, elMax]. */
 function niceElevationTicks(elMin: number, elMax: number): number[] {
   const span = elMax - elMin
   if (!(span > 0)) return [0]

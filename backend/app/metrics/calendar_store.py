@@ -1,4 +1,4 @@
-"""Prekalkulacja i odczyt wieloletnich kalendarzy dni księżycowych (zadanie 012)."""
+"""Precomputation and reading of multi-year lunar-day calendars (task 012)."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ def build_site_calendar(
     duration_hours: float = 708.7,
     sample_step_minutes: float = 120.0,
 ) -> list[dict]:
-    """Generuje listę kolejnych dni księżycowych dla miejsca na lata start_year..end_year."""
+    """Generates a list of consecutive lunar days for a site for the years start_year..end_year."""
     profile = terrain.horizon_profile(lat_deg, lon_deg)
     start_dt = datetime(start_year, 1, 1, 0, 0, tzinfo=UTC)
     end_dt = datetime(end_year, 12, 31, 23, 59, 59, tzinfo=UTC)
@@ -42,7 +42,7 @@ def build_site_calendar(
 
 
 def load_precomputed_calendar(lat_deg: float, lon_deg: float) -> list[dict] | None:
-    """Zwraca prekomputowany kalendarz z data/calendars/<id>.json, jeśli współrzędne pasują."""
+    """Returns the precomputed calendar from data/calendars/<id>.json if the coordinates match."""
     sites_file = DATA_DIR / "sites.json"
     if not (CALENDARS_DIR.is_dir() and sites_file.is_file()):
         return None

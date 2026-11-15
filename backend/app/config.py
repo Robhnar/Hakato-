@@ -1,4 +1,4 @@
-"""Ścieżki wspólne dla całego backendu."""
+"""Paths shared across the whole backend."""
 
 import os
 from pathlib import Path

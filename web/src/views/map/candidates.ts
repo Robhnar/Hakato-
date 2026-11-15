@@ -1,5 +1,5 @@
-// Czysta logika rankingu kandydatów nakładki (zadanie 021): etykiety i pozycje
-// z remisami. Bez three.js, testowalne w Node.
+// Pure ranking logic for the overlay candidates (task 021): labels and positions
+// with ties. No three.js, testable in Node.
 
 import type { OptimalCandidate, OptimalWeights } from '../../api/types'
 import { formatCoords } from '../../app/format'
@@ -12,7 +12,7 @@ export interface RankedCandidate {
   label: string
 }
 
-/** Katalog: nazwa bez przedrostka; punkt siatki: `Grid 88.5°S 45.0°W`. */
+/** Catalog: name without a prefix; grid point: `Grid 88.5°S 45.0°W`. */
 export function candidateLabel(
   candidate: Pick<OptimalCandidate, 'name' | 'lat_deg' | 'lon_deg' | 'is_catalog_site'>,
 ): string {
@@ -20,7 +20,7 @@ export function candidateLabel(
   return `Grid ${formatCoords(candidate.lat_deg, candidate.lon_deg, 1)}`
 }
 
-/** Sortuje malejąco; wyniki równe po zaokrągleniu do 0.1 dzielą pozycję (1, 1, 1, 4). */
+/** Sorts descending; scores equal after rounding to 0.1 share a position (1, 1, 1, 4). */
 export function rankCandidates(ranking: OptimalCandidate[]): RankedCandidate[] {
   const valid = ranking
     .filter((c) => [c.score, c.lat_deg, c.lon_deg].every(Number.isFinite))
@@ -33,7 +33,7 @@ export function rankCandidates(ranking: OptimalCandidate[]): RankedCandidate[] {
   })
 }
 
-/** Wagi jako liczby całkowite sumujące się do 100 (metoda największych reszt). */
+/** Weights as integers summing to 100 (largest remainder method). */
 export function weightsToPercent(weights: OptimalWeights): { sun: number; earth: number; overlap: number } {
   const w = normalizeWeights(weights)
   const raw = [w.w_sun * 100, w.w_earth * 100, w.w_overlap * 100]
@@ -43,7 +43,7 @@ export function weightsToPercent(weights: OptimalWeights): { sun: number; earth:
   return { sun: out[0], earth: out[1], overlap: out[2] }
 }
 
-/** Ustawia jedną wagę; pozostałe dwie skaluje proporcjonalnie do reszty (suma = 1). */
+/** Sets one weight; scales the other two proportionally to the remainder (sum = 1). */
 export function setWeight(weights: OptimalWeights, key: keyof OptimalWeights, percent: number): OptimalWeights {
   const value = Math.min(100, Math.max(0, percent)) / 100
   const others = (['w_sun', 'w_earth', 'w_overlap'] as const).filter((k) => k !== key)

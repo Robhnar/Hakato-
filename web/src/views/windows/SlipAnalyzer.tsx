@@ -32,14 +32,14 @@ interface Deltas {
 
 const DASH = '—'
 
-// Znaczniki ISO w zdaniu z backendu zamieniamy na ludzki czas (zadanie 021).
+// ISO timestamps in a sentence from the backend are turned into human time (task 021).
 const ISO_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?Z/g
 
 function humanizeDates(text: string): string {
   return text.replace(ISO_PATTERN, (iso) => formatUtc(iso))
 }
 
-/** Okno z siatki, w którego przedziale [start, end) mieści się podana chwila. */
+/** The grid window whose interval [start, end) contains the given moment. */
 function slotAt(grid: CalendarSlot[], utc: string): CalendarSlot | null {
   const ms = Date.parse(utc)
   if (!Number.isFinite(ms)) return null
@@ -52,7 +52,7 @@ function slotAt(grid: CalendarSlot[], utc: string): CalendarSlot | null {
   return null
 }
 
-/** Wpisana liczba, jeśli mieści się w zakresie 1…90; inaczej null. */
+/** The entered number if it is within 1…90; otherwise null. */
 function parseDays(raw: string): number | null {
   const text = raw.trim()
   if (text === '') return null
@@ -61,7 +61,7 @@ function parseDays(raw: string): number | null {
   return clampSlipDays(value)
 }
 
-/** Symulator "start opóźnił się o N dni" (zadanie 015). */
+/** "Launch delayed by N days" simulator (task 015). */
 export default function SlipAnalyzer({
   referenceStartUtc,
   requirements,
@@ -72,14 +72,14 @@ export default function SlipAnalyzer({
   onUse,
 }: Props) {
   const days = clampSlipDays(slipDays)
-  // Wersja robocza pola liczbowego pamięta, dla jakiej wartości `days` została
-  // wpisana - po zmianie slidera lub z zewnątrz pole pokazuje nową wartość
-  // bez efektu synchronizującego.
+  // The draft of the number field remembers for which `days` value it was
+  // entered - after the slider changes or from outside the field shows the new value
+  // without a syncing effect.
   const [draft, setDraft] = useState({ days, text: String(days) })
   const draftText = draft.days === days ? draft.text : String(days)
 
-  // Wpisana wartość trafia do rodzica dopiero, gdy jest poprawna liczbą
-  // z zakresu; na blur/Enter clampujemy to, co zostało w polu.
+  // The entered value reaches the parent only when it is a valid number
+  // within the range; on blur/Enter we clamp what is left in the field.
   function commitDays() {
     const next = clampSlipDays(Number(draftText.trim() === '' ? Number.NaN : draftText))
     setDraft({ days, text: String(next) })
@@ -95,13 +95,13 @@ export default function SlipAnalyzer({
 
   const delayedStart = shiftUtc(referenceStartUtc, days)
 
-  // Backend ma pierwszeństwo. Gdy nie zwrócił analizy, szukamy okien w siatce
-  // po stronie klienta - te same progi co panel wymagań.
+  // The backend takes precedence. When it returned no analysis, we look for windows in the grid
+  // on the client side - the same thresholds as the requirements panel.
   const original = slipAnalysis ? slipAnalysis.original_slot : slotAt(grid, referenceStartUtc)
   const delayed = slipAnalysis ? slipAnalysis.delayed_slot : slotAt(grid, delayedStart)
-  // Lokalne porównanie i najbliższe okno liczymy względem bieżących (żywych)
-  // wymagań z formularza, żeby "Jump to nearest window" oraz delty nie używały
-  // nieaktualnej odpowiedzi z poprzedniego zapytania.
+  // The local comparison and the nearest window are computed against the current (live)
+  // requirements from the form, so "Jump to nearest window" and the deltas do not use
+  // a stale response from the previous request.
   const localComparison =
     original && delayed ? slipComparison(original, delayed, requirements) : null
   const deltas: Deltas | null = localComparison ?? (

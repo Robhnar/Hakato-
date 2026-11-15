@@ -1,4 +1,4 @@
-"""Obsługa biegunowych modeli wysokości (DEM) LOLA w formacie PDS3 (.img + .lbl)."""
+"""Handling of LOLA polar elevation models (DEM) in the PDS3 format (.img + .lbl)."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ _NUM_RE = re.compile(r"^[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?")
 
 @dataclass(frozen=True)
 class PolarDem:
-    """Biegunowy model wysokości LOLA w odwzorowaniu stereograficznym."""
+    """LOLA polar elevation model in stereographic projection."""
 
     data: np.ndarray
     lines: int
@@ -36,7 +36,7 @@ class PolarDem:
 
 
 def parse_pds_label(lbl_path: Path) -> dict[str, str]:
-    """Parsuje podstawowe pary klucz = wartość z etykiety PDS3."""
+    """Parses basic key = value pairs from a PDS3 label."""
     values: dict[str, str] = {}
     for line in lbl_path.read_text(encoding="ascii", errors="replace").splitlines():
         m = _KV_RE.match(line)
@@ -49,12 +49,12 @@ def parse_pds_label(lbl_path: Path) -> dict[str, str]:
 def _parse_float(raw: str) -> float:
     m = _NUM_RE.match(raw.strip())
     if not m:
-        raise ValueError(f"Nieprawidłowa wartość liczbowa w etykiecie PDS: {raw!r}")
+        raise ValueError(f"Invalid numeric value in PDS label: {raw!r}")
     return float(m.group(0))
 
 
 def load_polar_dem(img_path: Path, lbl_path: Path | None = None) -> PolarDem:
-    """Wczytuje raster PDS3 (.img + .lbl) przez memmap bez ładowania całości do RAM."""
+    """Loads a PDS3 raster (.img + .lbl) via memmap without loading it all into RAM."""
     if lbl_path is None:
         lbl_path = img_path.with_suffix(".lbl")
     meta = parse_pds_label(lbl_path)
@@ -92,9 +92,9 @@ def load_polar_dem(img_path: Path, lbl_path: Path | None = None) -> PolarDem:
 def latlon_to_pixel(
     lat_rad: np.ndarray, lon_rad: np.ndarray, dem: PolarDem
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Przelicza współrzędne selenograficzne (rad) na (sample, line) w rastrze biegunowym."""
-    # Dla bieguna południowego (CENTER_LATITUDE = -90°, POSITIVE_LONGITUDE_DIRECTION = EAST):
-    # patrząc na biegun południowy z góry, 0° leży na górze (+Y), a 90° E po prawej (+X).
+    """Converts selenographic coordinates (rad) to (sample, line) in the polar raster."""
+    # For the south pole (CENTER_LATITUDE = -90°, POSITIVE_LONGITUDE_DIRECTION = EAST):
+    # looking at the south pole from above, 0° lies at the top (+Y) and 90° E on the right (+X).
     rho = 2.0 * dem.radius_m * np.tan((math.pi / 2.0 + lat_rad) / 2.0)
     dlon = lon_rad - math.radians(dem.center_lon_deg)
     x = rho * np.sin(dlon)
@@ -105,10 +105,10 @@ def latlon_to_pixel(
 
 
 def sample_heights(dem: PolarDem, sample: np.ndarray, line: np.ndarray) -> np.ndarray | None:
-    """Interpoluje dwuliniowo wysokość terenu (w metrach) dla tablic (sample, line).
+    """Bilinearly interpolates terrain height (in meters) for (sample, line) arrays.
 
-    Punkty leżące poza rastrem otrzymują wartość `np.nan`. Zwraca `None`, gdy wszystkie
-    przekazane punkty leżą poza rastrem.
+    Points outside the raster get the value `np.nan`. Returns `None` when all
+    passed points lie outside the raster.
     """
     in_bounds = (
         (sample >= 0.0) & (sample <= dem.line_samples - 1) & (line >= 0.0) & (line <= dem.lines - 1)
@@ -148,7 +148,7 @@ def compute_horizon_profile(
     max_distance_m: float = DEFAULT_MAX_DISTANCE_M,
     observer_height_m: float = DEFAULT_OBSERVER_HEIGHT_M,
 ) -> dict | None:
-    """Liczy 360-elementowy profil horyzontu (azymuty 0..359°) z modelu wysokości."""
+    """Computes a 360-element horizon profile (azimuths 0..359°) from the elevation model."""
     if lat_deg > SOUTH_POLE_LIMIT_DEG or lat_deg < -90.0:
         return None
 
@@ -171,7 +171,7 @@ def compute_horizon_profile(
     cos_lat0 = math.cos(lat0)
 
     if cos_lat0 < 1e-12:
-        # Na samym biegunie południowym wszystkie kierunki idą na północ wzdłuż południka az.
+        # At the south pole itself all directions go north along the meridian az.
         lat_pts = np.broadcast_to(-math.pi / 2.0 + delta, (360, distances.size))
         lon_pts = np.broadcast_to(az, (360, distances.size))
     else:

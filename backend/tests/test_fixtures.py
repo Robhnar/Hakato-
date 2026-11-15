@@ -1,4 +1,4 @@
-"""Pilnuje, żeby pliki w contracts/fixtures/ zgadzały się z kontraktem i z kodem."""
+"""Ensures the files in contracts/fixtures/ match the contract and the code."""
 
 import json
 
@@ -29,5 +29,5 @@ def test_fixtures_are_up_to_date():
     for name, payload in build().items():
         on_disk = (FIXTURES_DIR / name).read_text(encoding="utf-8")
         assert on_disk == dumps(payload), (
-            f"{name} jest nieaktualny - uruchom: python -m scripts.export_fixtures"
+            f"{name} is out of date - run: python -m scripts.export_fixtures"
         )

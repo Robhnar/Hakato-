@@ -5,7 +5,7 @@ export interface AzElSeries {
   el_deg: number[]
 }
 
-/** Odcinek śladu o stałej widoczności (Słońce/Ziemia nad linią terenu). */
+/** A track segment of constant visibility (Sun/Earth above the terrain line). */
 export interface VisibleTrailSegment {
   visible: boolean
   az_deg: number[]
@@ -13,10 +13,10 @@ export interface VisibleTrailSegment {
 }
 
 /**
- * Dzieli ślad na odcinki o stałej widoczności; sąsiednie odcinki dzielą punkt
- * graniczny, żeby linia ciągła i przerywana stykały się bez przerwy. Skok
- * azymutu > 180° (przejście przez północ) zawsze zaczyna nowy odcinek — inaczej
- * powstałaby pozioma kreska przez cały wykres.
+ * Splits the track into segments of constant visibility; adjacent segments share the
+ * boundary point so the solid and dashed lines meet without a gap. An azimuth
+ * jump > 180° (crossing north) always starts a new segment — otherwise
+ * a horizontal line across the whole chart would appear.
  */
 export function splitTrailByVisibility(series: AzElSeries & { visible: boolean[] }): VisibleTrailSegment[] {
   const { az_deg, el_deg } = series
@@ -36,7 +36,7 @@ export function splitTrailByVisibility(series: AzElSeries & { visible: boolean[]
     const flag = visibleAt(i)
 
     if (flag !== current.visible) {
-      // Punkt graniczny należy do obu odcinków — wspólny styk zamiast szczeliny.
+      // The boundary point belongs to both segments — a shared joint instead of a gap.
       if (!wraps) {
         current.az_deg.push(az_deg[i])
         current.el_deg.push(el_deg[i])
@@ -57,8 +57,8 @@ export function splitTrailByVisibility(series: AzElSeries & { visible: boolean[]
 }
 
 /**
- * Dzieli ślad na segmenty przy przejściu przez północ (skok azymutu > 180°),
- * żeby nie rysować poziomej kreski przez cały wykres.
+ * Splits the track into segments when crossing north (azimuth jump > 180°),
+ * so no horizontal line is drawn across the whole chart.
  */
 export function splitTrailByAzimuthWrap(series: AzElSeries): AzElSeries[] {
   const { az_deg, el_deg } = series
@@ -95,7 +95,7 @@ export function polylinePath(az_deg: number[], el_deg: number[], layout: PlotLay
   return parts.join(' ')
 }
 
-/** Wypełniona sylwetka terenu: profil horyzontu + zamknięcie wzdłuż dolnej krawędzi wykresu. */
+/** Filled terrain silhouette: the horizon profile + closure along the bottom edge of the chart. */
 export function horizonSilhouettePath(
   elevation_deg: number[],
   azimuth_step_deg: number,
@@ -111,8 +111,8 @@ export function horizonSilhouettePath(
     parts.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(2)} ${y.toFixed(2)}`)
   }
 
-  // Domknij do prawej krawędzi panoramy (az 360°), potem w dół do elMin i w lewo.
-  // azToX(360) zawija do 0°, więc prawą krawędź bierzemy z geometrii wykresu.
+  // Close to the right edge of the panorama (az 360°), then down to elMin and left.
+  // azToX(360) wraps to 0°, so we take the right edge from the chart geometry.
   const lastEl = elevation_deg[elevation_deg.length - 1]
   const inner = plotInner(layout)
   const x360 = inner.x + inner.w
@@ -126,7 +126,7 @@ export function horizonSilhouettePath(
   return parts.join(' ')
 }
 
-/** Górna krawędź sylwetki terenu (sama linia, bez wypełnienia) dociągnięta do 360°. */
+/** Top edge of the terrain silhouette (line only, no fill) extended to 360°. */
 export function horizonEdgePath(
   elevation_deg: number[],
   azimuth_step_deg: number,
@@ -154,7 +154,7 @@ export function trailPaths(series: AzElSeries, layout: PlotLayout): string[] {
     .filter((d) => d.length > 0)
 }
 
-/** Ścieżki śladu z podziałem na widoczny (ciągły) i zasłonięty (przerywany). */
+/** Track paths split into visible (solid) and occluded (dashed). */
 export function trailPathSegments(
   series: AzElSeries & { visible: boolean[] },
   layout: PlotLayout,

@@ -1,11 +1,11 @@
-"""Skrypt do pobierania oficjalnych jąder SPICE z NAIF (NASA JPL).
+"""Script for downloading the official SPICE kernels from NAIF (NASA JPL).
 
-Pobiera jądra potrzebne do obliczeń położeń Słońca i Ziemi w układzie MOON_ME:
+Downloads the kernels needed to compute Sun and Earth positions in the MOON_ME frame:
 - naif0012.tls (LSK - leap seconds)
-- de440s.bsp (SPK - efemerydy planet i Księżyca 1849-2150)
-- pck00010.tpc (PCK tekstowy - stałe planetarne)
-- moon_pa_de440_200625.bpc (PCK binarny - wysoka dokładność orientacji Księżyca)
-- moon_de440_250416.tf (FK - ramki odniesienia Księżyca w tym MOON_ME)
+- de440s.bsp (SPK - ephemerides of planets and the Moon 1849-2150)
+- pck00010.tpc (text PCK - planetary constants)
+- moon_pa_de440_200625.bpc (binary PCK - high-accuracy Moon orientation)
+- moon_de440_250416.tf (FK - Moon reference frames including MOON_ME)
 """
 
 import urllib.request
@@ -27,7 +27,7 @@ def download_kernels(target_dir: Path | None = None) -> None:
         target_dir = Path(__file__).resolve().parents[1] / "raw" / "kernels"
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Pobieranie jąder SPICE do: {target_dir}")
+    print(f"Downloading SPICE kernels to: {target_dir}")
     for remote_path, filename in KERNELS:
         dest = target_dir / filename
         if dest.exists() and dest.stat().st_size > 0:
@@ -46,7 +46,7 @@ def download_kernels(target_dir: Path | None = None) -> None:
             out.write(data)
         print(f"  [ZAPISANO] {filename} ({dest.stat().st_size / 1024 / 1024:.2f} MB)")
 
-    print("Wszystkie jądra są gotowe.")
+    print("All kernels are ready.")
 
 
 if __name__ == "__main__":

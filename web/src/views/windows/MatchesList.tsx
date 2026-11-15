@@ -16,7 +16,7 @@ function formatScore(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : DASH
 }
 
-/** Ranking okien spełniających wymagania (zadania 015 i 021). */
+/** Ranking of windows meeting the requirements (tasks 015 and 021). */
 export default function MatchesList({ matches, durationHours, onUse, limit }: Props) {
   const rows =
     limit === undefined ? matches : matches.slice(0, Math.max(0, Math.trunc(limit)))

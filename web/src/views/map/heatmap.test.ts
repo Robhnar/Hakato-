@@ -66,7 +66,7 @@ describe('visibility and zone classification', () => {
     expect(sunVisibleAt(0, 91, subsolar)).toBe(false)
     expect(sunVisibleAt(0, 180, subsolar)).toBe(false)
     expect(sunVisibleAt(89.9, 0, subsolar)).toBe(true)
-    // Za horyzontem (91°) ciało znika.
+    // Beyond the horizon (91°) the body disappears.
     expect(sunVisibleAt(-89, 180, subsolar)).toBe(false)
     expect(earthVisibleAt(0, 45, { lat_deg: 0, lon_deg: 0 })).toBe(true)
   })
@@ -114,7 +114,7 @@ describe('pixelForLatLon / buildOverlayPixels', () => {
   })
 
   it('paints the subsolar point as sun-lit and its antipode as shadow / Earth', () => {
-    // Słońce nad (0°, 0°), Ziemia nad przeciwległym punktem (0°, 180°).
+    // The Sun over (0°, 0°), Earth over the opposite point (0°, 180°).
     const cursor = bodies([0, 0], [0, 180])
     const pixels = buildOverlayPixels(width, height, cursor)
 
@@ -124,7 +124,7 @@ describe('pixelForLatLon / buildOverlayPixels', () => {
     const earth = pixelForLatLon(width, height, 0, 180)
     expect(pixelAt(pixels, width, earth.x, earth.y)).toEqual([...ZONE_COLORS.earth_only])
 
-    // Gdy oba ciała są nad tym samym punktem, antypoda jest w cieniu.
+    // When both bodies are over the same point, the antipode is in shadow.
     const sameBody = buildOverlayPixels(width, height, bodies([0, 0], [0, 0]))
     const shadow = pixelForLatLon(width, height, 0, 180)
     expect(pixelAt(sameBody, width, shadow.x, shadow.y)).toEqual([...ZONE_COLORS.shadow])
@@ -136,11 +136,11 @@ describe('pixelForLatLon / buildOverlayPixels', () => {
     expect(pixelAt(pixels, width, center.x, center.y)).toEqual([...ZONE_COLORS.sweet_spot])
   })
 
-  it('alfa żadnej strefy nie zasłania terenu', () => {
+  it('zone alpha never hides the terrain', () => {
     for (const zone of ZONE_ORDER) expect(ZONE_COLORS[zone][3]).toBeLessThanOrEqual(120)
   })
 
-  it('wygładza granicę strefy w pasie ±0.6°', () => {
+  it('smooths the zone boundary in a ±0.6° band', () => {
     const pixels = buildOverlayPixels(720, 360, bodies([0, 0], [0, 0]))
     const p = pixelForLatLon(720, 360, 0, 90)
     const alpha = pixelAt(pixels, 720, p.x, p.y)[3]

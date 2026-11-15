@@ -5,14 +5,14 @@ import { bandsFromWindows, windowsFromVisibility } from './windows'
 
 interface Props {
   scenario: Scenario
-  /** Wspólna oś czasu wszystkich scenariuszy w godzinach. */
+  /** Shared timeline of all scenarios in hours. */
   maxHours: number
   active: boolean
 }
 
 /**
- * Pasy okien widoczności jednego scenariusza na wspólnej osi godzin.
- * Dane z timeline (krok 60 min), więc pasy są dokładniejsze niż podsumowanie.
+ * Visibility-window bands of one scenario on the shared hour axis.
+ * Data from timeline (60 min step), so the bands are more precise than the summary.
  */
 export default function WindowLane({ scenario, maxHours, active }: Props) {
   const query = toRangeQuery(scenario, 60)

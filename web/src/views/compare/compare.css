@@ -1,4 +1,4 @@
-/* Style widoku porównania — tabela metryk i pasy okien (zadania 008, 021). */
+/* Styles of the compare view — metrics table and window bands (tasks 008, 021). */
 
 .compare {
   display: flex;
@@ -27,7 +27,7 @@
   font-size: 0.85rem;
 }
 
-/* Tabela przewija się poziomo sama, nie cała scena. */
+/* The table scrolls horizontally by itself, not the whole stage. */
 .compare-scroll {
   overflow-x: auto;
   border-bottom: 1px solid var(--line);
@@ -63,8 +63,8 @@
   vertical-align: bottom;
 }
 
-/* Nagłówek kolumny jest przyciskiem: kliknięcie wybiera scenariusz.
-   Aktywny dostaje kreskę 2 px z globalnej reguły [aria-pressed='true']. */
+/* The column header is a button: clicking selects the scenario.
+   The active one gets a 2 px bar from the global rule [aria-pressed='true']. */
 .compare-scenario {
   display: flex;
   flex-direction: column;
@@ -152,7 +152,7 @@
   font-size: 0.8rem;
 }
 
-/* --- Pasy okien na wspólnej osi godzin --- */
+/* --- Window bands on the shared hour axis --- */
 
 .compare-lanes {
   display: flex;

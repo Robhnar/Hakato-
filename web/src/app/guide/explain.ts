@@ -1,4 +1,4 @@
-// Wyjaśnienia zwykłym językiem: dlaczego ten termin i czy dane są przybliżone.
+// Plain-language explanations: why this date and whether the data is approximate.
 
 import type { Meta } from '../../api/types'
 import { formatDuration } from './format'

@@ -1,15 +1,15 @@
-// Wybór miejsca na mapie w trybie prowadzonym: dopasowanie kliknięcia do miejsca z katalogu
-// albo własny punkt.
+// Site selection on the map in guided mode: matching a click to a catalog site
+// or a custom point.
 
 import type { Site } from '../../api/types'
 import { formatCoords, wrapLon } from '../format'
 
-/** `answers.place` dla punktu wskazanego na mapie poza katalogiem. */
+/** `answers.place` for a point picked on the map outside the catalog. */
 export const PIN_ID = 'pin'
 
 const SAME_POINT_DEG = 1e-6
 
-/** Miejsce z katalogu o dokładnie tych współrzędnych (znacznik na globusie wysyła je bez zmian). */
+/** The catalog site with exactly these coordinates (the globe marker sends them unchanged). */
 export function siteAt(sites: Site[], lat_deg: number, lon_deg: number): Site | null {
   return (
     sites.find(
@@ -20,7 +20,7 @@ export function siteAt(sites: Site[], lat_deg: number, lon_deg: number): Site | 
   )
 }
 
-/** Własny punkt jako `Site`, żeby reszta trybu prowadzonego traktowała go jak miejsce z katalogu. */
+/** A custom point as a `Site`, so the rest of guided mode treats it like a catalog site. */
 export function pinnedSite(lat_deg: number, lon_deg: number): Site {
   const lon = wrapLon(lon_deg)
   return {

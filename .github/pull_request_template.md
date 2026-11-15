@@ -1,27 +1,27 @@
-## Zadanie
+## Task
 
-<!-- Numer pozycji z docs/tasks/README.md -->
+<!-- Item number from docs/tasks/README.md -->
 
-## Co się zmienia
+## What changes
 
-<!-- Dwa–trzy zdania: co teraz działa, czego wcześniej nie było. -->
+<!-- Two or three sentences: what works now that did not before. -->
 
-## Jak sprawdzone
+## How it was verified
 
-<!-- Co uruchomiłeś i z jakim wynikiem. Napisz też, czego NIE sprawdziłeś. -->
+<!-- What you ran and with what result. Also say what you did NOT verify. -->
 
-## Lista kontrolna
+## Checklist
 
-- [ ] Zmiany mieszczą się w zakresie zadania i w moim module
-- [ ] Testy i lint przechodzą lokalnie
-- [ ] Nie ma sekretów ani plików `.env` w zmianach
-- [ ] Pozycja na liście `docs/tasks/README.md` jest odhaczona
+- [ ] Changes stay within the task scope and my module
+- [ ] Tests and lint pass locally
+- [ ] No secrets or `.env` files in the changes
+- [ ] The item in `docs/tasks/README.md` is ticked off
 
-## Uwaga dla integratora
+## Note for the integrator
 
-<!-- Zaznacz i opisz, jeśli dotyczy; w przeciwnym razie usuń. -->
+<!-- Tick and describe if applicable; otherwise delete. -->
 
-- [ ] Zmienia kontrakt (API, format danych, schemat bazy)
-- [ ] Dodaje zależność lub zmienną środowiskową
-- [ ] Zawiera zaślepki albo niedokończone fragmenty
-- [ ] Znalazłem problem w cudzym module
+- [ ] Changes a contract (API, data format, database schema)
+- [ ] Adds a dependency or an environment variable
+- [ ] Contains stubs or unfinished parts
+- [ ] I found a problem in someone else's module

@@ -14,11 +14,11 @@ import {
 } from './windows'
 import './timeline.css'
 
-// Pasy widoczności i wykres wysokości muszą się zgadzać co do piksela, więc cały
-// rysunek jest w jednym SVG o stałym viewBox (skaluje się razem z szerokością).
+// Visibility bands and the elevation chart must match to the pixel, so the whole
+// drawing is in one SVG with a fixed viewBox (it scales with the width).
 const VIEW_W = 1000
 const PAD_L = 78
-// Prawy margines mieści procent pasa i podpisy „Sun" / „Earth" na końcu linii.
+// The right margin holds the band percentage and the "Sun" / "Earth" labels at the line end.
 const PAD_R = 56
 const BAND_H = 10
 const BAND_STEP = BAND_H + 8
@@ -29,7 +29,7 @@ const AXIS_TOP = CHART_TOP + CHART_H + 22
 const VIEW_H = AXIS_TOP + 14
 const PLOT_W = VIEW_W - PAD_L - PAD_R
 
-/** Minimalny zakres osi wysokości: przy horyzoncie wartości różnią się o ułamki stopnia. */
+/** Minimum range of the elevation axis: near the horizon values differ by fractions of a degree. */
 const MIN_EL_SPAN_DEG = 2
 const SPEEDS = [1, 12, 60, 240]
 const TICKS = 6
@@ -48,14 +48,14 @@ function clampTime(ms: number, startMs: number, endMs: number): number {
   return Math.min(endMs, Math.max(startMs, ms))
 }
 
-/** Podziałka krótkiego okna: dzień i godzina, np. `19 May 19:00`. */
+/** Tick of a short window: day and hour, e.g. `19 May 19:00`. */
 function formatHourTick(ms: number): string {
   const date = new Date(ms)
   const day = date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', timeZone: 'UTC' })
   return `${day} ${String(date.getUTCHours()).padStart(2, '0')}:00`
 }
 
-/** Podziałka wielodniowego okna: sama data, np. `20 May`. */
+/** Tick of a multi-day window: the date only, e.g. `20 May`. */
 function formatDayTick(ms: number): string {
   return new Date(ms).toLocaleDateString('en-GB', {
     month: 'short',
@@ -64,7 +64,7 @@ function formatDayTick(ms: number): string {
   })
 }
 
-/** Opis najbliższej zmiany: „Sun sets in 12.0 h", „Earth no change". */
+/** Description of the nearest change: „Sun sets in 12.0 h", „Earth no change". */
 function describeChange(label: string, visible: boolean, hours: number | null): string {
   if (hours === null) return `${label} no change`
   return `${label} ${visible ? 'sets' : 'rises'} in ${formatHours(hours)}`
@@ -79,14 +79,14 @@ function lastVisibleAt(times: string[], visible: boolean[], ms: number): boolean
   return value
 }
 
-/** Udział próbek, w których wszystkie podane serie są widoczne (procent 0…100). */
+/** Share of samples in which all the given series are visible (percent 0…100). */
 function share(times: string[], ...series: boolean[][]): number {
   if (times.length === 0) return 0
   const visible = times.filter((_, index) => series.every((flags) => flags[index])).length
   return (visible / times.length) * 100
 }
 
-/** Ostatnia poprawna wartość serii przeliczona na y wykresu. */
+/** The last valid value of the series converted to the chart's y. */
 function lastY(series: number[], scale: { min: number; max: number }): number {
   for (let index = series.length - 1; index >= 0; index -= 1) {
     if (Number.isFinite(series[index])) return yForElevation(series[index], scale)
@@ -116,10 +116,10 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     const values = [...data.sun.el_deg, ...data.earth.el_deg, 0].filter((value) => Number.isFinite(value))
     const rawMin = Math.min(...values)
     const rawMax = Math.max(...values)
-    // Przy horyzoncie cała skala to ułamek stopnia; rozciągamy ją do MIN_EL_SPAN_DEG.
+    // Near the horizon the whole scale is a fraction of a degree; we stretch it to MIN_EL_SPAN_DEG.
     const pad = Math.max(MIN_EL_SPAN_DEG - (rawMax - rawMin), 0) / 2
     const scale = { min: rawMin - pad, max: rawMax + pad }
-    // Brakującą lub niepoprawną próbkę pomijamy, żeby jeden NaN nie skasował całej linii.
+    // A missing or invalid sample is skipped so a single NaN does not erase the whole line.
     const path = (series: number[]) => {
       const points: string[] = []
       times.forEach((time, index) => {
@@ -150,9 +150,9 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     }
   }, [data, startMs, endMs])
 
-  // Animacja: kursor idzie od bieżącej pozycji do końca okna. Pętla nie zależy od
-  // `cursor_utc` (każda aktualizacja restartowałaby ją i gubiła czas renderu), więc
-  // pozycję startową bierzemy z ref aktualizowanego PRZED tym efektem.
+  // Animation: the cursor goes from the current position to the end of the window. The loop does not depend on
+  // `cursor_utc` (every update would restart it and lose render time), so
+  // we take the start position from a ref updated BEFORE this effect.
   const cursorRef = useRef(cursorMs)
   useEffect(() => {
     cursorRef.current = cursorMs
@@ -166,11 +166,11 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     let position = cursorRef.current
 
     const tick = (now: number) => {
-      // Ukryta karta wstrzymuje rAF; bez przycięcia delty powrót przeskoczyłby na koniec okna.
+      // A hidden tab pauses rAF; without clamping the delta, returning would jump to the end of the window.
       const step = advance(position, Math.min(now - previous, 250), speed, endMs)
       position = step.position
       previous = now
-      // Powłoka przerenderowuje się przy każdym ustawieniu kursora — 8 razy na sekundę wystarczy.
+      // The shell re-renders on every cursor update — 8 times per second is enough.
       if (now - emittedAt > 120 || step.done) {
         emittedAt = now
         setCursorUtc(toIsoZ(new Date(position)))
@@ -190,7 +190,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
   if (geometry.times.length === 0) return <p>No visibility samples in this window.</p>
 
   const { times, sunWindows, earthWindows, bothWindows, scale, sunPath, earthPath, shares } = geometry
-  // Kursor może wypaść z okna po zmianie okresu lub godziny startu — liczymy wszystko z przyciętej wartości.
+  // The cursor may fall out of the window after the period or start hour changes — we compute everything from the clamped value.
   const cursorIso = toIsoZ(new Date(cursorMs))
   const sunNow = lastVisibleAt(times, data!.sun.visible, cursorMs)
   const earthNow = lastVisibleAt(times, data!.earth.visible, cursorMs)
@@ -202,14 +202,14 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
   const belowHeight = Math.max(0, CHART_TOP + CHART_H - yZero)
   const elevationTicks = niceTicks(scale.min, scale.max)
 
-  // Podpisy linii na prawym końcu; przy zbliżonych wysokościach rozsuwamy je o 12 px.
+  // Line labels at the right end; when elevations are close we spread them by 12 px.
   const sunLabelY = Math.min(CHART_TOP + CHART_H, Math.max(CHART_TOP + 10, geometry.sunEndY))
   const earthLabelRaw = Math.abs(geometry.earthEndY - geometry.sunEndY) < 12
     ? geometry.earthEndY + 12
     : geometry.earthEndY
   const earthLabelY = Math.min(CHART_TOP + CHART_H, Math.max(CHART_TOP + 10, earthLabelRaw))
 
-  // Okno do 48 h: dotychczasowe 6 równych podziałek z godziną. Dłuższe: północe UTC.
+  // Window up to 48 h: the existing 6 equal ticks with the hour. Longer: UTC midnights.
   const spanHours = (endMs - startMs) / 3_600_000
   const midnightTicks = dayTicks(startMs, endMs)
   const timeTicks: { ms: number; label: string }[] =
@@ -236,12 +236,12 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
     try {
       event.currentTarget.setPointerCapture(event.pointerId)
     } catch {
-      // Zdarzenia syntetyczne (testy) nie mają aktywnego wskaźnika - przeciąganie i tak działa.
+      // Synthetic events (tests) have no active pointer - dragging works anyway.
     }
   }
 
   function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
-    // Bez pointer capture `pointerup` poza wykresem nie dotrze - odzyskujemy stan po puszczeniu.
+    // Without pointer capture `pointerup` outside the chart will not arrive - we recover the state on release.
     if (event.buttons === 0) draggingRef.current = false
     else if (draggingRef.current) moveCursor(timeAtClientX(event.clientX))
   }
@@ -293,7 +293,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
           type="button"
           className={playing ? 'selected' : ''}
           onClick={() => {
-            // Na końcu okna Play zaczyna od nowa.
+            // At the end of the window Play starts over.
             if (!playing && cursorMs >= endMs) setCursorUtc(toIsoZ(new Date(startMs)))
             setPlaying(!playing)
           }}
@@ -313,7 +313,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
             ))}
           </select>
         </label>
-        {/* Stały odczyt zamiast dymka nachodzącego na pasy. */}
+        {/* A fixed readout instead of a tooltip overlapping the bands. */}
         <div className="timeline-readout">
           <span className="num timeline-readout-time">{formatUtc(cursorIso)}</span>
           <span className="timeline-readout-change">
@@ -392,7 +392,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
             </g>
           ))}
 
-          {/* Wykres wysokości */}
+          {/* Elevation chart */}
           <rect className="timeline-chart-bg" x={PAD_L} y={CHART_TOP} width={PLOT_W} height={CHART_H} />
           {belowHeight > 0 && (
             <>
@@ -446,7 +446,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
               const x = xFor(tick.ms, startMs, endMs)
               const anchor = index === 0 ? 'start' : index === timeTicks.length - 1 ? 'end' : 'middle'
               return (
-                // Okno o zerowej długości daje identyczne znaczniki czasu — indeks pilnuje unikalności.
+                // A zero-length window gives identical timestamps — the index keeps keys unique.
                 <g key={`${tick.ms}-${index}`} aria-hidden="true">
                   <line className="timeline-tick" x1={x} y1={CHART_TOP} x2={x} y2={CHART_TOP + CHART_H} />
                   <text className="timeline-axis-label" x={x} y={AXIS_TOP} textAnchor={anchor}>
@@ -476,7 +476,7 @@ export default function TimelineView({ active, cursor_utc, setCursorUtc }: ViewP
   )
 }
 
-/** Jeden wiersz pasów widoczności: tor w kolorze linii + wypełnione okna. */
+/** One row of visibility bands: a track in the line color + filled windows. */
 function BandRow({
   windows,
   y,
@@ -492,14 +492,14 @@ function BandRow({
 }) {
   return (
     <g>
-      {/* Tor pasa: pełna szerokość okna w kolorze linii — pusty pas nadal widać. */}
+      {/* Band track: the full window width in the line color — an empty band is still visible. */}
       <rect className="timeline-track" x={PAD_L} y={y} width={PLOT_W} height={BAND_H} />
       {windows.map((window) => {
         const x1 = xFor(Date.parse(window.start_utc), startMs, endMs)
         const x2 = Math.max(x1 + 1, xFor(Date.parse(window.end_utc), startMs, endMs))
         const width = x2 - x1
         const title = `${formatUtc(window.start_utc)} → ${formatUtc(window.end_utc)}`
-        // „Both" to podział pasa w poprzek (góra Słońce, dół Ziemia) — bez gradientu.
+        // "Both" is a band split across (Sun on top, Earth below) — no gradient.
         return tone === 'both' ? (
           <g key={window.start_utc}>
             <rect className="timeline-band timeline-band-sun" x={x1} y={y} width={width} height={BAND_H / 2}>
@@ -530,7 +530,7 @@ function BandRow({
   )
 }
 
-/** Równe podziałki krótkiego okna (godziny) — sześć, jak dotąd. */
+/** Equal ticks of a short window (hours) — six, as before. */
 function tickTimes(startMs: number, endMs: number): number[] {
   const span = endMs - startMs
   return Array.from({ length: TICKS }, (_, index) => startMs + (span * index) / (TICKS - 1))

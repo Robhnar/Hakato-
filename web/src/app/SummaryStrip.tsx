@@ -4,8 +4,8 @@ import { useAsync } from '../api/useAsync'
 import { formatDeg, formatHours, formatPercent } from './format'
 import { type Scenario, toRangeQuery } from './scenario'
 
-// Status Słońca i Ziemi jako cztery wiersze panelu bocznego (zadanie 021).
-// Ostrzeżenia o źródłach danych są w plakietkach nagłówka (`DataBadge`).
+// Status of the Sun and Earth as four rows of the side panel (task 021).
+// Warnings about data sources are in the header badges (`DataBadge`).
 
 function changeText(body: BodySummary): string {
   if (body.hours_until_change === null) return 'no rise or set'
@@ -37,7 +37,7 @@ function BodyRow({
   )
 }
 
-/** Plakietki źródła danych do nagłówka: przybliżone efemerydy i płaski horyzont. */
+/** Data-source badges for the header: approximate ephemerides and a flat horizon. */
 export function DataBadge({ scenario }: { scenario: Scenario }) {
   const query = toRangeQuery(scenario)
   const { data } = useAsync(() => api.summary(query), JSON.stringify(query))
@@ -70,7 +70,7 @@ export function DataBadge({ scenario }: { scenario: Scenario }) {
   )
 }
 
-/** Podsumowanie aktywnego scenariusza — zawsze widoczne w panelu bocznym. */
+/** Summary of the active scenario — always visible in the side panel. */
 export default function SummaryStrip({ scenario }: { scenario: Scenario }) {
   const query = toRangeQuery(scenario)
   const { data, error, loading } = useAsync(() => api.summary(query), JSON.stringify(query))

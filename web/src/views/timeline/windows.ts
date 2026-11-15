@@ -3,7 +3,7 @@ export interface Segment {
   end_utc: string
 }
 
-/** Ciągłe przedziały, w których seria `visible` jest true. */
+/** Continuous intervals in which the `visible` series is true. */
 export function visibilitySegments(times_utc: string[], visible: boolean[]): Segment[] {
   const segments: Segment[] = []
   let start: string | null = null
@@ -17,21 +17,21 @@ export function visibilitySegments(times_utc: string[], visible: boolean[]): Seg
       start = null
     }
   }
-  // Widoczność do końca okna domyka się na ostatniej próbce.
+  // Visibility up to the end of the window closes at the last sample.
   if (start !== null) {
     segments.push({ start_utc: start, end_utc: times_utc[times_utc.length - 1] })
   }
   return segments
 }
 
-/** Część wspólna dwóch list przedziałów (np. Słońce i Ziemia widoczne naraz). */
+/** Intersection of two lists of intervals (e.g. Sun and Earth visible at once). */
 export function overlapSegments(a: Segment[], b: Segment[]): Segment[] {
   const out: Segment[] = []
   const at = (iso: string) => Date.parse(iso)
 
   for (const x of a) {
     for (const y of b) {
-      // Zachowujemy oryginalne znaczniki czasu, zamiast formatować je od nowa.
+      // We keep the original timestamps instead of formatting them anew.
       const start = at(x.start_utc) > at(y.start_utc) ? x.start_utc : y.start_utc
       const end = at(x.end_utc) < at(y.end_utc) ? x.end_utc : y.end_utc
       if (at(end) > at(start)) out.push({ start_utc: start, end_utc: end })
@@ -41,8 +41,8 @@ export function overlapSegments(a: Segment[], b: Segment[]): Segment[] {
 }
 
 /**
- * Godziny od `cursor_utc` do najbliższej zmiany widoczności (zachód albo wschód).
- * `null`, gdy w oknie nic się już nie zmienia.
+ * Hours from `cursor_utc` to the nearest visibility change (set or rise).
+ * `null` when nothing changes in the window any more.
  */
 export function hoursUntilChange(
   times_utc: string[],
@@ -56,7 +56,7 @@ export function hoursUntilChange(
   for (let i = 0; i < times_utc.length; i += 1) {
     if (Date.parse(times_utc[i]) <= cursor) at = i
   }
-  // Kursor na ostatniej próbce albo po niej: dalej nie ma już czego szukać.
+  // Cursor at or past the last sample: there is nothing more to look for.
   if (at === times_utc.length - 1) return null
 
   const current = at === -1 ? Boolean(visible[0]) : Boolean(visible[at])
@@ -68,20 +68,20 @@ export function hoursUntilChange(
   return null
 }
 
-/** Krok próbkowania w minutach dobrany do długości okna: 5…120, ~300–1100 próbek. */
+/** Sampling step in minutes chosen for the window length: 5…120, ~300–1100 samples. */
 export function stepMinutesFor(duration_hours: number): number {
-  // Krok rośnie liniowo: ~600 próbek w środku zakresu, 5 min to dolna granica.
+  // The step grows linearly: ~600 samples mid-range, 5 min is the lower bound.
   return Math.min(120, Math.max(5, Math.round(duration_hours / 10)))
 }
 
-// Odcina szum zmiennoprzecinkowy (np. 0.30000000000000004) i normalizuje -0.
+// Cuts floating-point noise (e.g. 0.30000000000000004) and normalizes -0.
 function clean(value: number): number {
   return Math.abs(value) < 1e-9 ? 0 : Number(value.toFixed(10))
 }
 
 /**
- * Okrągłe podziałki osi: krok 1, 2 albo 5 × 10ⁿ. Zero wypada zawsze, gdy leży
- * w zakresie (dzięki temu linia horyzontu ma własną podziałkę).
+ * Round axis ticks: step 1, 2 or 5 × 10ⁿ. Zero always falls on a tick when it lies
+ * in the range (so the horizon line has its own tick).
  */
 export function niceTicks(min: number, max: number, target = 4): number[] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return []
@@ -97,7 +97,7 @@ export function niceTicks(min: number, max: number, target = 4): number[] {
 
   const ticks: number[] = []
   const first = Math.ceil(low / step) * step
-  // Limit iteracji chroni przed pętlą, gdyby krok wyszedł niepoprawny.
+  // The iteration limit protects against a loop if the step comes out invalid.
   for (let i = 0; i < 200; i += 1) {
     const value = first + i * step
     if (value > high + step * 1e-9) break
@@ -113,8 +113,8 @@ export function niceTicks(min: number, max: number, target = 4): number[] {
 const DAY_MS = 86_400_000
 
 /**
- * Znaczniki osi czasu o północy UTC, rozrzedzone do `max`. Pusta lista, gdy okno
- * nie zawiera żadnej północy (krótsze niż doba i bez trafienia w granicę).
+ * Timeline ticks at UTC midnight, thinned to `max`. An empty list when the window
+ * contains no midnight (shorter than a day and not hitting the boundary).
  */
 export function dayTicks(startMs: number, endMs: number, max = 7): number[] {
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return []
@@ -136,8 +136,8 @@ export interface AdvanceResult {
 }
 
 /**
- * Jeden krok animacji: przesuwa kursor o `deltaMs` przy prędkości `speed_h_per_s`,
- * nie wychodząc za koniec okna. `done` mówi, że animacja ma się zatrzymać.
+ * One animation step: moves the cursor by `deltaMs` at speed `speed_h_per_s`,
+ * without going past the end of the window. `done` says the animation should stop.
  */
 export function advance(
   position_ms: number,

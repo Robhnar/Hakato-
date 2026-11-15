@@ -1,7 +1,7 @@
-// Jedyny punkt styku frontendu z backendem. Widoki nie wołają fetch() same.
+// The only point where the frontend touches the backend. Views do not call fetch() themselves.
 //
-// VITE_USE_FIXTURES=1 (npm run dev:fixtures): zamiast backendu zwraca pliki
-// z contracts/fixtures/ - zawsze ten sam scenariusz, niezależnie od parametrów.
+// VITE_USE_FIXTURES=1 (npm run dev:fixtures): instead of the backend returns the files
+// from contracts/fixtures/ - always the same scenario, regardless of parameters.
 
 import type {
   Horizon,

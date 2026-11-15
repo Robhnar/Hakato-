@@ -1,4 +1,4 @@
-"""Liczy z wyprzedzeniem profile horyzontu dla miejsc z data/sites.json i zapisuje w data/horizons/."""
+"""Precomputes horizon profiles for the sites in data/sites.json and saves them to data/horizons/."""
 
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ from app.terrain.lola import compute_horizon_profile, load_polar_dem
 
 
 def build_horizons(data_dir: Path | None = None) -> list[Path]:
-    """Generuje pliki data/horizons/<id>.json dla miejsc objętych modelem DEM."""
+    """Generates data/horizons/<id>.json files for sites covered by the DEM."""
     base = data_dir or config.DATA_DIR
     dem_path = _find_dem_path(base / "raw" / "dem")
     if dem_path is None:
         raise FileNotFoundError(
-            f"Brak modelu DEM w {base / 'raw' / 'dem'}. Uruchom najpierw data/scripts/fetch_dem.py."
+            f"No DEM model in {base / 'raw' / 'dem'}. Run data/scripts/fetch_dem.py first."
         )
 
     dem = load_polar_dem(dem_path)

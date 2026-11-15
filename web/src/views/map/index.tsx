@@ -16,8 +16,8 @@ import MoonGlobe, {
 import OptimalZonePanel from './OptimalZonePanel'
 import './map.css'
 
-// Słońce nad punktem (0°, 0°) daje azymut i wysokość, z których odtwarzamy
-// kierunek do Słońca w układzie globusa. API nie podaje wprost punktu podsłonecznego.
+// The Sun over the point (0°, 0°) gives an azimuth and elevation from which we reconstruct
+// the direction to the Sun in the globe frame. The API does not give the subsolar point directly.
 const SUN_REFERENCE_QUERY = { lat_deg: 0, lon_deg: 0, step_minutes: 1 }
 
 function minutesLater(utc: string, minutes: number): string {
@@ -37,7 +37,7 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
   )
   const [overlayEnabled, setOverlayEnabled] = useState(false)
   const [weights, setWeights] = useState<OptimalWeights>(() => ({ ...WEIGHT_PRESETS[0].weights }))
-  // Wagi z panelu zmieniają się od razu; zapytanie dostaje je po 300 ms ciszy.
+  // Weights from the panel change immediately; the request gets them after 300 ms of quiet.
   const [queryWeights, setQueryWeights] = useState(weights)
   const [retry, setRetry] = useState(0)
   const [pickedId, setPickedId] = useState<string | null>(null)
@@ -47,8 +47,8 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
   const [zoomRequest, setZoomRequest] = useState<ZoomRequest | null>(null)
   const requestSeq = useRef(0)
 
-  // Warstwa ON/OFF (zadanie 019). Przy OFF nie wołamy API wcale - loader
-  // rozwiązuje się od razu wartością null, a klucz nie zmienia się z wagami.
+  // ON/OFF layer (task 019). When OFF we do not call the API at all - the loader
+  // resolves immediately with null, and the key does not change with the weights.
   const optimalQuery = overlayQuery(active, cursor_utc, queryWeights)
   const optimal = useAsync<OptimalSiteResponse | null>(
     () => (overlayEnabled ? api.optimalSite(optimalQuery) : Promise.resolve(null)),
@@ -61,17 +61,17 @@ export default function MapView({ scenarios, active, cursor_utc, selectScenario,
   }, [weights])
 
   const ranked = useMemo(() => rankCandidates(optimal.data?.ranking ?? []), [optimal.data])
-  // Wybór wskazany ręcznie obowiązuje, dopóki kandydat jest w rankingu; inaczej zwycięzca.
+  // A manually chosen candidate applies while it is in the ranking; otherwise the winner.
   const selectedId =
     ranked.find((row) => row.candidate.id === pickedId)?.candidate.id ?? ranked[0]?.candidate.id ?? null
 
-  // Punkty podsłoneczny i podziemski z istniejącego zapytania o widoczność (bez dodatkowych zapytań).
+  // Subsolar and sub-Earth points from the existing visibility request (no extra requests).
   const subsolar = useMemo(() => {
     if (!sun.data || sun.data.times_utc.length === 0) return null
     return subBodyPoint(sun.data.sun.az_deg[0], sun.data.sun.el_deg[0])
   }, [sun.data])
 
-  // Z włączoną nakładką bierzemy dokładny punkt z jej danych (te same co strefy), inaczej z zapytania o widoczność.
+  // With the overlay on we take the exact point from its data (the same as the zones), otherwise from the visibility request.
   const cursorBodies = optimal.data?.cursor_bodies ?? null
   const subearth = useMemo(() => {
     if (overlayEnabled && cursorBodies) {

@@ -1,4 +1,4 @@
-"""Testy czasu bez jąder SPICE: granice pokrycia sprawdzane też w CI."""
+"""Time tests without SPICE kernels: coverage bounds are also checked in CI."""
 
 from datetime import UTC, datetime, timedelta, timezone
 
@@ -15,7 +15,7 @@ def test_check_spice_range_accepts_both_limits():
     "t",
     [
         SPICE_MAX_UTC + timedelta(seconds=1),
-        datetime(2150, 1, 21, tzinfo=UTC),  # koniec de440s - margines doby
+        datetime(2150, 1, 21, tzinfo=UTC),  # end of de440s - one-day margin
         datetime(2150, 6, 1, tzinfo=UTC),
         datetime(2300, 1, 1, tzinfo=UTC),
         SPICE_MIN_UTC - timedelta(seconds=1),
@@ -27,9 +27,9 @@ def test_check_spice_range_rejects_outside(t):
 
 
 def test_check_spice_range_treats_naive_as_utc_and_converts_zones():
-    check_spice_range(datetime(2027, 1, 1))  # bez strefy = UTC
-    # 2150-01-19 23:00 w UTC-5 to 2150-01-20 04:00 UTC, czyli już po końcu zakresu;
-    # bez konwersji do UTC ten czas wyglądałby na mieszczący się w zakresie.
+    check_spice_range(datetime(2027, 1, 1))  # no zone = UTC
+    # 2150-01-19 23:00 in UTC-5 is 2150-01-20 04:00 UTC, i.e. already past the end of the range;
+    # without conversion to UTC this time would look like it fits in the range.
     late = datetime(2150, 1, 19, 23, 0, tzinfo=timezone(timedelta(hours=-5)))
     assert late.replace(tzinfo=UTC) < SPICE_MAX_UTC < late.astimezone(UTC)
     with pytest.raises(ValueError):

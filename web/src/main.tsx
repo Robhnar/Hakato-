@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// Fonty osadzone lokalnie (demo działa offline) – przed stylami powłoki.
+// Fonts embedded locally (the demo works offline) – before the shell styles.
 import '@fontsource/ibm-plex-sans/latin-400.css'
 import '@fontsource/ibm-plex-sans/latin-500.css'
 import '@fontsource/ibm-plex-sans/latin-600.css'

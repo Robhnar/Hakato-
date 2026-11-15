@@ -1,4 +1,4 @@
-/** Przeliczanie azymutu/wysokości na współrzędne SVG panoramy. */
+/** Converting azimuth/elevation to SVG panorama coordinates. */
 
 export interface PlotPadding {
   top: number
@@ -25,14 +25,14 @@ export function plotInner(layout: PlotLayout): { x: number; y: number; w: number
   }
 }
 
-/** Azymut 0° (północ) po lewej, 360° po prawej. */
+/** Azimuth 0° (north) on the left, 360° on the right. */
 export function azToX(az_deg: number, layout: PlotLayout): number {
   const { x, w } = plotInner(layout)
   const az = ((az_deg % 360) + 360) % 360
   return x + (az / 360) * w
 }
 
-/** Wysokość: elMax u góry, elMin u dołu. */
+/** Elevation: elMax at the top, elMin at the bottom. */
 export function elToY(el_deg: number, layout: PlotLayout): number {
   const { y, h } = plotInner(layout)
   const { elMin, elMax } = layout
@@ -46,8 +46,8 @@ export function toSvgPoint(az_deg: number, el_deg: number, layout: PlotLayout): 
 }
 
 /**
- * Zakres wysokości dopasowany do danych (biegun: kilka stopni; równik: do ~90°).
- * Zawsze obejmuje 0°, z niewielkim marginesem.
+ * Elevation range fitted to the data (pole: a few degrees; equator: up to ~90°).
+ * Always includes 0°, with a small margin.
  */
 export function elevationRange(values: Iterable<number>, padFraction = 0.12, minPadDeg = 0.4): {
   elMin: number
@@ -65,7 +65,7 @@ export function elevationRange(values: Iterable<number>, padFraction = 0.12, min
   return { elMin: min - pad, elMax: max + pad }
 }
 
-/** Indeks najbliższej próbki czasu względem kursora. */
+/** Index of the time sample nearest to the cursor. */
 export function nearestTimeIndex(times_utc: string[], cursor_utc: string): number {
   if (times_utc.length === 0) return 0
   const target = Date.parse(cursor_utc)
@@ -84,7 +84,7 @@ export function nearestTimeIndex(times_utc: string[], cursor_utc: string): numbe
   return best
 }
 
-/** Wysokość horyzontu na danym azymucie (liniowa interpolacja, zawijanie 360°). */
+/** Horizon elevation at a given azimuth (linear interpolation, 360° wraparound). */
 export function horizonElevationAt(
   az_deg: number,
   elevation_deg: number[],

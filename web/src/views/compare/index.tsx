@@ -8,8 +8,8 @@ import { COMPARE_ROWS, rowBests } from './metrics'
 import WindowLane from './WindowLane'
 import './compare.css'
 
-// Porównanie scenariuszy (zadania 008 i 021). Powłoka zarządza listą; tutaj
-// jedna tabela: wiersz = metryka, kolumna = scenariusz, plus pasy okien pod nią.
+// Scenario comparison (tasks 008 and 021). The shell manages the list; here
+// a single table: row = metric, column = scenario, plus window bands below it.
 
 interface SummariesState {
   data: Record<string, Summary | null>
@@ -18,8 +18,8 @@ interface SummariesState {
 }
 
 /**
- * Podsumowania wszystkich scenariuszy naraz. Poprzednie dane zostają na ekranie
- * do czasu odpowiedzi, żeby tabela nie mrugała przy zmianie scenariusza.
+ * Summaries of all scenarios at once. The previous data stays on screen
+ * until the response arrives, so the table does not flicker when the scenario changes.
  */
 function useSummaries(scenarios: Scenario[]): SummariesState {
   const key = JSON.stringify(

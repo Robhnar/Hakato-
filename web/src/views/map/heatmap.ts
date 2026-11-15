@@ -1,8 +1,8 @@
-// Czysta logika warstwy ON/OFF na globusie (zadanie 019): strefy zasilania
-// i łączności, paleta kolorów, bufor RGBA mapy cieplnej i presety wag.
+// Pure logic of the ON/OFF layer on the globe (task 019): power zones
+// and communication, color palette, the RGBA heatmap buffer and weight presets.
 //
-// Brak importów three.js - ten moduł liczy tylko matematykę i da się testować
-// w Node bez WebGL. Mapowanie bufora na sferę robi `MoonGlobe.tsx`.
+// No three.js imports - this module only does math and can be tested
+// in Node without WebGL. Mapping the buffer onto the sphere is done by `MoonGlobe.tsx`.
 
 import { endUtc, type Scenario } from '../../app/scenario'
 import type {
@@ -13,10 +13,10 @@ import type {
 
 export type Zone = 'sun_only' | 'earth_only' | 'sweet_spot' | 'shadow'
 
-/** Kolejność stref w legendzie panelu. */
+/** Order of zones in the panel legend. */
 export const ZONE_ORDER: Zone[] = ['sun_only', 'earth_only', 'sweet_spot', 'shadow']
 
-/** Kolory RGBA nakładki: delikatny odcień, żeby teren pod spodem pozostał widoczny. */
+/** Overlay RGBA colors: a subtle tint so the terrain underneath stays visible. */
 export const ZONE_COLORS: Record<Zone, readonly [number, number, number, number]> = {
   sun_only: [233, 180, 76, 56],
   earth_only: [90, 162, 224, 56],
@@ -33,15 +33,15 @@ export const ZONE_LABELS: Record<Zone, string> = {
 
 const DEG = Math.PI / 180
 const HORIZON_DEG = 90
-/** Połowa szerokości pasa wygładzenia granicy strefy (stopnie). */
+/** Half the width of the zone boundary smoothing band (degrees). */
 const EDGE_DEG = 0.6
 
-/** Różnica długości geograficznej w zakresie (−180°, 180°]. */
+/** Longitude difference in the range (−180°, 180°]. */
 function wrapLonDelta(delta_deg: number): number {
   return ((delta_deg + 540) % 360) - 180
 }
 
-/** Indeks [0, 1) dla wartości ułamkowej. */
+/** Index [0, 1) for a fractional value. */
 function wrap01(value: number): number {
   return ((value % 1) + 1) % 1
 }
@@ -51,8 +51,8 @@ function clamp01(value: number): number {
 }
 
 /**
- * Odległość kątowa dwóch punktów na kuli (haversine / great-circle).
- * Odporna na bieguny i przejście przez ±180° długości geograficznej.
+ * Angular distance of two points on a sphere (haversine / great-circle).
+ * Robust at the poles and when crossing ±180° longitude.
  */
 export function angularDistanceDeg(
   lat1_deg: number,
@@ -77,18 +77,18 @@ export interface BodyPoint {
 }
 
 /**
- * Czy Słońce jest nad horyzontem w punkcie (lat, lon)?
- * Prosty model kulisty: punkt widzi ciało, gdy odległość kątowa od punktu
- * podsłonecznego jest mniejsza niż 90°. Bez rzeźby terenu i refrakcji.
+ * Is the Sun above the horizon at the point (lat, lon)?
+ * Simple spherical model: a point sees a body when its angular distance from the
+ * subsolar point is less than 90°. No terrain relief and no refraction.
  */
 export function sunVisibleAt(lat_deg: number, lon_deg: number, subsolar: BodyPoint): boolean {
   return angularDistanceDeg(lat_deg, lon_deg, subsolar.lat_deg, subsolar.lon_deg) < HORIZON_DEG
 }
 
 /**
- * Czy Ziemia jest nad horyzontem w punkcie (lat, lon)?
- * Ten sam model kulisty co dla Słońca: odległość od punktu podziemskiego < 90°.
- * Bez rzeźby terenu - na Księżycu horyzont jest niższy, więc to uproszczenie.
+ * Is Earth above the horizon at the point (lat, lon)?
+ * The same spherical model as for the Sun: distance from the sub-Earth point < 90°.
+ * No terrain relief - on the Moon the horizon is lower, so this is a simplification.
  */
 export function earthVisibleAt(lat_deg: number, lon_deg: number, subearth: BodyPoint): boolean {
   return angularDistanceDeg(lat_deg, lon_deg, subearth.lat_deg, subearth.lon_deg) < HORIZON_DEG
@@ -101,7 +101,7 @@ export function classifyZone(sunVisible: boolean, earthVisible: boolean): Zone {
   return 'shadow'
 }
 
-/** Strefa w punkcie dla ciał niebieskich wskazanych przez kursor czasu. */
+/** The zone at a point for the celestial bodies pointed to by the time cursor. */
 export function zoneAt(lat_deg: number, lon_deg: number, cursorBodies: CursorBodies): Zone {
   const sun = sunVisibleAt(lat_deg, lon_deg, {
     lat_deg: cursorBodies.subsolar_lat_deg,
@@ -115,11 +115,11 @@ export function zoneAt(lat_deg: number, lon_deg: number, cursorBodies: CursorBod
 }
 
 /**
- * Najbliższy piksel equirectangular dla punktu (lat, lon).
+ * The nearest equirectangular pixel for the point (lat, lon).
  *
- * Układ zgodny z `SphereGeometry` i teksturą LROC w `MoonGlobe.tsx`:
- * wiersz 0 = +90° (biegun północny), wiersz height−1 = −90°,
- * kolumna 0 wypada na długości 180° (zawijanej do −180°).
+ * Layout consistent with `SphereGeometry` and the LROC texture in `MoonGlobe.tsx`:
+ * row 0 = +90° (north pole), row height−1 = −90°,
+ * column 0 falls at longitude 180° (wrapped to −180°).
  */
 export function pixelForLatLon(
   width: number,
@@ -136,7 +136,7 @@ export function pixelForLatLon(
   return { x, y }
 }
 
-/** Współrzędne środka piksela (x, y) w buforze equirectangular. */
+/** Coordinates of the pixel center (x, y) in the equirectangular buffer. */
 function latLonForPixel(
   width: number,
   height: number,
@@ -152,9 +152,9 @@ function latLonForPixel(
 }
 
 /**
- * Buduje bufor RGBA (Uint8ClampedArray) mapy cieplnej w układzie
- * equirectangular zgodnym z teksturą LROC na sferze w `MoonGlobe.tsx`.
- * Wiersz 0 = +90°, wiersz height−1 = −90°.
+ * Builds the RGBA buffer (Uint8ClampedArray) of the heatmap in the
+ * equirectangular layout consistent with the LROC texture on the sphere in `MoonGlobe.tsx`.
+ * Row 0 = +90°, row height−1 = −90°.
  */
 export function buildOverlayPixels(
   width: number,
@@ -164,7 +164,7 @@ export function buildOverlayPixels(
   const w = Math.max(1, Math.floor(width))
   const h = Math.max(1, Math.floor(height))
   const pixels = new Uint8ClampedArray(w * h * 4)
-  // Udział (0..1) „ciało widoczne": liniowo w pasie ±EDGE_DEG wokół 90°.
+  // Share (0..1) of "body visible": linear within a ±EDGE_DEG band around 90°.
   const inside = (d: number) => clamp01((HORIZON_DEG + EDGE_DEG - d) / (2 * EDGE_DEG))
 
   for (let y = 0; y < h; y += 1) {
@@ -193,8 +193,8 @@ function sanitizeWeight(value: number): number {
 }
 
 /**
- * Sprowadza wagi do sumy 1. Wartości ujemne/NaN traktujemy jak 0,
- * a gdy wszystkie są zerowe - dzielimy po równo (1/3, 1/3, 1/3).
+ * Normalizes the weights to a sum of 1. Negative/NaN values are treated as 0,
+ * and when all are zero - we split equally (1/3, 1/3, 1/3).
  */
 export function normalizeWeights(weights: OptimalWeights): OptimalWeights {
   const sun = sanitizeWeight(weights.w_sun)
@@ -211,7 +211,7 @@ export interface WeightPreset {
   weights: OptimalWeights
 }
 
-/** Presety profilu misji (zadanie 019) - wartości jako ułamki. */
+/** Mission profile presets (task 019) - values as fractions. */
 export const WEIGHT_PRESETS: WeightPreset[] = [
   {
     id: 'balanced',
@@ -236,8 +236,8 @@ export const WEIGHT_PRESETS: WeightPreset[] = [
 ]
 
 /**
- * Zapytanie do `/api/optimal-site` dla aktywnego scenariusza:
- * okno = początek + długość, kursor czasu i wagi przekazane przez panel.
+ * Query to `/api/optimal-site` for the active scenario:
+ * window = start + duration, the time cursor and the weights passed by the panel.
  */
 export function overlayQuery(
   active: Scenario,

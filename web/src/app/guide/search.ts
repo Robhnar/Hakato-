@@ -1,4 +1,4 @@
-// Szukanie miejsca i terminu lądowania: pyta /api/windows o każde miejsce i układa wspólny ranking.
+// Searching for a landing site and date: asks /api/windows for each site and builds a shared ranking.
 
 import type { Meta, Site, WindowsQuery, WindowsResponse } from '../../api/types'
 import { toIsoZ } from '../scenario'
@@ -9,10 +9,10 @@ export interface GuideAnswers {
   mission: MissionKind
   priority: Priority
   earthAtLanding: boolean
-  /** Miesiące 'YYYY-MM'. */
+  /** Months 'YYYY-MM'. */
   from: string
   to: string
-  /** 'auto' = kandydaci z bieguna płd.; inaczej id miejsca z katalogu. */
+  /** 'auto' = candidates from the south pole; otherwise a catalog site id. */
   place: 'auto' | string
 }
 
@@ -23,18 +23,18 @@ export interface SearchResult {
   emptyReason: 'earth-at-landing' | 'no-windows' | null
 }
 
-/** Miesiąc synodyczny (dzień księżycowy) w dniach. */
+/** Synodic month (lunar day) in days. */
 const SYNODIC_MONTH_DAYS = 29.530589
-/** Od tej długości backend przesuwa okna co pełny miesiąc synodyczny (windows_search.py). */
+/** From this length on, the backend steps windows by a whole synodic month (windows_search.py). */
 const LONG_MISSION_HOURS = 300
 const PHASE_SAMPLES = 8
-/** Długi pobyt (~3 dni księżycowe) jest mało wrażliwy na fazę — wystarczą 4 próbki. */
+/** A long stay (~3 lunar days) is barely sensitive to phase — 4 samples are enough. */
 const LONG_STAY_HOURS = 1000
 const LONG_STAY_PHASE_SAMPLES = 4
-/** Backend liczy synchronicznie; więcej równoległych zapytań tylko wydłuża kolejkę i budzi timeouty. */
+/** The backend computes synchronously; more parallel requests only lengthen the queue and cause timeouts. */
 const MAX_PARALLEL = 4
 
-/** Uruchamia zadania z limitem równoległości; zwraca wyniki w kolejności zadań. */
+/** Runs tasks with a concurrency limit; returns results in task order. */
 async function settleWithLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<PromiseSettledResult<T>[]> {
   const results: PromiseSettledResult<T>[] = new Array(tasks.length)
   let next = 0
@@ -53,8 +53,8 @@ async function settleWithLimit<T>(tasks: (() => Promise<T>)[], limit: number): P
 }
 
 /**
- * Przesunięcia startu wyszukiwania (dni). Dla długich misji backend daje jeden start
- * na dzień księżycowy, zawsze w tej samej fazie — próbkujemy więc 8 faz.
+ * Search start offsets (days). For long missions the backend gives one start
+ * per lunar day, always in the same phase — so we sample 8 phases.
  */
 export function phaseOffsetsDays(durationHours: number): number[] {
   if (durationHours < LONG_MISSION_HOURS) return [0]
@@ -79,8 +79,8 @@ export async function findLandings(
 
   const startMs = new Date(range.search_start_utc).getTime()
   const landBeforeMs = new Date(range.search_end_utc).getTime()
-  // Backend trzyma tylko okna kończące się przed końcem zakresu; „Latest landing month” dotyczy
-  // lądowania, więc wydłużamy zakres o czas misji i odcinamy późniejsze lądowania niżej.
+  // The backend keeps only windows ending before the end of the range; "Latest landing month" concerns
+  // the landing, so we extend the range by the mission time and cut off later landings below.
   const searchEnd = toIsoZ(new Date(landBeforeMs + duration_hours * 3_600_000))
   const offsets = phaseOffsetsDays(duration_hours)
   const tasks = targets.flatMap((site) =>

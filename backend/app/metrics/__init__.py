@@ -1,7 +1,7 @@
-"""Moduł metryk: łączy efemerydy z terenem. Kontrakt w docs/ARCHITECTURE.md.
+"""Metrics module: joins ephemerides with terrain. Contract in docs/ARCHITECTURE.md.
 
-Precyzyjne wyznaczanie wschodów i zachodów z interpolacją liniową momentu przejścia
-różnicy wysokości ciała i horyzontu przez zero (dokładność rzędu minuty przy kroku 10 min).
+Precise sunrise and sunset times via linear interpolation of the moment the difference
+between body and horizon elevation crosses zero (about one-minute accuracy at a 10 min step).
 """
 
 from datetime import datetime, timedelta
@@ -15,7 +15,7 @@ SUMMARY_STEP_MINUTES = 10.0
 
 
 def horizon_elevation_at(profile: dict, az_deg: float) -> float:
-    """Wysokość horyzontu na dowolnym azymucie - interpolacja liniowa z zawinięciem 359 -> 0."""
+    """Horizon elevation at any azimuth - linear interpolation with 359 -> 0 wraparound."""
     values = profile["elevation_deg"]
     x = (az_deg % 360.0) / profile["azimuth_step_deg"]
     i = int(x)
@@ -32,7 +32,7 @@ def timeline(
     step_minutes: float,
     horizon: dict | None = None,
 ) -> dict:
-    """Przebieg położeń i widoczności w czasie. horizon=None: profil z modułu terrain."""
+    """Evolution of positions and visibility over time. horizon=None: profile from the terrain module."""
     profile = horizon if horizon is not None else terrain.horizon_profile(lat_deg, lon_deg)
     times = time_range(start_utc, end_utc, step_minutes)
     positions = ephemeris.body_positions(lat_deg, lon_deg, times)
@@ -50,7 +50,7 @@ def timeline(
 
 
 def _interpolate_crossing(t0: datetime, t1: datetime, diff0: float, diff1: float) -> datetime:
-    """Liniowa interpolacja chwili przejścia różnicy wysokości ciała i horyzontu przez 0."""
+    """Linear interpolation of the moment the body-minus-horizon elevation difference crosses 0."""
     span_s = (t1 - t0).total_seconds()
     denom = diff1 - diff0
     if abs(denom) < 1e-12:
@@ -67,10 +67,10 @@ def summarize_body(
     visible: list[bool],
     horizon_el_deg: list[float] | None = None,
 ) -> dict:
-    """Metryki jednego ciała z gotowego przebiegu.
+    """Metrics of a single body from a ready timeline.
 
-    Jeśli przekazano horizon_el_deg, momenty przejścia (wschód/zachód) są precyzyjnie
-    interpolowane z różnicy (el_deg - horizon_el_deg).
+    If horizon_el_deg is given, the crossing moments (rise/set) are precisely
+    interpolated from the difference (el_deg - horizon_el_deg).
     """
     n = len(times_utc)
     if n == 0:
@@ -122,7 +122,7 @@ def summarize_body(
         raw_windows.append({"start_utc": iso_z(win_start), "end_utc": iso_z(t_end)})
         total_visible_s += (t_end - win_start).total_seconds()
 
-    # Scal sąsiadujące okna i usuń okna o zerowej długości (np. punktowe dotknięcie horyzontu)
+    # Merge adjacent windows and drop zero-length ones (e.g. a point touch of the horizon)
     windows: list[dict[str, str]] = []
     for w in raw_windows:
         if w["start_utc"] == w["end_utc"]:
@@ -172,7 +172,7 @@ def summary(
     step_minutes: float = SUMMARY_STEP_MINUTES,
     horizon: dict | None = None,
 ) -> dict:
-    """Metryki scenariusza: precyzyjne okna i czas do najbliższej zmiany."""
+    """Scenario metrics: precise windows and time to the nearest change."""
     profile = horizon if horizon is not None else terrain.horizon_profile(lat_deg, lon_deg)
     tl = timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes, profile)
 

@@ -1,6 +1,6 @@
-"""Silnik wyszukiwania okien lądowania, cykli astronomicznych i analizy opóźnień startu.
+"""Engine for landing-window search, astronomical cycles and launch-delay analysis.
 
-Kontrakt i założenia: docs/ARCHITECTURE.md.
+Contract and assumptions: docs/ARCHITECTURE.md.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ EPOCH_J2026 = datetime(2026, 1, 1, 0, 0, tzinfo=UTC)
 
 
 def compute_cycles(dt: datetime) -> dict:
-    """Fazy kluczowych cykli astronomicznych dla danego momentu startu."""
+    """Phases of the key astronomical cycles for a given start moment."""
     dt_utc = to_utc(dt)
     elapsed_days = (dt_utc - EPOCH_J2026).total_seconds() / 86400.0
 
@@ -55,7 +55,7 @@ def compute_cycles(dt: datetime) -> dict:
 def _calculate_max_darkness_hours(
     windows: list[dict[str, str]], start_dt: datetime, end_dt: datetime
 ) -> float:
-    """Maksymalny nieprzerwany czas nocy (braku Słońca) w oknie."""
+    """Longest uninterrupted night (no Sun) within the window."""
     if not windows:
         return round((end_dt - start_dt).total_seconds() / 3600.0, 2)
 
@@ -91,7 +91,7 @@ def evaluate_slot(
     require_earth_at_landing: bool = False,
     min_earth_fraction: float = 0.0,
 ) -> dict:
-    """Oblicza parametry pojedynczego okna misji."""
+    """Computes the parameters of a single mission window."""
     start_utc = to_utc(start_dt)
     end_utc = start_utc + timedelta(hours=duration_hours)
 
@@ -185,11 +185,11 @@ def search_windows(
     slip_days: float = 0.0,
     horizon: dict | None = None,
 ) -> dict:
-    """Główna funkcja wyszukiwarki: przeszukuje siatkę okien, filtruje i analizuje opóźnienie."""
+    """Main search function: scans the window grid, filters and analyzes the delay."""
     start_utc = to_utc(search_start_utc)
     end_utc = to_utc(search_end_utc)
 
-    # Walidacja zakresu SPICE (de440s obejmuje 1850-2150)
+    # Validate the SPICE range (de440s covers 1850-2150)
     min_spice_year = 1850
     max_spice_year = 2150
     if not (
@@ -212,14 +212,14 @@ def search_windows(
 
     profile = horizon if horizon is not None else terrain.horizon_profile(lat_deg, lon_deg)
 
-    # 1. Sprawdź, czy mamy gotowy kalendarz z zadania 012 pokrywający badany przedział
+    # 1. Check whether a ready calendar from task 012 covers the searched range
     cached_slots = None
     if abs(duration_hours - 708.7) < 2.0:
         cached_slots = load_precomputed_calendar(lat_deg, lon_deg)
         if cached_slots:
             starts = [to_utc(datetime.fromisoformat(slot["start_utc"])) for slot in cached_slots]
             month = timedelta(days=SYNODIC_MONTH_DAYS)
-            # Kalendarz pokrywa tylko część zakresu: nie wolno gubić reszty, liczymy na żądanie.
+            # The calendar covers only part of the range: the rest must not be lost, compute on demand.
             if not (min(starts) <= start_utc + month and max(starts) >= end_utc - month):
                 cached_slots = None
 
@@ -232,7 +232,7 @@ def search_windows(
     grid: list[dict] = []
 
     if matching_cached:
-        # Filtruj prekomputowane sloty z kalendarza
+        # Filter the precomputed slots from the calendar
         for slot in matching_cached:
             s = dict(slot)
             passes = (
@@ -245,12 +245,12 @@ def search_windows(
             s["passes_requirements"] = passes
             grid.append(s)
     else:
-        # Licz siatkę na żądanie
+        # Compute the grid on demand
         step_days = SYNODIC_MONTH_DAYS if duration_hours >= 300.0 else (duration_hours / 24.0)
         step_days = max(1.0, step_days)
         if span_days / step_days > MAX_WINDOWS_SLOTS:
             raise ValueError(
-                f"Za dużo okien w siatce (limit {MAX_WINDOWS_SLOTS}); zwiększ duration_hours lub skróć zakres dat"
+                f"Too many windows in the grid (limit {MAX_WINDOWS_SLOTS}); increase duration_hours or shorten the date range"
             )
 
         current = start_utc
@@ -270,11 +270,11 @@ def search_windows(
             grid.append(slot)
             current += timedelta(days=step_days)
 
-    # 2. Posortuj dopasowane okna (matches)
+    # 2. Sort the matching windows (matches)
     matches = [s for s in grid if s["passes_requirements"]]
     matches.sort(key=lambda s: s["score"], reverse=True)
 
-    # 3. Analiza opóźnienia startu (slip analysis)
+    # 3. Launch-delay analysis (slip analysis)
     slip_analysis = None
     if reference_start_utc is not None:
         ref_start = to_utc(reference_start_utc)
@@ -315,7 +315,7 @@ def search_windows(
             4,
         )
 
-        # Znajdź najbliższe kolejne okno równoważne po dacie opóźnionej
+        # Find the nearest following equivalent window after the delayed date
         nearest_equivalent = None
         candidate_t = delayed_start + timedelta(days=SYNODIC_MONTH_DAYS)
         max_search_ahead = delayed_start + timedelta(days=365)
@@ -333,7 +333,7 @@ def search_windows(
                 require_earth_at_landing=require_earth_at_landing,
                 min_earth_fraction=min_earth_fraction,
             )
-            # Równoważne: spełnia wymagania lub ma zbliżony / lepszy score
+            # Equivalent: meets the requirements or has a similar / better score
             if cand["passes_requirements"] or cand["score"] >= orig_slot["score"] * 0.9:
                 nearest_equivalent = cand
                 break

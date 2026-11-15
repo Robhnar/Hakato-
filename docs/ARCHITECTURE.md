@@ -1,100 +1,100 @@
-# Architektura
+# Architecture
 
-> **Status: obowiązuje.** Zmiana kontraktu wymaga osobnego PR.
+> **Status: binding.** A contract change needs a separate PR.
 
-## Co budujemy
+## What we are building
 
-Aplikację webową do szybkiego porównywania miejsc i dat lądowania na Księżycu (wyzwanie [Lunar Landing Site Navigator](../lunar-landing-site-navigator-details.md), NASA Space Apps 2026). Dla wybranego miejsca i czasu pokazuje położenie Słońca i Ziemi względem horyzontu i odpowiada na dwa pytania: **czy jest zasilanie** (Słońce nad horyzontem) i **czy jest łączność bezpośrednia z Ziemią** (Ziemia nad horyzontem) – teraz, jak długo jeszcze i w jakich oknach.
+A web application for quickly comparing lunar landing sites and dates (the [Lunar Landing Site Navigator](../lunar-landing-site-navigator-details.md) challenge, NASA Space Apps 2026). For a chosen site and time it shows the position of the Sun and Earth relative to the horizon and answers two questions: **is there power** (Sun above the horizon) and **is there a direct link to Earth** (Earth above the horizon) – now, for how much longer, and in which windows.
 
-Dlaczego teren jest tu kluczowy: na biegunie południowym Słońce nigdy nie wznosi się wyżej niż ok. 1,5° nad płaski horyzont, a Ziemia waha się w granicach kilku stopni. O widoczności decyduje więc pojedyncze wzgórze albo krawędź krateru, a nie sama geometria kuli.
+Why terrain is key here: at the south pole the Sun never rises higher than about 1.5° above a flat horizon, and Earth varies within a few degrees. Visibility is therefore decided by a single hill or crater rim, not by the geometry of the sphere alone.
 
-## Stos technologiczny
+## Tech stack
 
-| Warstwa | Wybór | Dlaczego |
+| Layer | Choice | Why |
 | --- | --- | --- |
-| Obliczenia i API | Python 3.11+, FastAPI | SPICE i narzędzia do danych rastrowych są w Pythonie najdojrzalsze |
-| Efemerydy | SPICE przez `spiceypy`, jądra NAIF | to samo źródło, z którego korzysta JPL Horizons; działa lokalnie, bez limitów zapytań |
-| Teren | modele wysokości LOLA (PDS), `numpy` | wymienione w zasobach wyzwania; potrzebne do realnego horyzontu |
-| Frontend | TypeScript, React, Vite | szybki start, duża społeczność i bogaty ekosystem |
-| Testy | `pytest`, `vitest` | |
+| Computation and API | Python 3.11+, FastAPI | SPICE and raster-data tooling are most mature in Python |
+| Ephemerides | SPICE via `spiceypy`, NAIF kernels | the same source JPL Horizons uses; runs locally, no query limits |
+| Terrain | LOLA elevation models (PDS), `numpy` | listed in the challenge resources; needed for a real horizon |
+| Frontend | TypeScript, React, Vite | fast start, large community and rich ecosystem |
+| Tests | `pytest`, `vitest` | |
 
-Horizons służy nam do **weryfikacji** wyników (porównanie kilku punktów kontrolnych), nie jako zależność w czasie działania.
+Horizons is used to **verify** results (comparing a few control points), not as a runtime dependency.
 
-## Moduły
+## Modules
 
-Każdy moduł ma własny katalog. Poza swoim katalogiem nie zmieniasz plików bez uzgodnienia.
+Each module has its own directory. You do not change files outside your directory without agreement.
 
-| Moduł | Katalog | Za co odpowiada |
+| Module | Directory | Responsible for |
 | --- | --- | --- |
-| Efemerydy | `backend/app/ephemeris/` | azymut i wysokość Słońca i Ziemi dla (szer., dł., czas) |
-| Teren | `backend/app/terrain/` | profil horyzontu dla (szer., dł.) z modelu wysokości |
-| Metryki | `backend/app/metrics/` | widoczność, okna, czas do zachodu, podsumowanie scenariusza |
-| API | `backend/app/api/` | endpointy HTTP, katalog miejsc, cache |
-| Dane | `data/` | katalog miejsc (`sites.json`), gotowe profile horyzontu, skrypty pobierania jąder i modeli wysokości |
-| Frontend – powłoka | `web/src/App.tsx`, `web/src/app/`, `web/src/api/` | układ aplikacji, wybór miejsca i daty, klient API, stan scenariuszy |
-| Frontend – widoki | `web/src/views/<widok>/` | każdy widok w osobnym katalogu: niebo (`sky`), oś czasu (`timeline`), porównanie (`compare`), wyszukiwarka okien (`windows`), mapa 3D (`map`) |
-| Kontrakty | `contracts/` | przykładowe odpowiedzi API (fixtures) – wspólne dla backendu i frontendu |
+| Ephemerides | `backend/app/ephemeris/` | azimuth and elevation of the Sun and Earth for (lat, lon, time) |
+| Terrain | `backend/app/terrain/` | horizon profile for (lat, lon) from the elevation model |
+| Metrics | `backend/app/metrics/` | visibility, windows, time to sunset, scenario summary |
+| API | `backend/app/api/` | HTTP endpoints, site catalog, cache |
+| Data | `data/` | site catalog (`sites.json`), prebuilt horizon profiles, scripts that download kernels and elevation models |
+| Frontend – shell | `web/src/App.tsx`, `web/src/app/`, `web/src/api/` | app layout, site and date selection, API client, scenario state |
+| Frontend – views | `web/src/views/<view>/` | each view in its own directory: sky (`sky`), timeline (`timeline`), compare (`compare`), window search (`windows`), 3D map (`map`) |
+| Contracts | `contracts/` | sample API responses (fixtures) – shared by backend and frontend |
 
-Przepływ danych: `ephemeris` + `terrain` → `metrics` → `api` → `web`.
+Data flow: `ephemeris` + `terrain` → `metrics` → `api` → `web`.
 
-Moduły `ephemeris` i `terrain` nie wiedzą o sobie nawzajem; łączy je dopiero `metrics`. Dzięki temu trzy osoby mogą pisać backend równolegle.
+The `ephemeris` and `terrain` modules do not know about each other; only `metrics` joins them. This lets three people write the backend in parallel.
 
-## Kontrakty
+## Contracts
 
-### Konwencje (obowiązują wszędzie)
+### Conventions (apply everywhere)
 
-- **Współrzędne miejsca:** stopnie, układ selenograficzny Mean Earth / Polar Axis (ME). Szerokość −90…90, długość −180…180, dodatnia na wschód.
-- **Azymut:** stopnie, 0 = północ, rośnie zgodnie z ruchem wskazówek zegara (90 = wschód), zakres 0…360.
-- **Wysokość (elevation):** stopnie nad lokalną płaszczyzną poziomą, geometryczna – bez refrakcji, bo Księżyc nie ma atmosfery.
-- **Czas:** UTC, ISO 8601 z sufiksem `Z`.
-- **Widoczność (wersja 1):** ciało jest widoczne, gdy jego środek leży powyżej profilu horyzontu na swoim azymucie. Ułamek widocznej tarczy to rozszerzenie na później.
-- **Nazwy pól w JSON:** `snake_case`, jednostka w nazwie (`_deg`, `_hours`).
+- **Site coordinates:** degrees, selenographic Mean Earth / Polar Axis (ME) frame. Latitude −90…90, longitude −180…180, positive east.
+- **Azimuth:** degrees, 0 = north, increasing clockwise (90 = east), range 0…360.
+- **Elevation:** degrees above the local horizontal plane, geometric – no refraction, since the Moon has no atmosphere.
+- **Time:** UTC, ISO 8601 with the `Z` suffix.
+- **Visibility (version 1):** a body is visible when its center is above the horizon profile at its azimuth. The visible fraction of the disc is a later extension.
+- **JSON field names:** `snake_case`, unit in the name (`_deg`, `_hours`).
 
-### Interfejsy wewnętrzne backendu
+### Internal backend interfaces
 
 ```python
 # ephemeris
 def body_positions(lat_deg, lon_deg, times_utc) -> dict
 # {"sun": {"az_deg": [...], "el_deg": [...]}, "earth": {"az_deg": [...], "el_deg": [...]}}
-SOURCE  # "placeholder" albo "spice" - z czego faktycznie policzono
+SOURCE  # "placeholder" or "spice" - what the result was actually computed from
 
 # terrain
 def horizon_profile(lat_deg, lon_deg) -> dict
-# {"azimuth_step_deg": 1.0, "elevation_deg": [360 wartości dla azymutów 0…359], "source": "flat" | "lola"}
+# {"azimuth_step_deg": 1.0, "elevation_deg": [360 values for azimuths 0…359], "source": "flat" | "lola"}
 
 # metrics
-def timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes, horizon=None) -> dict   # jak /api/timeline
-def summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes=10, horizon=None) -> dict # jak /api/summary
+def timeline(lat_deg, lon_deg, start_utc, end_utc, step_minutes, horizon=None) -> dict   # like /api/timeline
+def summary(lat_deg, lon_deg, start_utc, end_utc, step_minutes=10, horizon=None) -> dict # like /api/summary
 ```
 
-Przeliczenie wektora w układzie ME na azymut i wysokość jest w `backend/app/ephemeris/geometry.py` i nie zależy od źródła efemeryd.
+Converting a vector in the ME frame to azimuth and elevation is in `backend/app/ephemeris/geometry.py` and does not depend on the ephemeris source.
 
-### API HTTP
+### HTTP API
 
-Źródłem prawdy o kształcie odpowiedzi są `backend/app/api/schemas.py` i jego odbicie `web/src/api/types.ts` – oba pliki zmienia się razem. Pełne przykładowe odpowiedzi leżą w `contracts/fixtures/` (generuje je `python -m scripts.export_fixtures`, test pilnuje ich aktualności). Frontend może pracować na nich bez backendu: `npm run dev:fixtures`.
+The source of truth for the response shape is `backend/app/api/schemas.py` and its mirror `web/src/api/types.ts` – the two files are changed together. Full sample responses are in `contracts/fixtures/` (generated by `python -m scripts.export_fixtures`; a test keeps them up to date). The frontend can work on them without the backend: `npm run dev:fixtures`.
 
-Każda odpowiedź z obliczeniami niesie pole `meta` mówiące, z czego ją policzono: `ephemeris` = `placeholder` | `spice`, `horizon` = `flat` | `lola` | `synthetic` | `mixed`. Aplikacja pokazuje ostrzeżenie, dopóki nie jest to `spice` + `lola`.
+Every response with computed data carries a `meta` field saying what it was computed from: `ephemeris` = `placeholder` | `spice`, `horizon` = `flat` | `lola` | `synthetic` | `mixed`. The app shows a warning until it is `spice` + `lola`.
 
-Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 10 minut to ok. 12 800), `step_minutes` od 1 do 1440, zakres lat 1850–2150; przekroczenie daje błąd 422.
+Limits: at most 20,000 samples per request (three lunar days at a 10-minute step is about 12,800), `step_minutes` from 1 to 1440, year range 1850–2150; exceeding them returns a 422 error.
 
-**`GET /api/health`** – kontrola stanu serwera (`{"status": "ok"}`).
+**`GET /api/health`** – server health check (`{"status": "ok"}`).
 
-**`GET /api/sites`** – katalog miejsc.
+**`GET /api/sites`** – site catalog.
 
 ```json
 [{"id": "apollo-11", "name": "Apollo 11", "lat_deg": 0.674, "lon_deg": 23.473,
   "category": "apollo", "landing_utc": "1969-07-20T20:17:40Z"}]
 ```
 
-`category`: `apollo` | `clps` | `commercial` | `international` | `candidate`. `landing_utc` może być `null`.
+`category`: `apollo` | `clps` | `commercial` | `international` | `candidate`. `landing_utc` may be `null`.
 
-**`GET /api/horizon?lat_deg&lon_deg`** – profil horyzontu.
+**`GET /api/horizon?lat_deg&lon_deg`** – horizon profile.
 
 ```json
 {"azimuth_step_deg": 1, "elevation_deg": [0.4, 0.4, 0.5], "source": "lola"}
 ```
 
-**`GET /api/timeline?lat_deg&lon_deg&start_utc&end_utc&step_minutes`** – przebieg w czasie.
+**`GET /api/timeline?lat_deg&lon_deg&start_utc&end_utc&step_minutes`** – evolution over time.
 
 ```json
 {"times_utc": ["2027-01-01T00:00:00Z"],
@@ -103,7 +103,7 @@ Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 
  "meta":  {"ephemeris": "spice", "horizon": "lola"}}
 ```
 
-**`GET /api/summary?lat_deg&lon_deg&start_utc&end_utc&step_minutes`** – metryki scenariusza (`step_minutes` domyślnie 10).
+**`GET /api/summary?lat_deg&lon_deg&start_utc&end_utc&step_minutes`** – scenario metrics (`step_minutes` defaults to 10).
 
 ```json
 {"sun":   {"visible_fraction": 0.62, "max_el_deg": 1.4,
@@ -119,12 +119,12 @@ Limity: najwyżej 20 000 próbek na zapytanie (trzy dni księżycowe przy kroku 
  "meta":  {"ephemeris": "spice", "horizon": "lola"}}
 ```
 
-`hours_until_change`: czas od `start_utc` do najbliższego zachodu (gdy widoczne) albo wschodu (gdy niewidoczne); `null`, jeśli w zadanym zakresie nic się nie zmienia.
-`uncertainty` i `eclipses` są opcjonalnymi rozszerzeniami: czas oświetlenia uwzględnia widoczny ułamek tarczy Słońca i pasmo dla marginesu horyzontu ±0,2°, a zaćmienia opisują nakładanie się tarcz Ziemi i Słońca widzianych z Księżyca. Dotychczasowe pola widoczności pozostają bez zmian.
+`hours_until_change`: time from `start_utc` to the nearest sunset (when visible) or sunrise (when not visible); `null` if nothing changes in the given range.
+`uncertainty` and `eclipses` are optional extensions: the illumination time accounts for the visible fraction of the Sun's disc and a band for a ±0.2° horizon margin, and eclipses describe the overlap of the Earth and Sun discs as seen from the Moon. The existing visibility fields are unchanged.
 
-**`GET /api/windows?lat_deg&lon_deg&search_start_utc&search_end_utc&…`** – wyszukiwarka okien lądowania.
+**`GET /api/windows?lat_deg&lon_deg&search_start_utc&search_end_utc&…`** – landing-window search.
 
-Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_landing_deg` (-90.0), `min_sunlight_hours` (0), `max_darkness_hours` (708.7), `require_earth_at_landing` (false), `min_earth_fraction` (0), opcjonalnie `reference_start_utc` i `slip_days` (0, w zakresie ±3650) dla trybu „start się opóźnił". Maksymalny przedział wyszukiwania to 10 lat i 500 okien.
+Parameters (defaults in brackets): `duration_hours` (708.7), `min_sun_el_at_landing_deg` (-90.0), `min_sunlight_hours` (0), `max_darkness_hours` (708.7), `require_earth_at_landing` (false), `min_earth_fraction` (0), optionally `reference_start_utc` and `slip_days` (0, within ±3650) for the "launch delayed" mode. The maximum search range is 10 years and 500 windows.
 
 ```json
 {"grid":[{"start_utc":"2027-01-01T00:00:00Z","end_utc":"2027-01-30T12:42:00Z",
@@ -142,30 +142,30 @@ Parametry (domyślne w nawiasach): `duration_hours` (708.7), `min_sun_el_at_land
  "meta":{"ephemeris":"placeholder","horizon":"synthetic"}}
 ```
 
-`matches` to podzbiór `grid` spełniający wymagania, posortowany malejąco po `score`. Pola `uncertainty` i `eclipses` są opcjonalne dla każdego okna. Do czasu zadań 012/013 endpoint może zwracać zaślepkę o tym kształcie.
+`matches` is the subset of `grid` that meets the requirements, sorted by `score` descending. The `uncertainty` and `eclipses` fields are optional for each window. Until tasks 012/013 the endpoint may return a stub of this shape.
 
-**`GET /api/optimal-site?start_utc&end_utc&cursor_utc&step_minutes&w_sun&w_earth&w_overlap`** – ranking miejsca optymalnego dla wybranego okna. `cursor_utc` jest opcjonalny i domyślnie równy `start_utc`; `step_minutes` domyślnie wynosi 60, a wagi odpowiednio 0,45, 0,25 i 0,30.
+**`GET /api/optimal-site?start_utc&end_utc&cursor_utc&step_minutes&w_sun&w_earth&w_overlap`** – ranking of the optimal site for the chosen window. `cursor_utc` is optional and defaults to `start_utc`; `step_minutes` defaults to 60, and the weights to 0.45, 0.25 and 0.30 respectively.
 
-Odpowiedź zawiera `optimal`, `ranking`, pozycje podpunktów Słońca i Ziemi w `cursor_bodies`, użyte `weights` i `meta`. Każdy element rankingu ma współrzędne, wynik (`score` 0–100), ułamki/czasy widoczności oraz flagi widoczności w chwili kursora. Ranking obejmuje katalog miejsc i referencyjną siatkę polarną.
+The response contains `optimal`, `ranking`, the sub-solar and sub-Earth point positions in `cursor_bodies`, the `weights` used and `meta`. Each ranking item has coordinates, a score (`score` 0–100), visibility fractions/times, and visibility flags at the cursor time. The ranking covers the site catalog and a reference polar grid.
 
-### Kontrakt między powłoką a widokami (frontend)
+### Contract between shell and views (frontend)
 
-Zdefiniowany w `web/src/app/scenario.ts`. Każdy widok to komponent w `web/src/views/<nazwa>/index.tsx`, zarejestrowany w `web/src/app/views.ts`, który dostaje `ViewProps`:
+Defined in `web/src/app/scenario.ts`. Each view is a component in `web/src/views/<name>/index.tsx`, registered in `web/src/app/views.ts`, which receives `ViewProps`:
 
-- `scenarios`, `active` – lista porównywanych scenariuszy (miejsce + okno czasu) i ten aktualnie wybrany;
-- `cursor_utc`, `setCursorUtc` – wspólny kursor czasu: przesunięcie go na osi czasu przesuwa Słońce w widoku nieba;
-- `selectScenario(id)`, `pickLocation(lat_deg, lon_deg)`, `applyWindow(start_utc, duration_hours?)` – akcje, którymi widok zmienia stan powłoki (`applyWindow` ustawia start aktywnego scenariusza z wyszukiwarki okien).
+- `scenarios`, `active` – the list of compared scenarios (site + time window) and the currently selected one;
+- `cursor_utc`, `setCursorUtc` – the shared time cursor: moving it on the timeline moves the Sun in the sky view;
+- `selectScenario(id)`, `pickLocation(lat_deg, lon_deg)`, `applyWindow(start_utc, duration_hours?)` – actions through which a view changes the shell state (`applyWindow` sets the start of the active scenario from the window search).
 
-Widoki pobierają dane wyłącznie przez `api` z `web/src/api/client.ts` i hook `useAsync`. Nie importują niczego z innych widoków ani z `App.tsx`.
+Views fetch data only through `api` from `web/src/api/client.ts` and the `useAsync` hook. They import nothing from other views or from `App.tsx`.
 
-## Dane
+## Data
 
-- Duże pliki (jądra SPICE, modele wysokości) **nie trafiają do repo**. Pobiera je skrypt do `data/raw/`, który jest w `.gitignore`.
-- Profile horyzontu dla miejsc z katalogu liczymy z wyprzedzeniem i zapisujemy w `data/horizons/` (małe pliki JSON, w repo). Dla współrzędnych własnych liczymy na żądanie i cache'ujemy.
-- Jeśli model wysokości nie obejmuje danego miejsca albo nie jest pobrany, `terrain` zwraca płaski horyzont i API oznacza to w odpowiedzi – aplikacja ma działać także wtedy.
+- Large files (SPICE kernels, elevation models) **do not go into the repo**. A script downloads them to `data/raw/`, which is in `.gitignore`.
+- Horizon profiles for catalog sites are computed ahead of time and stored in `data/horizons/` (small JSON files, in the repo). For custom coordinates we compute on demand and cache.
+- If the elevation model does not cover a site or is not downloaded, `terrain` returns a flat horizon and the API flags it in the response – the app must work in that case too.
 
-## Decyzje
+## Decisions
 
-- **2026-11-14** – Obliczenia po stronie serwera w Pythonie (SPICE), a nie w przeglądarce. Powód: dokładność rzędu ułamka stopnia jest na biegunie warunkiem sensownego wyniku, a profil horyzontu wymaga pracy na dużych rastrach.
-- **2026-11-14** – Interfejs aplikacji po angielsku (zgłoszenie do międzynarodowego konkursu), dokumentacja zespołu po polsku.
-- **2026-11-14** – Frontend rozwijany na plikach z `contracts/fixtures/`, żeby nie blokował się na backendzie.
+- **2026-11-14** – Computation on the server in Python (SPICE), not in the browser. Reason: accuracy to a fraction of a degree is a precondition for a meaningful result at the pole, and the horizon profile needs work on large rasters.
+- **2026-11-14** – App interface and documentation in English (submission to an international competition).
+- **2026-11-14** – Frontend developed against the files in `contracts/fixtures/`, so it does not block on the backend.

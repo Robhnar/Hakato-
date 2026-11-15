@@ -19,10 +19,10 @@ import {
 } from './requirements'
 import './windows.css'
 
-/** Ile czekamy, zanim zmiana wymagań trafi do zapytania (ms). */
+/** How long we wait before a requirements change goes into the request (ms). */
 const DEBOUNCE_MS = 400
 
-/** Opóźnia wartość - formularz nie wysyła zapytania przy każdym znaku. */
+/** Delays a value - the form does not send a request on every keystroke. */
 function useDebounced<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value)
 
@@ -35,9 +35,9 @@ function useDebounced<T>(value: T, delayMs: number): T {
 }
 
 /**
- * Widok wyszukiwarki okien (015): panel wymagań, ranking dopasowań i symulator
- * opóźnienia. Lista dopasowań filtruje siatkę z API lokalnie, więc zaostrzenie
- * progu widać natychmiast; zapytanie odświeża się po debounce.
+ * Window search view (015): requirements panel, ranking of matches and the
+ * delay simulator. The list of matches filters the API grid locally, so tightening
+ * a threshold is visible immediately; the request refreshes after the debounce.
  */
 export default function WindowsView({ active, applyWindow }: ViewProps) {
   const searchStart = `${active.start_utc.slice(0, 4)}-01-01T00:00:00Z`
@@ -76,7 +76,7 @@ export default function WindowsView({ active, applyWindow }: ViewProps) {
     queryKey,
   )
 
-  // Filtrowanie natychmiastowe - używa bieżących wymagań, nie opóźnionych.
+  // Immediate filtering - uses the current requirements, not the delayed ones.
   const liveGrid = data
     ? data.grid.map((slot) => ({
         ...slot,

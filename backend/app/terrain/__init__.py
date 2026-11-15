@@ -1,4 +1,4 @@
-"""Moduł terenu: profil horyzontu wokół miejsca lądowania. Kontrakt w docs/ARCHITECTURE.md."""
+"""Terrain module: horizon profile around the landing site. Contract in docs/ARCHITECTURE.md."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ PREFERRED_DEMS = ("ldem_75s_120m.img", "ldem_80s_80m.img", "ldem_75s_240m.img")
 
 
 def flat_profile() -> dict:
-    """Zwraca awaryjny, płaski profil horyzontu."""
+    """Returns a fallback flat horizon profile."""
     return {
         "azimuth_step_deg": AZIMUTH_STEP_DEG,
         "elevation_deg": [0.0] * SAMPLES,
@@ -85,11 +85,11 @@ def _compute_cached(data_dir_str: str, lat_key: float, lon_key: float) -> dict |
 
 
 def horizon_profile(lat_deg: float, lon_deg: float) -> dict:
-    """Wysokość horyzontu dla azymutów 0, 1, ..., 359 stopni.
+    """Horizon elevation for azimuths 0, 1, ..., 359 degrees.
 
-    Najpierw szuka gotowego profilu w `data/horizons/<id>.json`.
-    Jeśli brak, liczy na żądanie z pobranego modelu LOLA w `data/raw/dem/`.
-    Poza obszarem modelu albo bez pobranych danych zwraca płaski horyzont.
+    First looks for a ready profile in `data/horizons/<id>.json`.
+    If missing, computes on demand from the downloaded LOLA model in `data/raw/dem/`.
+    Outside the model area or without downloaded data returns a flat horizon.
     """
     data_dir = config.DATA_DIR
     precomputed = _find_precomputed_horizon(data_dir, lat_deg, lon_deg)

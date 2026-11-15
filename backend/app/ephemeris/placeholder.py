@@ -1,8 +1,8 @@
-"""TYMCZASOWY model położeń Słońca i Ziemi - do zastąpienia przez SPICE (zadanie 001).
+"""TEMPORARY model of Sun and Earth positions - to be replaced by SPICE (task 001).
 
-Uproszczone sinusoidy: dają jakościowo poprawny obraz (miesiąc synodyczny, Słońce
-tuż przy horyzoncie na biegunach, libracje Ziemi), ale błąd sięga kilku stopni,
-a fazy libracji są umowne. NIE nadaje się do oceny rzeczywistych okien widoczności.
+Simplified sinusoids: they give a qualitatively right picture (synodic month, Sun
+just at the horizon at the poles, Earth librations), but the error reaches several degrees,
+and the libration phases are arbitrary. NOT suitable for assessing real visibility windows.
 """
 
 import math
@@ -14,7 +14,7 @@ AU_KM = 149_597_870.7
 EARTH_MOON_KM = 384_400.0
 
 _J2000 = datetime(2000, 1, 1, 12, 0, 0, tzinfo=UTC)
-_NEW_MOON_DAYS = 5.2597  # nów 2000-01-06 18:14 UTC, w dniach od J2000
+_NEW_MOON_DAYS = 5.2597  # new moon 2000-01-06 18:14 UTC, in days since J2000
 _SYNODIC_MONTH = 29.530588
 _DRACONIC_YEAR = 346.62
 _ANOMALISTIC_MONTH = 27.554550
@@ -32,7 +32,7 @@ def _scaled(lat_deg: float, lon_deg: float, dist_km: float) -> Vec:
 
 def sun_position_km(t: datetime) -> Vec:
     d = _days(t)
-    # W nowiu Słońce stoi nad niewidoczną stroną (dł. 180); punkt podsłoneczny wędruje na zachód.
+    # At new moon the Sun is over the far side (lon 180); the subsolar point moves west.
     lon = (180.0 - 360.0 * (d - _NEW_MOON_DAYS) / _SYNODIC_MONTH + 180.0) % 360.0 - 180.0
     lat = 1.54 * math.sin(2 * math.pi * d / _DRACONIC_YEAR)
     return _scaled(lat, lon, AU_KM)

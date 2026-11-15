@@ -1,11 +1,11 @@
-// Przeliczenia szerokość/długość <-> punkt na kuli dla globusa.
+// Conversions latitude/longitude <-> point on the sphere for the globe.
 //
-// Układ: +X = (0°, 0°), +Y = biegun północny, +Z = 90° długości zachodniej.
-// To obrót prawoskrętny układu ME z backendu (tam +Z to biegun), więc kamera
-// postawiona nad punktem (0°, 0°) widzi północ u góry i wschód po prawej -
-// tak jak Ziemia widzi Księżyc. Oświetlenie i znaczniki muszą używać tego
-// samego układu; tekstura globusa jest odbita lustrzanie, bo SphereGeometry
-// nawija UV w drugą stronę (patrz MoonGlobe.tsx).
+// Frame: +X = (0°, 0°), +Y = north pole, +Z = 90° west longitude.
+// This is a right-handed rotation of the backend's ME frame (there +Z is the pole), so a camera
+// placed over the point (0°, 0°) sees north at the top and east on the right -
+// just as Earth sees the Moon. Lighting and markers must use the
+// same frame; the globe texture is mirrored because SphereGeometry
+// wraps UVs the other way (see MoonGlobe.tsx).
 
 export interface Vec3 {
   x: number
@@ -30,7 +30,7 @@ export function vectorToLatLon(v: Vec3): { lat_deg: number; lon_deg: number } {
   }
 }
 
-/** Wektor jednostkowy do ciała z azymutu i wysokości widzianych z (lat, lon). */
+/** Unit vector to a body from the azimuth and elevation seen from (lat, lon). */
 export function vectorFromAzEl(lat_deg: number, lon_deg: number, az_deg: number, el_deg: number): Vec3 {
   const lat = lat_deg * DEG
   const lon = lon_deg * DEG
@@ -51,9 +51,9 @@ export function vectorFromAzEl(lat_deg: number, lon_deg: number, az_deg: number,
 }
 
 /**
- * Punkt na Księżycu pod ciałem (podsłoneczny, podziemski): kierunek do ciała widziany z (0°, 0°),
- * czyli z azymutu i wysokości zwracanych przez /api/timeline dla tego punktu. Błąd z paralaksy
- * (obserwator na powierzchni, nie w środku) to ok. 0.03° dla Ziemi, dla Słońca pomijalny.
+ * The point on the Moon under a body (subsolar, sub-Earth): the direction to the body seen from (0°, 0°),
+ * i.e. from the azimuth and elevation returned by /api/timeline for that point. Parallax error
+ * (observer on the surface, not at the center) is about 0.03° for Earth, negligible for the Sun.
  */
 export function subBodyPoint(az_deg: number, el_deg: number): { lat_deg: number; lon_deg: number } {
   return vectorToLatLon(vectorFromAzEl(0, 0, az_deg, el_deg))

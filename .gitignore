@@ -1,11 +1,11 @@
-# Sekrety
+# Secrets
 .env
 .env.*
 !.env.example
 *.pem
 *.key
 
-# Zależności i buildy
+# Dependencies and builds
 node_modules/
 dist/
 build/
@@ -22,7 +22,7 @@ venv/
 coverage/
 .coverage
 
-# Narzędzia i system
+# Tools and system
 .idea/
 .vscode/*
 !.vscode/extensions.json
@@ -31,13 +31,13 @@ coverage/
 Thumbs.db
 *.log
 
-# Lokalne ustawienia asystentów AI
+# Local AI assistant settings
 .claude/settings.local.json
 CLAUDE.local.md
 .cursor/
 .aider*
 
-# Duże dane pobierane skryptami (jądra SPICE, modele wysokości)
+# Large data downloaded by scripts (SPICE kernels, elevation models)
 data/raw/
 *.egg-info/
 .playwright-mcp/

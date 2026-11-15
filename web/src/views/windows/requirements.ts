@@ -1,14 +1,14 @@
-// Czysta logika wymagań misji dla widoku "windows" (zadanie 015).
-// Bez Reacta i bez efektów ubocznych: panel, ranking i symulator opóźnienia
-// używają tych samych progów, więc lista pasujących okien zmienia się natychmiast.
+// Pure mission-requirements logic for the "windows" view (task 015).
+// No React and no side effects: the panel, ranking and delay simulator
+// use the same thresholds, so the list of matching windows changes immediately.
 
 import { LUNAR_DAY_HOURS, toIsoZ } from '../../app/scenario'
 import type { CalendarSlot, WindowsQuery } from '../../api/types'
 
-/** Presety czasu trwania są wspólne z powłoką (zadanie 005). */
+/** Duration presets are shared with the shell (task 005). */
 export { DURATION_PRESETS } from '../../app/scenario'
 
-/** Pola wymagań misji - dokładnie te, które trafiają do WindowsQuery. */
+/** Mission requirement fields - exactly those that go into WindowsQuery. */
 export interface MissionRequirements {
   duration_hours: number
   min_sun_el_at_landing_deg: number
@@ -18,7 +18,7 @@ export interface MissionRequirements {
   min_earth_fraction: number
 }
 
-/** Domyślne wartości z briefu 011 (te same co w backendowym schemacie). */
+/** Default values from brief 011 (the same as in the backend schema). */
 export const DEFAULT_REQUIREMENTS: MissionRequirements = {
   duration_hours: LUNAR_DAY_HOURS,
   min_sun_el_at_landing_deg: 0,
@@ -28,7 +28,7 @@ export const DEFAULT_REQUIREMENTS: MissionRequirements = {
   min_earth_fraction: 0,
 }
 
-/** Pojemności baterii pokazywane jako skróty w panelu wymagań (godziny). */
+/** Battery capacities shown as shortcuts in the requirements panel (hours). */
 export const BATTERY_PRESETS: number[] = [48, 100, 350]
 
 export interface MissionProfile {
@@ -37,7 +37,7 @@ export interface MissionProfile {
   requirements: MissionRequirements
 }
 
-/** Typowe profile misji - jedno kliknięcie wypełnia cały formularz. */
+/** Typical mission profiles - one click fills in the whole form. */
 export const MISSION_PROFILES: MissionProfile[] = [
   {
     id: 'short-surface-lander',
@@ -81,8 +81,8 @@ export type RequirementField = keyof MissionRequirements
 export type RequirementErrors = Partial<Record<RequirementField, string>>
 
 /**
- * Walidacja progów przed wysłaniem zapytania. Zwraca mapę pole -> komunikat;
- * pusta mapa oznacza poprawne wymagania.
+ * Validation of thresholds before sending the request. Returns a field -> message map;
+ * an empty map means valid requirements.
  */
 export function validateRequirements(requirements: MissionRequirements): RequirementErrors {
   const errors: RequirementErrors = {}
@@ -141,8 +141,8 @@ function percent(value: number): string {
 }
 
 /**
- * Powody, dla których okno nie spełnia wymagań. Równość progu liczy się jako
- * spełnienie (np. sunlight_hours == min_sunlight_hours przechodzi).
+ * Reasons why a window does not meet the requirements. Equality with a threshold counts as
+ * meeting it (e.g. sunlight_hours == min_sunlight_hours passes).
  */
 export function violations(slot: CalendarSlot, requirements: MissionRequirements): string[] {
   const reasons: string[] = []
@@ -203,9 +203,9 @@ function sortableScore(slot: CalendarSlot): number {
 }
 
 /**
- * Filtrowanie po stronie klienta - dzięki temu lista reaguje na zmianę progów
- * bez czekania na odpowiedź backendu. Kolejność: score malejąco, remisy po
- * starcie rosnąco.
+ * Client-side filtering - so the list reacts to threshold changes
+ * without waiting for the backend response. Order: score descending, ties by
+ * start ascending.
  */
 export function filterMatches(grid: CalendarSlot[], requirements: MissionRequirements): CalendarSlot[] {
   const matching = grid.filter((slot) => passes(slot, requirements))
@@ -218,13 +218,13 @@ export function filterMatches(grid: CalendarSlot[], requirements: MissionRequire
   return matching
 }
 
-/** Opcjonalny tryb opóźnienia startu w zapytaniu. */
+/** Optional launch-delay mode in the request. */
 export interface SlipParams {
   reference_start_utc: string
   slip_days: number
 }
 
-/** Buduje pełne zapytanie GET /api/windows z aktualnych wymagań. */
+/** Builds the full GET /api/windows request from the current requirements. */
 export function toQuery(
   requirements: MissionRequirements,
   lat_deg: number,
@@ -260,9 +260,9 @@ export interface SlipComparison {
 }
 
 /**
- * Porównanie okna oryginalnego z opóźnionym. Deltę liczymy jako
- * "opóźniony minus oryginalny", więc dodatnia zmiana ciemności jest zła.
- * Używane, gdy backend nie zwróci slip_analysis, oraz do kontroli jego wyniku.
+ * Comparison of the original window with the delayed one. The delta is computed as
+ * "delayed minus original", so a positive change in darkness is bad.
+ * Used when the backend returns no slip_analysis, and to check its result.
  */
 export function slipComparison(
   original: CalendarSlot,
@@ -279,7 +279,7 @@ export function slipComparison(
   }
 }
 
-/** Przesuwa znacznik czasu o pełne lub ułamkowe dni, zwracając ISO z "Z". */
+/** Shifts a timestamp by whole or fractional days, returning ISO with "Z". */
 export function shiftUtc(iso: string, days: number): string {
   const ms = Date.parse(iso)
   if (!Number.isFinite(ms) || !Number.isFinite(days)) return ''
@@ -287,8 +287,8 @@ export function shiftUtc(iso: string, days: number): string {
 }
 
 /**
- * Najwcześniejsze okno po `fromUtc`, które spełnia wymagania. `null`, gdy
- * w siatce nie ma już nic pasującego albo data wejściowa jest niepoprawna.
+ * The earliest window after `fromUtc` that meets the requirements. `null` when
+ * the grid has nothing matching left or the input date is invalid.
  */
 export function nearestEquivalent(
   grid: CalendarSlot[],
@@ -315,7 +315,7 @@ export function nearestEquivalent(
 export const SLIP_MIN_DAYS = 1
 export const SLIP_MAX_DAYS = 90
 
-/** Ogranicza opóźnienie startu do całkowitej liczby dni z zakresu 1…90. */
+/** Limits the launch delay to a whole number of days in the range 1…90. */
 export function clampSlipDays(days: number): number {
   if (!Number.isFinite(days)) return SLIP_MIN_DAYS
   return Math.min(SLIP_MAX_DAYS, Math.max(SLIP_MIN_DAYS, Math.round(days)))

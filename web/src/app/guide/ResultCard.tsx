@@ -1,4 +1,4 @@
-// Karta rekomendacji: miejsce, dzień, godzina, trzy oceny i wyjaśnienie.
+// Recommendation card: site, day, hour, three ratings and an explanation.
 
 import type { Site } from '../../api/types'
 import DayStrip from './DayStrip'
@@ -10,7 +10,7 @@ const RATING_TEXT: Record<Rating, string> = { great: 'Great', okay: 'Okay', poor
 
 type MetricSign = 'sun' | 'earth' | 'dark'
 
-// Znak przy ocenie: kwadrat Słońca, koło Ziemi, szary kwadrat ciemności (zamiast emoji).
+// Mark next to a rating: Sun square, Earth circle, grey darkness square (instead of emoji).
 function Metric({ sign, label, value, rating }: { sign: MetricSign; label: string; value: string; rating: Rating }) {
   return (
     <li className={`guide-metric rating-${rating}`}>
